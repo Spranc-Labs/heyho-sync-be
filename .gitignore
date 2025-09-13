@@ -1,0 +1,76 @@
+# Bundler
+/.bundle/
+/vendor/bundle/
+/lib/bundler/man/
+
+# Database
+/db/*.sqlite3
+/db/*.sqlite3-journal
+/db/*.sqlite3-*
+
+# Logs and temp files
+/log/*
+/tmp/*
+!/log/.keep
+!/tmp/.keep
+
+# Storage
+/storage/*
+!/storage/.keep
+/public/uploads
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Test coverage
+/coverage/
+.rspec_status
+
+# Documentation
+/public/docs/
+/.yardoc/
+
+# Security reports
+brakeman-report.html
+
+# RuboCop
+.rubocop-https---*
+.rubocop_todo.yml
+
+# Node modules (if using Webpacker/JS)
+/node_modules/
+/yarn-error.log
+yarn-debug.log*
+.yarn-integrity
+
+# Public assets
+/public/assets/
+/public/packs/
+/public/packs-test/
+
+# Credentials
+/config/master.key
+/config/credentials/*.key
+
+# Byebug
+.byebug_history
+
+# Redis dump
+dump.rdb
+
+# Docker volumes (local development)
+postgres-data/
+redis-data/
+
+# System files
+Thumbs.db

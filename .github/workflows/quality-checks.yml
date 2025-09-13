@@ -1,0 +1,70 @@
+name: Code Quality Checks
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: heyho_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.2.0'
+        bundler-cache: true
+
+    - name: Install dependencies
+      run: |
+        gem install bundler
+        bundle install --jobs 4 --retry 3
+
+    - name: Setup database
+      env:
+        DATABASE_URL: postgres://postgres:postgres@localhost:5432/heyho_test
+        RAILS_ENV: test
+      run: |
+        bundle exec rails db:create
+        bundle exec rails db:schema:load
+
+    - name: Run RuboCop
+      run: bundle exec rubocop
+
+    - name: Run Brakeman Security Scan
+      run: bundle exec brakeman -q --no-pager
+
+    - name: Run Tests
+      env:
+        DATABASE_URL: postgres://postgres:postgres@localhost:5432/heyho_test
+        RAILS_ENV: test
+      run: bundle exec rspec
+
+    - name: Check Documentation Coverage
+      run: bundle exec yard stats --list-undoc --fail-on-warning
+
+    - name: Upload Brakeman Report
+      if: failure()
+      uses: actions/upload-artifact@v3
+      with:
+        name: brakeman-report
+        path: brakeman-report.html

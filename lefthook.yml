@@ -1,0 +1,142 @@
+# Lefthook Git Hooks Configuration
+# https://github.com/evilmartians/lefthook
+
+# Pre-commit hooks run before each commit
+pre-commit:
+  parallel: true
+  commands:
+    rubocop:
+      glob: "*.rb"
+      run: bundle exec rubocop {staged_files}
+      skip:
+        - merge
+        - rebase
+      fail_text: "RuboCop found style violations. Run 'make lint:fix' to auto-fix."
+
+    rspec:
+      glob: "spec/**/*.rb"
+      run: bundle exec rspec {staged_files}
+      skip:
+        - merge
+        - rebase
+      fail_text: "Tests are failing. Please fix before committing."
+
+    check-merge-conflict:
+      glob: "**/*"
+      run: grep -H -n "^<<<<<<< " {staged_files} && exit 1 || exit 0
+      fail_text: "Merge conflict markers detected. Please resolve conflicts before committing."
+
+    check-debugger:
+      glob: "*.rb"
+      run: grep -H -n -E "(binding\.(pry|irb|remote_pry)|debugger|byebug|save_and_open_page)" {staged_files} && exit 1 || exit 0
+      fail_text: "Debugger statements detected. Please remove before committing."
+
+    check-console-log:
+      glob: "*.{js,jsx,ts,tsx}"
+      run: grep -H -n "console\.(log|debug|info|warn|error)" {staged_files} && exit 1 || exit 0
+      fail_text: "Console statements detected. Please remove before committing."
+
+    check-todo:
+      glob: "*.{rb,js,jsx,ts,tsx}"
+      run: grep -H -n -E "(TODO|FIXME|HACK|XXX|OPTIMIZE|REVIEW)" {staged_files} || exit 0
+      skip_output: false
+      fail_text: "TODO comments found. Consider addressing them or creating tickets."
+
+# Pre-push hooks run before pushing to remote
+pre-push:
+  parallel: false
+  commands:
+    security:
+      run: bundle exec brakeman -q --no-pager
+      fail_text: "Security vulnerabilities detected. Run 'bundle exec brakeman' for details."
+
+    test-suite:
+      run: bundle exec rspec
+      fail_text: "Test suite is failing. All tests must pass before pushing."
+
+    rubocop-all:
+      run: bundle exec rubocop
+      fail_text: "RuboCop violations found. Run 'make lint:fix' to auto-fix."
+
+    check-migrations:
+      run: |
+        if git diff HEAD origin/$(git rev-parse --abbrev-ref HEAD) --name-only | grep -q "db/migrate"; then
+          echo "Database migrations detected. Ensuring migrations are reversible..."
+          bundle exec rails db:migrate && bundle exec rails db:rollback && bundle exec rails db:migrate
+        fi
+      fail_text: "Database migrations are not reversible."
+
+# Commit message hook
+commit-msg:
+  commands:
+    check-commit-message:
+      run: |
+        # Check for conventional commit format
+        pattern="^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert)(\(.+\))?: .{1,72}$"
+        if ! grep -qE "$pattern" "$1"; then
+          echo "Commit message does not follow conventional format."
+          echo "Format: <type>(<scope>): <subject>"
+          echo "Types: feat, fix, docs, style, refactor, test, chore, perf, ci, build, revert"
+          exit 1
+        fi
+      fail_text: "Commit message format is invalid."
+
+# Post-checkout hook
+post-checkout:
+  commands:
+    bundle-check:
+      run: |
+        if [ -f "Gemfile.lock" ]; then
+          if git diff HEAD@{1} HEAD --name-only | grep -q "Gemfile.lock"; then
+            echo "Gemfile.lock changed. Running bundle install..."
+            bundle install
+          fi
+        fi
+
+    yarn-check:
+      run: |
+        if [ -f "yarn.lock" ]; then
+          if git diff HEAD@{1} HEAD --name-only | grep -q "yarn.lock"; then
+            echo "yarn.lock changed. Running yarn install..."
+            yarn install
+          fi
+        fi
+
+    db-migrate:
+      run: |
+        if git diff HEAD@{1} HEAD --name-only | grep -q "db/migrate"; then
+          echo "New migrations detected. Running db:migrate..."
+          bundle exec rails db:migrate
+        fi
+
+# Post-merge hook
+post-merge:
+  commands:
+    bundle-install:
+      run: |
+        if git diff HEAD@{1} HEAD --name-only | grep -q "Gemfile.lock"; then
+          bundle install
+        fi
+
+    yarn-install:
+      run: |
+        if git diff HEAD@{1} HEAD --name-only | grep -q "yarn.lock"; then
+          yarn install
+        fi
+
+    db-migrate:
+      run: |
+        if git diff HEAD@{1} HEAD --name-only | grep -q "db/migrate"; then
+          bundle exec rails db:migrate
+        fi
+
+# Custom skip patterns
+skip:
+  - merge_commit: merge
+  - rebase: rebase
+
+# Colors for output
+colors: true
+
+# Suppress output for successful commands
+suppress_output: false

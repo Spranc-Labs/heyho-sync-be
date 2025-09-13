@@ -1,0 +1,19 @@
+--output-dir ./public/docs
+--markup markdown
+--markup-provider redcarpet
+--charset utf-8
+--title "HeyHo Sync Backend API Documentation"
+--protected
+--private
+--embed-mixins
+--plugin rails
+--plugin activerecord
+--hide-void-return
+--no-cache
+--verbose
+--files specs/**/*.md
+app/**/*.rb
+lib/**/*.rb
+-
+README.md
+specs/tools/code-quality-tools.md

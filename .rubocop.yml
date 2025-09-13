@@ -1,0 +1,166 @@
+require:
+  - rubocop-rails
+  - rubocop-rspec
+  - rubocop-performance
+
+AllCops:
+  TargetRubyVersion: 3.2
+  NewCops: enable
+  Exclude:
+    - 'bin/**/*'
+    - 'db/**/*'
+    - 'config/**/*'
+    - 'script/**/*'
+    - 'vendor/**/*'
+    - 'node_modules/**/*'
+    - 'tmp/**/*'
+    - 'log/**/*'
+    - 'public/**/*'
+    - 'storage/**/*'
+
+# Style Configuration
+Style/Documentation:
+  Enabled: false
+
+Style/FrozenStringLiteralComment:
+  Enabled: true
+  EnforcedStyle: always
+
+Style/StringLiterals:
+  Enabled: true
+  EnforcedStyle: single_quotes
+
+Style/StringLiteralsInInterpolation:
+  Enabled: true
+  EnforcedStyle: double_quotes
+
+Style/SymbolArray:
+  Enabled: true
+  EnforcedStyle: percent
+
+Style/WordArray:
+  Enabled: true
+  EnforcedStyle: percent
+
+# Layout Configuration
+Layout/LineLength:
+  Max: 120
+  Exclude:
+    - 'spec/**/*'
+
+Layout/MultilineMethodCallIndentation:
+  EnforcedStyle: indented
+
+Layout/HashAlignment:
+  EnforcedHashRocketStyle: key
+  EnforcedColonStyle: key
+  EnforcedLastArgumentHashStyle: always_inspect
+
+# Metrics Configuration
+Metrics/MethodLength:
+  Max: 20
+  Exclude:
+    - 'db/migrate/*'
+    - 'spec/**/*'
+
+Metrics/BlockLength:
+  Max: 25
+  Exclude:
+    - 'spec/**/*'
+    - 'config/routes.rb'
+    - 'lib/tasks/**/*'
+    - '*.gemspec'
+
+Metrics/ClassLength:
+  Max: 150
+  Exclude:
+    - 'spec/**/*'
+
+Metrics/ModuleLength:
+  Max: 150
+  Exclude:
+    - 'spec/**/*'
+
+Metrics/AbcSize:
+  Max: 20
+  Exclude:
+    - 'db/migrate/*'
+
+Metrics/CyclomaticComplexity:
+  Max: 10
+
+Metrics/PerceivedComplexity:
+  Max: 10
+
+# Rails Configuration
+Rails:
+  Enabled: true
+
+Rails/HasAndBelongsToMany:
+  Enabled: false
+
+Rails/SkipsModelValidations:
+  Enabled: true
+  AllowedMethods:
+    - touch
+    - update_column
+    - update_columns
+    - update_all
+    - update_attribute
+
+Rails/FilePath:
+  Enabled: true
+  EnforcedStyle: arguments
+
+Rails/Output:
+  Exclude:
+    - 'db/seeds.rb'
+    - 'lib/tasks/**/*'
+
+# RSpec Configuration
+RSpec/ExampleLength:
+  Max: 15
+
+RSpec/MultipleExpectations:
+  Max: 5
+
+RSpec/NestedGroups:
+  Max: 4
+
+RSpec/MultipleMemoizedHelpers:
+  Max: 10
+
+RSpec/MessageSpies:
+  EnforcedStyle: have_received
+
+RSpec/FilePath:
+  Enabled: true
+  CustomTransform:
+    RuboCop: rubocop
+    RSpec: rspec
+
+# Performance Configuration
+Performance:
+  Enabled: true
+
+# Naming Configuration
+Naming/PredicateName:
+  AllowedMethods:
+    - is_a?
+    - has_one
+    - has_many
+
+Naming/VariableNumber:
+  EnforcedStyle: snake_case
+
+# Lint Configuration
+Lint/MissingSuper:
+  Enabled: true
+
+Lint/UnusedMethodArgument:
+  AllowUnusedKeywordArguments: false
+  IgnoreEmptyMethods: true
+
+# Bundler Configuration
+Bundler/OrderedGems:
+  Enabled: true
