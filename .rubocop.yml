@@ -1,4 +1,4 @@
-plugins:
+require:
   - rubocop-rails
   - rubocop-rspec
   - rubocop-performance
@@ -134,21 +134,18 @@ RSpec/MultipleMemoizedHelpers:
 RSpec/MessageSpies:
   EnforcedStyle: have_received
 
-RSpec/SpecFilePathFormat:
+RSpec/FilePath:
   Enabled: true
   CustomTransform:
     RuboCop: rubocop
     RSpec: rspec
-
-RSpec/SpecFilePathSuffix:
-  Enabled: true
 
 # Performance Configuration
 Performance:
   Enabled: true
 
 # Naming Configuration
-Naming/PredicatePrefix:
+Naming/PredicateName:
   AllowedMethods:
     - is_a?
     - has_one
