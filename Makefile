@@ -1,4 +1,4 @@
-.PHONY: help setup build up down restart logs console migrate seed test clean db-create db-drop db-reset shell lint lint-fix security-check docs quality-check
+.PHONY: help setup build up down restart logs console migrate seed test clean db-create db-drop db-reset shell lint lint-fix security-check docs quality-check hooks-install hooks-test docs-serve docs-stats rubocop-todo security-report security-interactive
 
 help: ## Show this help message
 	@echo 'Usage: make [target]'
