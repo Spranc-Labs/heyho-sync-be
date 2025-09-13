@@ -1,4 +1,4 @@
-require:
+plugins:
   - rubocop-rails
   - rubocop-rspec
   - rubocop-performance
@@ -6,6 +6,7 @@ require:
 AllCops:
   TargetRubyVersion: 3.2
   NewCops: enable
+  SuggestExtensions: false
   Exclude:
     - 'bin/**/*'
     - 'db/**/*'
@@ -133,18 +134,21 @@ RSpec/MultipleMemoizedHelpers:
 RSpec/MessageSpies:
   EnforcedStyle: have_received
 
-RSpec/FilePath:
+RSpec/SpecFilePathFormat:
   Enabled: true
   CustomTransform:
     RuboCop: rubocop
     RSpec: rspec
+
+RSpec/SpecFilePathSuffix:
+  Enabled: true
 
 # Performance Configuration
 Performance:
   Enabled: true
 
 # Naming Configuration
-Naming/PredicateName:
+Naming/PredicatePrefix:
   AllowedMethods:
     - is_a?
     - has_one

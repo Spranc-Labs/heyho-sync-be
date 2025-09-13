@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 source 'https://rubygems.org'
 
 ruby '3.2.0'
@@ -18,9 +20,9 @@ group :development, :test do
 
   # Code quality tools
   gem 'rubocop', '~> 1.56', require: false
+  gem 'rubocop-performance', '~> 1.19', require: false
   gem 'rubocop-rails', '~> 2.21', require: false
   gem 'rubocop-rspec', '~> 2.24', require: false
-  gem 'rubocop-performance', '~> 1.19', require: false
 
   # Security scanning
   gem 'brakeman', '~> 6.0', require: false
