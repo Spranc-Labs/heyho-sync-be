@@ -30,9 +30,6 @@ group :development, :test do
   # Documentation
   gem 'yard', '~> 0.9', require: false
   gem 'yard-activerecord', '~> 0.0.16', require: false
-
-  # Git hooks
-  gem 'lefthook', '~> 1.4', require: false
 end
 
 group :development do

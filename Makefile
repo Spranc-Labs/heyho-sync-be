@@ -93,15 +93,13 @@ docs: ## Generate YARD documentation
 quality-check: lint security-check test ## Run all quality checks (lint, security, tests)
 	@echo "✅ All quality checks passed!"
 
-# Lefthook Git Hooks
-hooks-install: ## Install git hooks via Lefthook
-	docker-compose run --rm app bundle exec lefthook install
+# Git Hooks (Docker-based)
+hooks-install: ## Install git hooks
+	@echo "Git hooks already installed via scripts/pre-commit.sh"
+	@echo "Hooks run RuboCop in Docker automatically on commit"
 
-hooks-uninstall: ## Uninstall git hooks
-	docker-compose run --rm app bundle exec lefthook uninstall
-
-hooks-run: ## Run git hooks manually (use with HOOK="pre-commit")
-	docker-compose run --rm app bundle exec lefthook run $(HOOK)
+hooks-test: ## Test pre-commit hook manually
+	@./scripts/pre-commit.sh
 
 # Documentation Tools
 docs-serve: ## Serve documentation locally
