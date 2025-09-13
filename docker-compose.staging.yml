@@ -1,0 +1,30 @@
+version: '3.8'
+
+# Staging-specific overrides
+services:
+  app:
+    environment:
+      - RAILS_ENV=staging
+    env_file:
+      - .env.staging
+    # Remove volume mounts in staging for better performance
+    volumes:
+      - bundle_cache:/usr/local/bundle
+    # You might want different resource limits in staging
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  db:
+    # Use persistent volume for staging database
+    volumes:
+      - staging_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  staging_postgres_data:
+  bundle_cache:

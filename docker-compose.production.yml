@@ -1,0 +1,53 @@
+version: '3.8'
+
+# Production-specific overrides
+services:
+  app:
+    # In production, you might want to use a pre-built image
+    # image: your-registry/heyho-sync:latest
+    environment:
+      - RAILS_ENV=production
+    env_file:
+      - .env.production
+    # No source code volume mount in production
+    volumes:
+      - bundle_cache:/usr/local/bundle
+      - public_assets:/app/public/assets
+      - storage_data:/app/storage
+    # Production resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '1.0'
+          memory: 1G
+      replicas: 2
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+
+  db:
+    # In production, you'd typically use a managed database service
+    # This is just for example
+    volumes:
+      - production_postgres_data:/var/lib/postgresql/data
+    # Remove ports exposure in production (access only from app network)
+    ports: []
+
+  redis:
+    # Remove ports exposure in production
+    ports: []
+    # Add persistence
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+
+volumes:
+  production_postgres_data:
+  bundle_cache:
+  public_assets:
+  storage_data:
+  redis_data:

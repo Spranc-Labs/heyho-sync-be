@@ -10,26 +10,29 @@ services:
       - .:/app
       - bundle_cache:/usr/local/bundle
     ports:
-      - "3000:3000"
+      - "${PORT:-3000}:3000"
     depends_on:
       - db
       - redis
+    env_file:
+      - .env.${RAILS_ENV:-development}
     environment:
-      - DATABASE_HOST=db
-      - DATABASE_USER=postgres
-      - DATABASE_PASSWORD=postgres
-      - REDIS_URL=redis://redis:6379/1
-      - RAILS_ENV=development
+      - DATABASE_HOST=${DATABASE_HOST:-db}
+      - DATABASE_USER=${DATABASE_USER:-postgres}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD:-postgres}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/1}
+      - RAILS_ENV=${RAILS_ENV:-development}
 
   db:
     image: postgres:15
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=${DATABASE_USER:-postgres}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD:-postgres}
+      - POSTGRES_DB=${DATABASE_NAME:-heyho_sync_development}
     ports:
-      - "5432:5432"
+      - "${DATABASE_PORT:-5432}:5432"
 
   redis:
     image: redis:7-alpine

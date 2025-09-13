@@ -1,4 +1,4 @@
-.PHONY: help setup build up down restart logs console migrate seed test clean db-create db-drop db-reset shell lint lint-fix security-check docs quality-check hooks-install hooks-test docs-serve docs-stats rubocop-todo security-report security-interactive
+.PHONY: help setup build up down restart logs console migrate seed test clean db-create db-drop db-reset shell lint lint-fix security-check docs quality-check hooks-install hooks-test docs-serve docs-stats rubocop-todo security-report security-interactive dev staging prod dev-up dev-down dev-logs staging-up staging-down staging-logs prod-up prod-down prod-logs env-setup env-check
 
 help: ## Show this help message
 	@echo 'Usage: make [target]'
@@ -118,3 +118,92 @@ security-report: ## Generate detailed HTML security report
 
 security-interactive: ## Run Brakeman in interactive mode
 	docker-compose run --rm app bundle exec brakeman -I
+
+# Environment Management
+env-setup: ## Setup environment files from examples
+	@echo "Setting up environment files..."
+	@test -f .env.development || cp .env.example .env.development
+	@test -f .env.staging || cp .env.example .env.staging
+	@test -f .env.production || cp .env.example .env.production
+	@echo "✅ Environment files created. Please update them with actual values."
+
+env-check: ## Check if environment files exist
+	@echo "Checking environment files..."
+	@test -f .env.development && echo "✅ .env.development exists" || echo "❌ .env.development missing"
+	@test -f .env.staging && echo "✅ .env.staging exists" || echo "❌ .env.staging missing"
+	@test -f .env.production && echo "✅ .env.production exists" || echo "❌ .env.production missing"
+
+# Development Environment
+dev: dev-up ## Start development environment (alias)
+
+dev-up: ## Start development environment
+	./bin/docker-env development up
+
+dev-down: ## Stop development environment
+	./bin/docker-env development down
+
+dev-logs: ## Show development logs
+	./bin/docker-env development logs -f
+
+dev-shell: ## Open shell in development
+	./bin/docker-env development run --rm app bash
+
+dev-console: ## Open Rails console in development
+	./bin/docker-env development run --rm app rails c
+
+# Staging Environment
+staging: staging-up ## Start staging environment (alias)
+
+staging-up: ## Start staging environment
+	./bin/docker-env staging up
+
+staging-down: ## Stop staging environment
+	./bin/docker-env staging down
+
+staging-logs: ## Show staging logs
+	./bin/docker-env staging logs -f
+
+staging-shell: ## Open shell in staging
+	./bin/docker-env staging run --rm app bash
+
+staging-console: ## Open Rails console in staging
+	./bin/docker-env staging run --rm app rails c
+
+staging-migrate: ## Run migrations in staging
+	./bin/docker-env staging run --rm app rails db:migrate
+
+# Production Environment
+prod: prod-up ## Start production environment (alias)
+
+prod-up: ## Start production environment (with confirmation)
+	./bin/docker-env production up
+
+prod-down: ## Stop production environment
+	./bin/docker-env production down
+
+prod-logs: ## Show production logs
+	./bin/docker-env production logs -f
+
+prod-shell: ## Open shell in production (use with caution!)
+	@echo "⚠️  WARNING: You're about to open a shell in production!"
+	@read -p "Are you sure? (y/N) " -n 1 -r; \
+	echo; \
+	if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
+		./bin/docker-env production run --rm app bash; \
+	fi
+
+prod-console: ## Open Rails console in production (use with caution!)
+	@echo "⚠️  WARNING: You're about to open Rails console in production!"
+	@read -p "Are you sure? (y/N) " -n 1 -r; \
+	echo; \
+	if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
+		./bin/docker-env production run --rm app rails c; \
+	fi
+
+prod-migrate: ## Run migrations in production (use with caution!)
+	@echo "⚠️  WARNING: You're about to run migrations in production!"
+	@read -p "Are you sure? (y/N) " -n 1 -r; \
+	echo; \
+	if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
+		./bin/docker-env production run --rm app rails db:migrate; \
+	fi

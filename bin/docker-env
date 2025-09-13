@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+
+# Script to manage Docker environments
+set -e
+
+ENVIRONMENT=${1:-development}
+COMMAND=${2:-up}
+
+case $ENVIRONMENT in
+  development|dev)
+    echo "🚀 Running in DEVELOPMENT environment"
+    export RAILS_ENV=development
+    if [ -f .env.development ]; then
+      export $(cat .env.development | grep -v '^#' | xargs)
+    fi
+    docker-compose ${COMMAND} ${@:3}
+    ;;
+
+  staging|stg)
+    echo "🎯 Running in STAGING environment"
+    export RAILS_ENV=staging
+    if [ -f .env.staging ]; then
+      export $(cat .env.staging | grep -v '^#' | xargs)
+    fi
+    docker-compose -f docker-compose.yml -f docker-compose.staging.yml ${COMMAND} ${@:3}
+    ;;
+
+  production|prod)
+    echo "🏭 Running in PRODUCTION environment"
+    echo "⚠️  WARNING: You're about to run in production mode!"
+    read -p "Are you sure? (y/N) " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+      export RAILS_ENV=production
+      if [ -f .env.production ]; then
+        export $(cat .env.production | grep -v '^#' | xargs)
+      fi
+      docker-compose -f docker-compose.yml -f docker-compose.production.yml ${COMMAND} ${@:3}
+    else
+      echo "Aborted."
+      exit 1
+    fi
+    ;;
+
+  *)
+    echo "Usage: $0 [development|staging|production] [docker-compose command]"
+    echo "Examples:"
+    echo "  $0 development up        # Start development environment"
+    echo "  $0 staging up -d         # Start staging environment in background"
+    echo "  $0 production logs app   # View production app logs"
+    exit 1
+    ;;
+esac
