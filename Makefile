@@ -8,8 +8,8 @@ help: ## Show this help message
 
 setup: ## Initial setup - build, create db, migrate, and start
 	docker-compose build
-	docker-compose run --rm app rails db:create
-	docker-compose run --rm app rails db:migrate
+	docker-compose run --rm app bundle exec rails db:create
+	docker-compose run --rm app bundle exec rails db:migrate
 	docker-compose up
 
 build: ## Build Docker images
@@ -34,30 +34,30 @@ logs-app: ## Show logs for app service only
 	docker-compose logs -f app
 
 console: ## Open Rails console
-	docker-compose run --rm app rails c
+	docker-compose run --rm app bundle exec rails c
 
 c: console ## Shortcut for console
 
 migrate: ## Run database migrations
-	docker-compose run --rm app rails db:migrate
+	docker-compose run --rm app bundle exec rails db:migrate
 
 seed: ## Seed the database
-	docker-compose run --rm app rails db:seed
+	docker-compose run --rm app bundle exec rails db:seed
 
 test: ## Run tests
 	docker-compose run --rm app bundle exec rspec
 
 db-create: ## Create database
-	docker-compose run --rm app rails db:create
+	docker-compose run --rm app bundle exec rails db:create
 
 db-drop: ## Drop database
-	docker-compose run --rm app rails db:drop
+	docker-compose run --rm app bundle exec rails db:drop
 
 db-reset: ## Reset database (drop, create, migrate, seed)
-	docker-compose run --rm app rails db:drop
-	docker-compose run --rm app rails db:create
-	docker-compose run --rm app rails db:migrate
-	docker-compose run --rm app rails db:seed
+	docker-compose run --rm app bundle exec rails db:drop
+	docker-compose run --rm app bundle exec rails db:create
+	docker-compose run --rm app bundle exec rails db:migrate
+	docker-compose run --rm app bundle exec rails db:seed
 
 shell: ## Open bash shell in app container
 	docker-compose run --rm app bash
@@ -67,13 +67,13 @@ clean: ## Remove containers, volumes, and images
 	docker system prune -f
 
 routes: ## Show Rails routes
-	docker-compose run --rm app rails routes
+	docker-compose run --rm app bundle exec rails routes
 
 bundle: ## Install gems
 	docker-compose run --rm app bundle install
 
 generate: ## Run Rails generator (use with ARGS="controller User")
-	docker-compose run --rm app rails generate $(ARGS)
+	docker-compose run --rm app bundle exec rails generate $(ARGS)
 
 g: generate ## Shortcut for generate
 
