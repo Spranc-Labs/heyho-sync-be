@@ -122,16 +122,16 @@ security-interactive: ## Run Brakeman in interactive mode
 # Environment Management
 env-setup: ## Setup environment files from examples
 	@echo "Setting up environment files..."
-	@test -f .env.development || cp .env.example .env.development
-	@test -f .env.staging || cp .env.example .env.staging
-	@test -f .env.production || cp .env.example .env.production
+	@test -f config/env/.env.development || cp config/env/.env.example config/env/.env.development
+	@test -f config/env/.env.staging || cp config/env/.env.example config/env/.env.staging
+	@test -f config/env/.env.production || cp config/env/.env.example config/env/.env.production
 	@echo "✅ Environment files created. Please update them with actual values."
 
 env-check: ## Check if environment files exist
 	@echo "Checking environment files..."
-	@test -f .env.development && echo "✅ .env.development exists" || echo "❌ .env.development missing"
-	@test -f .env.staging && echo "✅ .env.staging exists" || echo "❌ .env.staging missing"
-	@test -f .env.production && echo "✅ .env.production exists" || echo "❌ .env.production missing"
+	@test -f config/env/.env.development && echo "✅ config/env/.env.development exists" || echo "❌ config/env/.env.development missing"
+	@test -f config/env/.env.staging && echo "✅ config/env/.env.staging exists" || echo "❌ config/env/.env.staging missing"
+	@test -f config/env/.env.production && echo "✅ config/env/.env.production exists" || echo "❌ config/env/.env.production missing"
 
 # Development Environment
 dev: dev-up ## Start development environment (alias)

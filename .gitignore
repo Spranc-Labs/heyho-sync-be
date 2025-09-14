@@ -23,12 +23,9 @@
 .env
 .env.local
 .env.*.local
-.env.development
-.env.staging
-.env.production
-# Keep example files
-!.env.example
-!.env.*.example
+config/env/.env.*
+!config/env/.env.example
+!config/env/.env.*.example
 
 # IDE files
 .idea/

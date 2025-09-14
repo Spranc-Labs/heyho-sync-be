@@ -21,10 +21,10 @@ cd heyho-sync-be
 ```bash
 make env-setup
 # Or manually:
-cp .env.example .env.development
+cp config/env/.env.example config/env/.env.development
 ```
 
-3. Update `.env.development` with your configuration
+3. Update `config/env/.env.development` with your configuration
 
 4. Build and start the application:
 ```bash
@@ -95,9 +95,9 @@ This application supports three environments:
 
 1. Copy the example environment file:
 ```bash
-cp .env.example .env.development
-cp .env.example .env.staging
-cp .env.example .env.production
+cp config/env/.env.example config/env/.env.development
+cp config/env/.env.example config/env/.env.staging
+cp config/env/.env.example config/env/.env.production
 ```
 
 2. Update each file with environment-specific values
@@ -115,7 +115,7 @@ make staging
 make prod
 ```
 
-For detailed environment setup, see [ENVIRONMENT_SETUP.md](ENVIRONMENT_SETUP.md)
+For detailed environment setup, see [ENVIRONMENT_SETUP.md](specs/resources/environment_setup.md)
 
 ## 🏗️ Project Structure
 
@@ -127,6 +127,7 @@ For detailed environment setup, see [ENVIRONMENT_SETUP.md](ENVIRONMENT_SETUP.md)
 │   ├── jobs/              # Background jobs
 │   └── mailers/           # Email mailers
 ├── config/                # Configuration files
+│   ├── env/               # Environment variable files
 │   ├── environments/      # Environment-specific configs
 │   ├── database.yml       # Database configuration
 │   └── routes.rb          # API routes
@@ -187,14 +188,14 @@ make security-report          # Generate detailed HTML report
 ## 🚢 Deployment
 
 ### Staging Deployment
-1. Update `.env.staging` with your staging configuration
+1. Update `config/env/.env.staging` with your staging configuration
 2. Build and deploy:
 ```bash
 make staging
 ```
 
 ### Production Deployment
-1. Update `.env.production` with your production configuration
+1. Update `config/env/.env.production` with your production configuration
 2. Build and deploy (with confirmation):
 ```bash
 make prod
@@ -207,7 +208,7 @@ make prod
 
 ## 📚 Documentation
 
-- [Environment Setup Guide](ENVIRONMENT_SETUP.md) - Detailed environment configuration
+- [Environment Setup Guide](specs/resources/environment_setup.md) - Detailed environment configuration
 - [API Documentation](docs/api.md) - API endpoints and usage (if applicable)
 
 Generate code documentation:

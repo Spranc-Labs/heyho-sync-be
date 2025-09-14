@@ -8,7 +8,7 @@ services:
     environment:
       - RAILS_ENV=production
     env_file:
-      - .env.production
+      - config/env/.env.production
     # No source code volume mount in production
     volumes:
       - bundle_cache:/usr/local/bundle

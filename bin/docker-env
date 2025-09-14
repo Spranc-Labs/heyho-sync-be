@@ -10,8 +10,8 @@ case $ENVIRONMENT in
   development|dev)
     echo "🚀 Running in DEVELOPMENT environment"
     export RAILS_ENV=development
-    if [ -f .env.development ]; then
-      export $(cat .env.development | grep -v '^#' | xargs)
+    if [ -f config/env/.env.development ]; then
+      export $(cat config/env/.env.development | grep -v '^#' | xargs)
     fi
     docker-compose ${COMMAND} ${@:3}
     ;;
@@ -19,8 +19,8 @@ case $ENVIRONMENT in
   staging|stg)
     echo "🎯 Running in STAGING environment"
     export RAILS_ENV=staging
-    if [ -f .env.staging ]; then
-      export $(cat .env.staging | grep -v '^#' | xargs)
+    if [ -f config/env/.env.staging ]; then
+      export $(cat config/env/.env.staging | grep -v '^#' | xargs)
     fi
     docker-compose -f docker-compose.yml -f docker-compose.staging.yml ${COMMAND} ${@:3}
     ;;
@@ -32,8 +32,8 @@ case $ENVIRONMENT in
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
       export RAILS_ENV=production
-      if [ -f .env.production ]; then
-        export $(cat .env.production | grep -v '^#' | xargs)
+      if [ -f config/env/.env.production ]; then
+        export $(cat config/env/.env.production | grep -v '^#' | xargs)
       fi
       docker-compose -f docker-compose.yml -f docker-compose.production.yml ${COMMAND} ${@:3}
     else

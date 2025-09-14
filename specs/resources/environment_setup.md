@@ -6,26 +6,26 @@ This application supports multiple environments: development, staging, and produ
 
 ### 1. Setting Up Environment Variables
 
-Each environment has its own `.env` file:
-- `.env.development` - Local development settings
-- `.env.staging` - Staging environment settings
-- `.env.production` - Production environment settings
+Each environment has its own `.env` file in the `config/env/` directory:
+- `config/env/.env.development` - Local development settings
+- `config/env/.env.staging` - Staging environment settings
+- `config/env/.env.production` - Production environment settings
 
-**Important:** Never commit actual credentials to git. The `.env.*` files (except `.env.example`) are gitignored.
+**Important:** Never commit actual credentials to git. The `config/env/.env.*` files (except `.env.example`) are gitignored.
 
 ### 2. Initial Setup
 
 1. Copy the example environment file for your environment:
    ```bash
-   cp .env.example .env.development
+   cp config/env/.env.example config/env/.env.development
    ```
 
-2. Update the values in your `.env.development` file with your actual configuration.
+2. Update the values in your `config/env/.env.development` file with your actual configuration.
 
 3. For staging/production, create appropriate `.env` files:
    ```bash
-   cp .env.example .env.staging
-   cp .env.example .env.production
+   cp config/env/.env.example config/env/.env.staging
+   cp config/env/.env.example config/env/.env.production
    ```
 
 ### 3. Running Different Environments
@@ -132,7 +132,7 @@ docker-compose run --rm app rails credentials:edit
 ## Troubleshooting
 
 ### Environment variables not loading
-- Ensure your `.env.[environment]` file exists
+- Ensure your `config/env/.env.[environment]` file exists
 - Check file permissions
 - Restart Docker containers after changing env files
 

@@ -15,7 +15,7 @@ services:
       - db
       - redis
     env_file:
-      - .env.${RAILS_ENV:-development}
+      - config/env/.env.${RAILS_ENV:-development}
     environment:
       - DATABASE_HOST=${DATABASE_HOST:-db}
       - DATABASE_USER=${DATABASE_USER:-postgres}

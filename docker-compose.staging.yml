@@ -6,7 +6,7 @@ services:
     environment:
       - RAILS_ENV=staging
     env_file:
-      - .env.staging
+      - config/env/.env.staging
     # Remove volume mounts in staging for better performance
     volumes:
       - bundle_cache:/usr/local/bundle
