@@ -26,6 +26,10 @@ gem 'redis', '~> 4.0'
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
 # gem "bcrypt", "~> 3.1.7"
 
+# Authentication
+gem 'jwt'
+gem 'rodauth-rails', '~> 1.13'
+
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem 'tzinfo-data', platforms: %i[mingw mswin x64_mingw jruby]
 
@@ -36,7 +40,7 @@ gem 'bootsnap', require: false
 # gem "image_processing", "~> 1.2"
 
 # Use Rack CORS for handling Cross-Origin Resource Sharing (CORS), making cross-origin AJAX possible
-# gem "rack-cors"
+gem 'rack-cors'
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
@@ -68,6 +72,10 @@ group :development do
 
   # Web console for better debugging
   gem 'web-console'
+
+  # Email preview in development
+  gem 'letter_opener'
+  gem 'letter_opener_web'
 end
 
 group :test do
