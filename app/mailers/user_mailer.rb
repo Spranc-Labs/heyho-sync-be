@@ -8,7 +8,7 @@ class UserMailer < ApplicationMailer
 
     mail(
       to: @user.email,
-      subject: 'Verify your HeyHo Sync account'
+      subject: I18n.t('mailers.user_mailer.email_verification.subject')
     )
   end
 
@@ -19,7 +19,7 @@ class UserMailer < ApplicationMailer
 
     mail(
       to: @user.email,
-      subject: 'Reset your HeyHo Sync password'
+      subject: I18n.t('mailers.user_mailer.password_reset.subject')
     )
   end
 
@@ -32,7 +32,7 @@ class UserMailer < ApplicationMailer
 
     mail(
       to: @new_email,
-      subject: 'Verify your new email for HeyHo Sync'
+      subject: I18n.t('mailers.user_mailer.email_change_verification.subject')
     )
   end
 
@@ -43,13 +43,13 @@ class UserMailer < ApplicationMailer
 
     mail(
       to: old_email,
-      subject: 'Email change requested for your HeyHo Sync account'
+      subject: I18n.t('mailers.user_mailer.email_change_notification.subject')
     )
   end
 
   private
 
   def frontend_url
-    ENV['FRONTEND_URL'] || 'http://localhost:3001'
+    ENV.fetch('FRONTEND_URL', 'http://localhost:3001')
   end
 end

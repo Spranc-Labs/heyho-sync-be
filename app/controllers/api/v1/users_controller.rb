@@ -17,18 +17,20 @@ module Api
 
       # PATCH /api/v1/users/me
       def update
-        if @user.update(user_params)
+        result = ::Users::ProfileService.update_profile(@user, user_params)
+
+        if result.success?
           render_json_response(
             success: true,
-            message: 'User updated successfully',
+            message: result.message || 'User updated successfully',
             data: {
-              user: UserSerializer.new(@user).as_json
+              user: UserSerializer.new(result.data).as_json
             }
           )
         else
           render_error_response(
-            message: 'User could not be updated',
-            errors: @user.errors.full_messages,
+            message: result.message || 'User could not be updated',
+            errors: result.error_messages,
             status: :unprocessable_entity
           )
         end
@@ -36,31 +38,24 @@ module Api
 
       # PATCH /api/v1/users/me/password
       def update_password
-        unless @user.valid_password?(password_params[:current_password])
-          render_error_response(
-            message: 'Password could not be updated',
-            errors: ['Current password is incorrect'],
-            status: :unprocessable_entity
-          )
-          return
-        end
+        result = ::Users::ProfileService.update_password(
+          @user,
+          current_password: password_params[:current_password],
+          new_password: password_params[:password]
+        )
 
-        # Set password_confirmation to match password
-        @user.password = password_params[:password]
-        @user.password_confirmation = password_params[:password]
-
-        if @user.save
+        if result.success?
           render_json_response(
             success: true,
-            message: 'Password updated successfully',
+            message: result.message || 'Password updated successfully',
             data: {
-              user: UserSerializer.new(@user).as_json
+              user: UserSerializer.new(result.data).as_json
             }
           )
         else
           render_error_response(
-            message: 'Password could not be updated',
-            errors: @user.errors.full_messages,
+            message: result.message || 'Password could not be updated',
+            errors: result.error_messages,
             status: :unprocessable_entity
           )
         end
@@ -73,7 +68,7 @@ module Api
       end
 
       def user_params
-        params.permit(:email, :first_name, :last_name, :isVerified)
+        params.permit(:email, :first_name, :last_name)
       end
 
       def password_params

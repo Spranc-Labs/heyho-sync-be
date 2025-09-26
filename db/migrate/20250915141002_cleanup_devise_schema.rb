@@ -1,7 +1,6 @@
 class CleanupDeviseSchema < ActiveRecord::Migration[7.0]
   def change
-    # Drop Devise-related tables
-    drop_table :jwt_denylists if table_exists?(:jwt_denylists)
+    # Drop Devise-related tables (keep jwt_denylists for Rodauth JWT revocation)
     drop_table :refresh_tokens if table_exists?(:refresh_tokens)
     
     # Remove Devise columns from users table  

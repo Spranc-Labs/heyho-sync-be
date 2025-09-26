@@ -1,5 +1,7 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
-RSpec.describe JwtDenylist, type: :model do
-  pending "add some examples to (or delete) #{__FILE__}"
+RSpec.describe JwtDenylist do
+  pending 'JWT denylist functionality to be implemented later'
 end

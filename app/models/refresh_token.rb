@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# TODO: Create refresh_tokens table migration when implementing token refresh functionality
 class RefreshToken < ApplicationRecord
   belongs_to :user
 

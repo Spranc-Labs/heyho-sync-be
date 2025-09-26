@@ -1,42 +1,36 @@
 # frozen_string_literal: true
 
 class User < ApplicationRecord
+  # Includes
   include Rodauth::Rails.model
+  include Verifiable
+  include Tokenable
 
-  # Validations are handled by Rodauth for auth-related fields
-  # validates :first_name, presence: true, allow_blank: false
-  # validates :last_name, presence: true, allow_blank: false
-  # validates :email, presence: true, uniqueness: true
+  # Associations are in Tokenable concern:
+  # has_many :jwt_denylists, dependent: :destroy
+  # has_many :refresh_tokens, dependent: :destroy
 
-  # Status enum for Rodauth compatibility
-  enum status: { verified: 1, unverified: 2, closed: 3 }
+  # Validations
+  validates :email, presence: true, format: { with: URI::MailTo::EMAIL_REGEXP }
+  validates :first_name, presence: true, allow_blank: false
+  validates :last_name, presence: true, allow_blank: false
 
-  # Keep isVerified as the primary field, sync with status
-  before_save :sync_status_with_is_verified
+  # Callbacks are in Verifiable concern:
+  # before_save :sync_status_with_is_verified
 
-  def verified?
-    isVerified
-  end
+  # Instance methods
+  def valid_password?(password)
+    return false if password_hash.blank?
 
-  def unverified?
-    !isVerified
+    BCrypt::Password.new(password_hash) == password
+  rescue BCrypt::Errors::InvalidHash
+    false
   end
 
   # Override isVerified= to sync with status
+  # TODO: Refactor to use snake_case (is_verified) with migration
   def isVerified=(value)
     super(value)
     self.status = value ? :verified : :unverified
-  end
-
-  private
-
-  def sync_status_with_is_verified
-    # Sync status based on isVerified when saving
-    if isVerified_changed?
-      self.status = isVerified? ? :verified : :unverified
-    elsif status_changed?
-      # If status is changed directly, sync isVerified
-      self.isVerified = verified?
-    end
   end
 end

@@ -30,4 +30,54 @@
 # available at https://guides.rubyonrails.org/i18n.html.
 
 en:
-  hello: "Hello world"
+  activerecord:
+    errors:
+      models:
+        user_verification_key:
+          attributes:
+            key:
+              invalid: "must be a 6-digit code"
+
+  controllers:
+    users:
+      update:
+        success: "User updated successfully"
+        failure: "User could not be updated"
+      update_password:
+        success: "Password updated successfully"
+        failure: "Password could not be updated"
+
+    verification:
+      verify_email:
+        success: "Email verified successfully"
+      resend_verification:
+        success: "Verification email sent successfully"
+
+  services:
+    authentication:
+      email_verification:
+        params_required: "Email and verification code are required"
+        email_required: "Email is required"
+        user_not_found: "User not found"
+        invalid_code: "Invalid or expired verification code"
+        already_verified: "Email is already verified"
+        verification_failed: "Verification failed"
+        resend_failed: "Failed to resend verification code"
+        email_sent: "Verification email sent"
+
+    users:
+      profile:
+        invalid_params: "Invalid parameters"
+        incorrect_password: "Current password is incorrect"
+        password_required: "New password is required"
+
+  mailers:
+    user_mailer:
+      email_verification:
+        subject: "Verify your HeyHo Sync account"
+      password_reset:
+        subject: "Reset your HeyHo Sync password"
+      email_change_verification:
+        subject: "Verify your new email for HeyHo Sync"
+      email_change_notification:
+        subject: "Email change requested for your HeyHo Sync account"

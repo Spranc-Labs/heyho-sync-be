@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'sequel/core'
 require 'jwt'
 
@@ -27,7 +29,8 @@ class RodauthMain < Rodauth::Rails::Auth
 
     # The secret key used for hashing public-facing tokens for various features.
     # Defaults to Rails `secret_key_base`, but you can use your own secret key.
-    # hmac_secret "ed5ab3065d130a8ff84173cc3bb7f55a861dd443c6c0c192c5c0b587c3f939ef478067caee28a7292d8173e3dab077a0ca5c62bac15978b29a573b3bb93dd2b1"
+    # hmac_secret "ed5ab3065d130a8ff84173cc3bb7f55a861dd443c6c0c192c5c0b587c3f939ef" \
+    #             "478067caee28a7292d8173e3dab077a0ca5c62bac15978b29a573b3bb93dd2b1"
 
     # JWT tokens are handled manually in login_response
 
@@ -151,9 +154,11 @@ class RodauthMain < Rodauth::Rails::Auth
     login_response do
       user = User.find(account_id)
 
-      # Generate JWT access token manually
+      # Generate JWT access token manually with JTI for revocation
+      jti = SecureRandom.uuid
       access_token_payload = {
         sub: user.id,
+        jti:,
         iss: 'heyho-sync-api',
         aud: 'heyho-sync-app',
         iat: Time.current.to_i,
@@ -207,8 +212,29 @@ class RodauthMain < Rodauth::Rails::Auth
       request.halt
     end
 
-    # Custom logout response
+    # Custom logout response with JWT revocation
     logout_response do
+      # Get the JWT token from Authorization header and revoke it
+      auth_header = request.env['HTTP_AUTHORIZATION']
+      if auth_header&.start_with?('Bearer ')
+        token = auth_header.sub('Bearer ', '')
+
+        begin
+          # Decode token to get JTI and user info
+          payload = JWT.decode(token, Rails.application.secret_key_base, true, { algorithm: 'HS256' })[0]
+          user = User.find(payload['sub'])
+
+          # Add token to denylist if JTI is present
+          if payload['jti']
+            JwtDenylist.revoke_jwt(payload, user)
+            Rails.logger.info "JWT token #{payload["jti"]} revoked for user #{user.id}"
+          end
+        rescue JWT::DecodeError, JWT::ExpiredSignature, ActiveRecord::RecordNotFound => e
+          Rails.logger.warn "Failed to revoke JWT during logout: #{e.message}"
+          # Continue with logout even if token revocation fails
+        end
+      end
+
       response['Content-Type'] = 'application/json'
       response.write({
         statusCode: 200,
@@ -220,7 +246,8 @@ class RodauthMain < Rodauth::Rails::Auth
 
     # ==> Flash
     # Override default flash messages.
-    # create_account_notice_flash "Your account has been created. Please verify your account by visiting the confirmation link sent to your email address."
+    # create_account_notice_flash "Your account has been created. Please verify your account " \
+    #                             "by visiting the confirmation link sent to your email address."
     # require_login_error_flash "Login is required for accessing this page"
     # login_notice_flash nil
 
@@ -229,7 +256,9 @@ class RodauthMain < Rodauth::Rails::Auth
     # no_matching_login_message "user with this email address doesn't exist"
     # already_an_account_with_this_login_message "user with this email address already exists"
     # password_too_short_message { "needs to have at least #{password_minimum_length} characters" }
-    # login_does_not_meet_requirements_message { "invalid email#{", #{login_requirement_message}" if login_requirement_message}" }
+    # login_does_not_meet_requirements_message do
+    #   "invalid email#{", #{login_requirement_message}" if login_requirement_message}"
+    # end
 
     # Passwords shorter than 8 characters are considered weak according to OWASP.
     password_minimum_length 8

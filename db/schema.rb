@@ -10,10 +10,21 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_09_23_194530) do
+ActiveRecord::Schema[7.0].define(version: 2025_09_26_202215) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "plpgsql"
+
+  create_table "jwt_denylists", force: :cascade do |t|
+    t.string "jti"
+    t.datetime "exp"
+    t.bigint "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["exp"], name: "index_jwt_denylists_on_exp"
+    t.index ["jti"], name: "index_jwt_denylists_on_jti"
+    t.index ["user_id"], name: "index_jwt_denylists_on_user_id"
+  end
 
   create_table "user_login_change_keys", force: :cascade do |t|
     t.string "key", null: false
@@ -50,6 +61,7 @@ ActiveRecord::Schema[7.0].define(version: 2025_09_23_194530) do
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
+  add_foreign_key "jwt_denylists", "users"
   add_foreign_key "user_login_change_keys", "users", column: "id"
   add_foreign_key "user_password_reset_keys", "users", column: "id"
   add_foreign_key "user_remember_keys", "users", column: "id"

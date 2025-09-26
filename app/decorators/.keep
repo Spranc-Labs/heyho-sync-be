@@ -1,0 +1,17 @@
+# Decorators
+
+Decorators add presentation logic to models without cluttering the model itself.
+Use them for view-specific formatting and display concerns.
+
+Example usage:
+```ruby
+class UserDecorator < BaseDecorator
+  def full_name
+    "#{first_name} #{last_name}".strip
+  end
+
+  def status_badge
+    verified? ? 'Verified' : 'Pending'
+  end
+end
+```

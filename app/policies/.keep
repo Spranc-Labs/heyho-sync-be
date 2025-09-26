@@ -1,0 +1,17 @@
+# Policies
+
+Authorization policies define who can perform actions on resources.
+Use them to centralize authorization logic.
+
+Example usage:
+```ruby
+class UserPolicy < BasePolicy
+  def update?
+    user == record || user.admin?
+  end
+
+  def destroy?
+    user.admin? && user != record
+  end
+end
+```
