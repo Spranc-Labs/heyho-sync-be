@@ -9,6 +9,10 @@ Rails.application.routes.draw do
     namespace :v1 do
       post 'verify-email', to: 'verification#verify_email'
       post 'resend-verification', to: 'verification#resend_verification'
+
+      # Password reset endpoints
+      post 'reset-password-request', to: 'password_reset#request_reset'
+      post 'reset-password', to: 'password_reset#reset_password'
     end
   end
 

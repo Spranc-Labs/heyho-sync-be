@@ -28,7 +28,7 @@ module Authentication
       return invalid_code_result unless verification
 
       verify_user!(user, verification)
-      success_result(data: user, message: 'Email verified successfully')
+      success_result(data: { user: user_data(user) }, message: 'Email verified successfully')
     rescue StandardError => e
       log_error('Email verification failed', e)
       failure_result(message: 'Verification failed')
@@ -96,6 +96,16 @@ module Authentication
 
     def generate_verification_code
       SecureRandom.random_number(100_000..999_999).to_s
+    end
+
+    def user_data(user)
+      {
+        id: user.id,
+        email: user.email,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        isVerified: user.isVerified
+      }
     end
 
     # Result builders

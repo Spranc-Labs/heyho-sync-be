@@ -6,9 +6,10 @@ require 'jwt'
 class RodauthMain < Rodauth::Rails::Auth
   configure do
     # List of authentication features that are loaded.
+    # Note: reset_password feature disabled - using custom implementation via PasswordResetService
     enable :create_account, :verify_account, :verify_account_grace_period,
            :login, :logout, :remember, :json,
-           :reset_password, :change_password, :change_login, :verify_login_change,
+           :change_password, :change_login, :verify_login_change,
            :close_account
 
     # See the Rodauth documentation for the list of available config options:
@@ -24,7 +25,7 @@ class RodauthMain < Rodauth::Rails::Auth
     accounts_table :users
     verify_account_table :user_verification_keys
     verify_login_change_table :user_login_change_keys
-    reset_password_table :user_password_reset_keys
+    # reset_password_table disabled - using custom implementation
     remember_table :user_remember_keys
 
     # The secret key used for hashing public-facing tokens for various features.
