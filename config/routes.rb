@@ -13,6 +13,9 @@ Rails.application.routes.draw do
       # Password reset endpoints
       post 'reset-password-request', to: 'password_reset#request_reset'
       post 'reset-password', to: 'password_reset#reset_password'
+
+      # Data sync endpoints
+      post 'data/sync', to: 'data_sync#create'
     end
   end
 

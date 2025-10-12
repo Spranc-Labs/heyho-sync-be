@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_09_26_202215) do
+ActiveRecord::Schema[7.0].define(version: 2025_10_12_125552) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "plpgsql"
@@ -24,6 +24,30 @@ ActiveRecord::Schema[7.0].define(version: 2025_09_26_202215) do
     t.index ["exp"], name: "index_jwt_denylists_on_exp"
     t.index ["jti"], name: "index_jwt_denylists_on_jti"
     t.index ["user_id"], name: "index_jwt_denylists_on_user_id"
+  end
+
+  create_table "page_visits", id: :string, force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "url", null: false
+    t.string "title", null: false
+    t.datetime "visited_at", null: false
+    t.string "source_page_visit_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["source_page_visit_id"], name: "index_page_visits_on_source_page_visit_id"
+    t.index ["user_id"], name: "index_page_visits_on_user_id"
+    t.index ["visited_at"], name: "index_page_visits_on_visited_at"
+  end
+
+  create_table "tab_aggregates", id: :string, force: :cascade do |t|
+    t.string "page_visit_id", null: false
+    t.integer "total_time_seconds", default: 0, null: false
+    t.integer "active_time_seconds", default: 0, null: false
+    t.integer "scroll_depth_percent", default: 0
+    t.datetime "closed_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["page_visit_id"], name: "index_tab_aggregates_on_page_visit_id"
   end
 
   create_table "user_login_change_keys", force: :cascade do |t|
@@ -62,6 +86,9 @@ ActiveRecord::Schema[7.0].define(version: 2025_09_26_202215) do
   end
 
   add_foreign_key "jwt_denylists", "users"
+  add_foreign_key "page_visits", "page_visits", column: "source_page_visit_id"
+  add_foreign_key "page_visits", "users"
+  add_foreign_key "tab_aggregates", "page_visits"
   add_foreign_key "user_login_change_keys", "users", column: "id"
   add_foreign_key "user_password_reset_keys", "users", column: "id"
   add_foreign_key "user_remember_keys", "users", column: "id"
