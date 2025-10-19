@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_10_19_123356) do
+ActiveRecord::Schema[7.0].define(version: 2025_10_19_140751) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "plpgsql"
@@ -57,6 +57,9 @@ ActiveRecord::Schema[7.0].define(version: 2025_10_19_123356) do
     t.jsonb "client_info", default: {}
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.jsonb "validation_errors", default: [], null: false
+    t.integer "rejected_records_count", default: 0, null: false
+    t.index ["rejected_records_count"], name: "index_sync_logs_on_rejected_records_count"
     t.index ["status"], name: "index_sync_logs_on_status"
     t.index ["synced_at"], name: "index_sync_logs_on_synced_at"
     t.index ["user_id", "synced_at"], name: "index_sync_logs_on_user_id_and_synced_at"

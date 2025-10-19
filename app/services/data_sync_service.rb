@@ -44,22 +44,27 @@ class DataSyncService < BaseService
     @client_info = client_info || {}
     @raw_page_visits = Array(page_visits)
     @raw_tab_aggregates = Array(tab_aggregates)
-    @page_visits = transform_page_visits(@raw_page_visits)
-    @tab_aggregates = transform_tab_aggregates(@raw_tab_aggregates, @raw_page_visits)
+    @validation_service = DataValidationService.new
+    @sanitization_service = DataSanitizationService.new
+    @rejected_records = []
+    @page_visits = []
+    @tab_aggregates = []
     @sync_log = nil
   end
 
   def sync
     return invalid_params_result if user.blank?
-    return batch_size_exceeded_result if batch_size_exceeded?
-    return validation_result unless validate_payload
+    return batch_size_exceeded_result if raw_batch_size_exceeded?
 
     create_sync_log
-    save_batch
+    process_and_validate_records
+    return validation_result if all_records_rejected?
+
+    save_batch if valid_records?
     complete_sync_log
     success_result(
       data: sync_stats,
-      message: 'Data synced successfully'
+      message: build_success_message
     )
   rescue StandardError => e
     log_error('Data sync failed', e)
@@ -69,7 +74,109 @@ class DataSyncService < BaseService
 
   private
 
-  attr_reader :user, :page_visits, :tab_aggregates, :raw_page_visits, :raw_tab_aggregates, :client_info, :sync_log
+  attr_reader :user, :page_visits, :tab_aggregates, :raw_page_visits, :raw_tab_aggregates,
+              :client_info, :sync_log, :rejected_records, :validation_service, :sanitization_service
+
+  # Validation and processing workflow
+  def process_and_validate_records
+    process_page_visits
+    process_tab_aggregates
+  end
+
+  def process_page_visits
+    raw_page_visits.each_with_index do |raw_visit, index|
+      visit = transform_and_validate_page_visit(raw_visit, index)
+      @page_visits << visit if visit
+    end
+  end
+
+  def process_tab_aggregates
+    transformed_aggregates = transform_tab_aggregates(raw_tab_aggregates, raw_page_visits)
+    transformed_aggregates.each_with_index do |aggregate, index|
+      validated = validate_and_sanitize_tab_aggregate(aggregate, index)
+      @tab_aggregates << validated if validated
+    end
+  end
+
+  def transform_and_validate_page_visit(raw_visit, index)
+    # Transform to internal format
+    visit = build_page_visit_hash(raw_visit)
+
+    # Validate
+    validation_result = validation_service.validate_page_visit(visit)
+
+    if validation_result.invalid?
+      record_validation_errors(visit['id'], 'page_visit', index, validation_result.errors)
+      return nil
+    end
+
+    # Sanitize
+    sanitized = sanitization_service.sanitize_page_visit(visit)
+
+    # Log warnings if any
+    log_validation_warnings(visit['id'], 'page_visit', validation_result.warnings) if validation_result.warnings?
+
+    sanitized
+  end
+
+  def validate_and_sanitize_tab_aggregate(aggregate, index)
+    # Validate
+    validation_result = validation_service.validate_tab_aggregate(aggregate)
+
+    if validation_result.invalid?
+      record_validation_errors(aggregate['id'], 'tab_aggregate', index, validation_result.errors)
+      return nil
+    end
+
+    # Sanitize
+    sanitized = sanitization_service.sanitize_tab_aggregate(aggregate)
+
+    # Log warnings if any
+    if validation_result.warnings?
+      log_validation_warnings(aggregate['id'], 'tab_aggregate',
+                              validation_result.warnings)
+    end
+
+    sanitized
+  end
+
+  def record_validation_errors(record_id, record_type, index, errors)
+    @rejected_records << { id: record_id, type: record_type, index:, errors: }
+
+    errors.each do |error|
+      sync_log.add_validation_error(
+        record_id:,
+        record_type:,
+        field: error[:field],
+        message: error[:message],
+        value: error[:value]
+      )
+    end
+  end
+
+  def log_validation_warnings(record_id, record_type, warnings)
+    warnings.each do |warning|
+      Rails.logger.warn(
+        "Validation warning for #{record_type} #{record_id}: #{warning[:field]} - #{warning[:message]}"
+      )
+    end
+  end
+
+  def all_records_rejected?
+    page_visits.empty? && tab_aggregates.empty? && rejected_records.any?
+  end
+
+  def valid_records?
+    page_visits.any? || tab_aggregates.any?
+  end
+
+  def build_success_message
+    if rejected_records.any?
+      "Data synced with #{rejected_records.size} record(s) rejected due to validation errors"
+    else
+      'Data synced successfully'
+    end
+  end
 
   # Transform extension format to our internal format
   def transform_page_visits(visits)
@@ -398,7 +505,10 @@ class DataSyncService < BaseService
   def sync_stats
     {
       page_visits_synced: page_visits.size,
-      tab_aggregates_synced: tab_aggregates.size
+      tab_aggregates_synced: tab_aggregates.size,
+      rejected_records_count: rejected_records.size,
+      data_quality_score: sync_log&.data_quality_score,
+      validation_errors: sync_log&.validation_errors || []
     }
   end
 
@@ -413,13 +523,13 @@ class DataSyncService < BaseService
     )
   end
 
-  def batch_size_exceeded?
-    total_records = page_visits.size + tab_aggregates.size
+  def raw_batch_size_exceeded?
+    total_records = raw_page_visits.size + raw_tab_aggregates.size
     total_records > MAX_BATCH_SIZE
   end
 
   def batch_size_exceeded_result
-    total = page_visits.size + tab_aggregates.size
+    total = raw_page_visits.size + raw_tab_aggregates.size
     failure_result(
       message: "Batch size exceeded. Maximum #{MAX_BATCH_SIZE} records allowed, got #{total}"
     )
@@ -440,6 +550,7 @@ class DataSyncService < BaseService
   def complete_sync_log
     return unless sync_log
 
+    sync_log.save!
     sync_log.update!(
       status: 'completed',
       page_visits_synced: page_visits.size,

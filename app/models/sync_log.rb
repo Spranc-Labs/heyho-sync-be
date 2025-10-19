@@ -10,7 +10,7 @@ class SyncLog < ApplicationRecord
   # Validations
   validates :synced_at, presence: true
   validates :status, presence: true, inclusion: { in: STATUSES }
-  validates :page_visits_synced, :tab_aggregates_synced,
+  validates :page_visits_synced, :tab_aggregates_synced, :rejected_records_count,
             numericality: { only_integer: true, greater_than_or_equal_to: 0 }
 
   # Scopes
@@ -19,6 +19,8 @@ class SyncLog < ApplicationRecord
   scope :by_status, ->(status) { where(status:) }
   scope :completed, -> { where(status: 'completed') }
   scope :failed, -> { where(status: 'failed') }
+  scope :with_validation_errors, -> { where('rejected_records_count > 0') }
+  scope :clean, -> { where(rejected_records_count: 0) }
 
   # Class methods
   def self.last_sync_for(user)
@@ -54,5 +56,33 @@ class SyncLog < ApplicationRecord
       status: 'failed',
       error_messages: Array(messages)
     )
+  end
+
+  def add_validation_error(record_id:, record_type:, field:, message:, value: nil)
+    error = {
+      record_id:,
+      record_type:,
+      field:,
+      message:,
+      value:,
+      timestamp: Time.current.iso8601
+    }.compact
+
+    self.validation_errors = validation_errors + [error]
+    self.rejected_records_count += 1
+  end
+
+  def validation_errors?
+    rejected_records_count.positive?
+  end
+
+  def data_quality_score
+    return 100.0 if total_records.zero?
+
+    ((total_synced.to_f / total_records) * 100).round(2)
+  end
+
+  def total_records
+    total_synced + rejected_records_count
   end
 end
