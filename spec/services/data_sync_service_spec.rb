@@ -156,8 +156,8 @@ RSpec.describe DataSyncService, type: :service do
           ]
           result = service.send(:resolve_conflict, versions, 'visited_at')
 
-          expect(result['title']).to be_nil # Most recent is nil
-          expect(result['domain']).to eq('example.com') # Merged from older
+          expect(result['title']).to eq('Title') # Merged from older version (doesn't overwrite with nil)
+          expect(result['domain']).to eq('example.com') # From most recent
           expect(result['visited_at']).to eq('2024-01-02') # Most recent
         end
 
