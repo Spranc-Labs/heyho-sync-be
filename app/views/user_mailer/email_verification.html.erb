@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .verification-code {
+      background-color: #f8f9fa;
+      border: 2px solid #4CAF50;
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      margin: 20px 0;
+      font-size: 32px;
+      font-weight: bold;
+      letter-spacing: 8px;
+      color: #4CAF50;
+    }
+    .footer {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #ddd;
+      font-size: 12px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <h2>Welcome to HeyHo Sync!</h2>
+  <p>Hi <%= @user.first_name %>,</p>
+  <p>Please verify your email address to complete your registration.</p>
+  <p>Enter this verification code in your app:</p>
+  <div class="verification-code">
+    <%= @token %>
+  </div>
+  <p>This verification code will expire in 24 hours.</p>
+  <div class="footer">
+    <p>If you didn't create an account, please ignore this email.</p>
+  </div>
+</body>
+</html>

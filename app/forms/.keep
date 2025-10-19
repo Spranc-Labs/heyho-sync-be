@@ -1,0 +1,19 @@
+# Form Objects
+
+Form objects encapsulate complex validations and user input processing.
+Use them when dealing with multi-model forms or complex business rules.
+
+Example usage:
+```ruby
+class RegistrationForm < BaseForm
+  attribute :email
+  attribute :password
+
+  validates :email, presence: true, format: { with: URI::MailTo::EMAIL_REGEXP }
+  validates :password, length: { minimum: 8 }
+
+  def save
+    # Create user and send verification email
+  end
+end
+```

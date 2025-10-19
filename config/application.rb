@@ -25,6 +25,9 @@ module App
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 7.0
 
+    # Disable host authorization in test environment
+    config.hosts = nil if Rails.env.test?
+
     # Configuration for the application, engines, and railties goes here.
     #
     # These settings can be overridden in specific environments using the files
@@ -33,9 +36,18 @@ module App
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
 
+    # Add rodauth configuration to autoload paths
+    config.autoload_paths << Rails.root.join('config/rodauth')
+
+
     # Only loads a smaller set of middleware suitable for API only apps.
     # Middleware like session, flash, cookies can be added back manually.
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
+
+    # Add session middleware for Rodauth
+    config.session_store :cookie_store, key: '_app_session'
+    config.middleware.use ActionDispatch::Cookies
+    config.middleware.use ActionDispatch::Session::CookieStore
   end
 end

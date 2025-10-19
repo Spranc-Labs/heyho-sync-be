@@ -1,0 +1,1818 @@
+{
+  "info": {
+    "_postman_id": "heyho-sync-auth-v4",
+    "name": "HeyHo Sync - Complete API",
+    "description": "Complete API collection for HeyHo Sync backend including authentication, user management, email verification, password reset, and email change functionality",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Sign Up",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"user\": {\n        \"email\": \"john.doe@example.com\",\n        \"password\": \"SecurePass123!\",\n        \"first_name\": \"John\",\n        \"last_name\": \"Doe\"\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/signup",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "signup"
+              ]
+            },
+            "description": "Create a new user account.\n\n## Request Fields\n- **email**: User's email address (required)\n- **password**: Minimum 6 characters (required)\n- **first_name**: User's first name (required)\n- **last_name**: User's last name (required)\n\n## Request Examples\n\n### ✅ Valid Request\n```json\n{\n    \"user\": {\n        \"email\": \"john.doe@example.com\",\n        \"password\": \"SecurePass123!\",\n        \"first_name\": \"John\",\n        \"last_name\": \"Doe\"\n    }\n}\n```\n\n### ❌ Invalid Email\n```json\n{\n    \"user\": {\n        \"email\": \"invalid-email\",\n        \"password\": \"SecurePass123!\",\n        \"first_name\": \"John\",\n        \"last_name\": \"Doe\"\n    }\n}\n```\n\n### ❌ Password Too Short\n```json\n{\n    \"user\": {\n        \"email\": \"john.doe@example.com\",\n        \"password\": \"123\",\n        \"first_name\": \"John\",\n        \"last_name\": \"Doe\"\n    }\n}\n```"
+          },
+          "response": [
+            {
+              "name": "✅ Success - User Created",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"user\": {\n        \"email\": \"john.doe@example.com\",\n        \"password\": \"SecurePass123!\",\n        \"first_name\": \"John\",\n        \"last_name\": \"Doe\"\n    }\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/signup",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "signup"
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"message\": \"User created successfully\",\n    \"data\": {\n        \"user\": {\n            \"id\": 1,\n            \"email\": \"john.doe@example.com\",\n            \"first_name\": \"John\",\n            \"last_name\": \"Doe\",\n            \"created_at\": \"2024-01-15T10:30:00.000Z\",\n            \"updated_at\": \"2024-01-15T10:30:00.000Z\"\n        },\n        \"access_token\": \"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwic2NwIjoidXNlciIsImF1ZCI6bnVsbCwiaWF0IjoxNzA1MzE3MDAwLCJleHAiOjE3MDUzMTc5MDAsImp0aSI6ImFiY2RlZjEyMzQ1NiJ9.X1Y2Z3A0B5C6D7E8F9G0H1I2J3K4L5M6N7O8P9Q0R1S2\",\n        \"refresh_token\": \"abc123def456ghi789jkl012mno345pqr678stu901vwx234yz\"\n    }\n}"
+            },
+            {
+              "name": "❌ Error - Email Already Taken",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"user\": {\n        \"email\": \"existing@example.com\",\n        \"password\": \"SecurePass123!\",\n        \"first_name\": \"John\",\n        \"last_name\": \"Doe\"\n    }\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/signup",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "signup"
+                  ]
+                }
+              },
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": false,\n    \"message\": \"User could not be created\",\n    \"errors\": [\n        \"Email has already been taken\"\n    ]\n}"
+            },
+            {
+              "name": "❌ Error - Missing Required Fields",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"user\": {\n        \"email\": \"john.doe@example.com\",\n        \"password\": \"SecurePass123!\"\n    }\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/signup",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "signup"
+                  ]
+                }
+              },
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": false,\n    \"message\": \"User could not be created\",\n    \"errors\": [\n        \"First name can't be blank\",\n        \"Last name can't be blank\"\n    ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"user\": {\n        \"email\": \"john.doe@example.com\",\n        \"password\": \"SecurePass123!\"\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "login"
+              ]
+            },
+            "description": "Authenticate an existing user.\n\n## Request Fields\n- **email**: Registered email address (required)\n- **password**: User's password (required)"
+          },
+          "response": [
+            {
+              "name": "✅ Success - Login Successful",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"user\": {\n        \"email\": \"john.doe@example.com\",\n        \"password\": \"SecurePass123!\"\n    }\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/login",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "login"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"message\": \"Logged in successfully\",\n    \"data\": {\n        \"user\": {\n            \"id\": 1,\n            \"email\": \"john.doe@example.com\",\n            \"first_name\": \"John\",\n            \"last_name\": \"Doe\",\n            \"created_at\": \"2024-01-15T10:30:00.000Z\",\n            \"updated_at\": \"2024-01-15T10:30:00.000Z\"\n        },\n        \"access_token\": \"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwic2NwIjoidXNlciIsImF1ZCI6bnVsbCwiaWF0IjoxNzA1MzE3MDAwLCJleHAiOjE3MDUzMTc5MDAsImp0aSI6ImFiY2RlZjEyMzQ1NiJ9.X1Y2Z3A0B5C6D7E8F9G0H1I2J3K4L5M6N7O8P9Q0R1S2\",\n        \"refresh_token\": \"xyz789abc456def123ghi789jkl012mno345pqr678stu901vwx\"\n    }\n}"
+            },
+            {
+              "name": "❌ Error - Invalid Credentials",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"user\": {\n        \"email\": \"john.doe@example.com\",\n        \"password\": \"WrongPassword\"\n    }\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/login",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "login"
+                  ]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": false,\n    \"message\": \"Invalid Email or password.\",\n    \"errors\": [\"Invalid Email or password.\"]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"refresh_token\": \"{{refresh_token}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/refresh",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "refresh"
+              ]
+            },
+            "description": "Exchange a refresh token for new access and refresh tokens."
+          },
+          "response": [
+            {
+              "name": "✅ Success - Token Refreshed",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"refresh_token\": \"abc123def456ghi789jkl012mno345pqr678stu901vwx234yz\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/auth/refresh",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "refresh"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"message\": \"Token refreshed successfully\",\n    \"data\": {\n        \"user\": {\n            \"id\": 1,\n            \"email\": \"john.doe@example.com\",\n            \"first_name\": \"John\",\n            \"last_name\": \"Doe\",\n            \"created_at\": \"2024-01-15T10:30:00.000Z\",\n            \"updated_at\": \"2024-01-15T10:30:00.000Z\"\n        },\n        \"access_token\": \"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwic2NwIjoidXNlciIsImF1ZCI6bnVsbCwiaWF0IjoxNzA1MzE4MDAwLCJleHAiOjE3MDUzMTg5MDAsImp0aSI6InpjdzY3ODkwIn0.N3E4W5F6G7H8I9J0K1L2M3N4O5P6Q7R8S9T0U1V2W3X4\",\n        \"refresh_token\": \"new789xyz456abc123def789ghi012jkl345mno678pqr901stu\"\n    }\n}"
+            },
+            {
+              "name": "❌ Error - Invalid Token",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"refresh_token\": \"invalid_token\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/auth/refresh",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "refresh"
+                  ]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": false,\n    \"message\": \"Refresh token not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "SSO - Google",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"token\": \"google_id_token_here\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/sso/google",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "sso",
+                "google"
+              ]
+            },
+            "description": "Authenticate using Google OAuth."
+          },
+          "response": []
+        },
+        {
+          "name": "SSO - Facebook",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"token\": \"facebook_access_token_here\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/sso/facebook",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "sso",
+                "facebook"
+              ]
+            },
+            "description": "Authenticate using Facebook OAuth."
+          },
+          "response": []
+        },
+        {
+          "name": "SSO - Apple",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"token\": \"apple_id_token_here\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/sso/apple",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "sso",
+                "apple"
+              ]
+            },
+            "description": "Authenticate using Apple Sign In."
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text",
+                "description": "JWT access token"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/logout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "logout"
+              ]
+            },
+            "description": "Logout the current user and revoke tokens."
+          },
+          "response": [
+            {
+              "name": "✅ Success - Logged Out",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer eyJhbGciOiJIUzI1NiJ9..."
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/logout",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "logout"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"message\": \"Logged out successfully\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/v1/health",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "health"
+          ]
+        },
+        "description": "Simple health check endpoint."
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global test to save tokens if present in response",
+          "if (pm.response.code === 200 || pm.response.code === 201) {",
+          "    try {",
+          "        const jsonData = pm.response.json();",
+          "        ",
+          "        if (jsonData.data && jsonData.data.access_token) {",
+          "            pm.environment.set(\"access_token\", jsonData.data.access_token);",
+          "            console.log(\"Access token saved to environment\");",
+          "        }",
+          "        ",
+          "        if (jsonData.data && jsonData.data.refresh_token) {",
+          "            pm.environment.set(\"refresh_token\", jsonData.data.refresh_token);",
+          "            console.log(\"Refresh token saved to environment\");",
+          "        }",
+          "        ",
+          "        if (jsonData.data && jsonData.data.user) {",
+          "            if (jsonData.data.user.id) {",
+          "                pm.environment.set(\"user_id\", jsonData.data.user.id);",
+          "            }",
+          "            if (jsonData.data.user.email) {",
+          "                pm.environment.set(\"user_email\", jsonData.data.user.email);",
+          "            }",
+          "        }",
+          "    } catch (e) {",
+          "        // Not a JSON response or doesn't have expected structure",
+          "    }",
+          "}",
+          "",
+          "// Clear tokens on logout",
+          "if (pm.request.url.path.includes(\"logout\") && pm.response.code === 200) {",
+          "    pm.environment.unset(\"access_token\");",
+          "    pm.environment.unset(\"refresh_token\");",
+          "    console.log(\"Tokens cleared from environment\");",
+          "}"
+        ]
+      }
+    },
+    {
+      "name": "User Management",
+      "item": [
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "me"
+              ]
+            },
+            "description": "Get current authenticated user's information."
+          },
+          "response": [
+            {
+              "name": "✅ Success - User Retrieved",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/users/me",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "users",
+                    "me"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"data\": {\n        \"user\": {\n            \"id\": 1,\n            \"email\": \"john.doe@example.com\",\n            \"first_name\": \"John\",\n            \"last_name\": \"Doe\",\n            \"email_verified\": true,\n            \"email_verified_at\": \"2024-01-15T10:30:00.000Z\",\n            \"pending_email\": null,\n            \"created_at\": \"2024-01-15T10:30:00.000Z\",\n            \"updated_at\": \"2024-01-15T10:30:00.000Z\"\n        }\n    }\n}"
+            },
+            {
+              "name": "❌ Unauthorized",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer invalid_token",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/users/me",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "users",
+                    "me"
+                  ]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": false,\n    \"message\": \"You need to sign in or sign up before continuing.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update User Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"user\": {\n        \"first_name\": \"John Updated\",\n        \"last_name\": \"Doe Updated\"\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "me"
+              ]
+            },
+            "description": "Update current user's profile information."
+          },
+          "response": [
+            {
+              "name": "✅ Success - Profile Updated",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"user\": {\n        \"first_name\": \"John Updated\",\n        \"last_name\": \"Doe Updated\"\n    }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/users/me",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "users",
+                    "me"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"message\": \"User updated successfully\",\n    \"data\": {\n        \"user\": {\n            \"id\": 1,\n            \"email\": \"john.doe@example.com\",\n            \"first_name\": \"John Updated\",\n            \"last_name\": \"Doe Updated\",\n            \"email_verified\": true,\n            \"email_verified_at\": \"2024-01-15T10:30:00.000Z\",\n            \"pending_email\": null,\n            \"created_at\": \"2024-01-15T10:30:00.000Z\",\n            \"updated_at\": \"2024-01-15T10:35:00.000Z\"\n        }\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update Password",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"user\": {\n        \"current_password\": \"OldPassword123!\",\n        \"password\": \"NewPassword456!\"\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/me/password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "me",
+                "password"
+              ]
+            },
+            "description": "Update current user's password."
+          },
+          "response": [
+            {
+              "name": "✅ Success - Password Updated",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"user\": {\n        \"current_password\": \"OldPassword123!\",\n        \"password\": \"NewPassword456!\"\n    }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/users/me/password",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "users",
+                    "me",
+                    "password"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"message\": \"Password updated successfully\",\n    \"data\": {\n        \"user\": {\n            \"id\": 1,\n            \"email\": \"john.doe@example.com\",\n            \"first_name\": \"John\",\n            \"last_name\": \"Doe\",\n            \"email_verified\": true,\n            \"email_verified_at\": \"2024-01-15T10:30:00.000Z\",\n            \"pending_email\": null,\n            \"created_at\": \"2024-01-15T10:30:00.000Z\",\n            \"updated_at\": \"2024-01-15T10:30:00.000Z\"\n        }\n    }\n}"
+            },
+            {
+              "name": "❌ Invalid Current Password",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"user\": {\n        \"current_password\": \"WrongPassword\",\n        \"password\": \"NewPassword456!\"\n    }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/users/me/password",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "users",
+                    "me",
+                    "password"
+                  ]
+                }
+              },
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": false,\n    \"message\": \"Password could not be updated\",\n    \"errors\": [\n        \"Current password is incorrect\"\n    ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Email Verification",
+      "item": [
+        {
+          "name": "Verify Email",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"token\": \"verification_token_from_email\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/email_verifications/verify",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "email_verifications",
+                "verify"
+              ]
+            },
+            "description": "Verify user's email address using token from verification email."
+          },
+          "response": [
+            {
+              "name": "✅ Success - Email Verified",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"token\": \"verification_token_from_email\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/email_verifications/verify",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "email_verifications",
+                    "verify"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"message\": \"Email verified successfully\",\n    \"data\": {\n        \"user\": {\n            \"id\": 1,\n            \"email\": \"john.doe@example.com\",\n            \"first_name\": \"John\",\n            \"last_name\": \"Doe\",\n            \"email_verified\": true,\n            \"email_verified_at\": \"2024-01-15T10:30:00.000Z\",\n            \"pending_email\": null,\n            \"created_at\": \"2024-01-15T10:30:00.000Z\",\n            \"updated_at\": \"2024-01-15T10:30:00.000Z\"\n        }\n    }\n}"
+            },
+            {
+              "name": "❌ Invalid Token",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"token\": \"invalid_token\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/email_verifications/verify",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "email_verifications",
+                    "verify"
+                  ]
+                }
+              },
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": false,\n    \"message\": \"Email verification failed\",\n    \"errors\": [\n        \"Invalid or expired verification token\"\n    ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Resend Verification Email",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/email_verifications/resend",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "email_verifications",
+                "resend"
+              ]
+            },
+            "description": "Resend verification email to current user."
+          },
+          "response": [
+            {
+              "name": "✅ Success - Email Sent",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/email_verifications/resend",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "email_verifications",
+                    "resend"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"message\": \"Verification email sent successfully\"\n}"
+            },
+            {
+              "name": "❌ Already Verified",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/email_verifications/resend",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "email_verifications",
+                    "resend"
+                  ]
+                }
+              },
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": false,\n    \"message\": \"Email is already verified\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Password Reset",
+      "item": [
+        {
+          "name": "Request Password Reset",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"john.doe@example.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/password_resets",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "password_resets"
+              ]
+            },
+            "description": "Request password reset email."
+          },
+          "response": [
+            {
+              "name": "✅ Success - Reset Email Sent",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"email\": \"john.doe@example.com\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/password_resets",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "password_resets"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"message\": \"If an account with that email exists, a password reset link has been sent.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Confirm Password Reset",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"token\": \"reset_token_from_email\",\n    \"password\": \"NewPassword123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/password_resets/confirm",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "password_resets",
+                "confirm"
+              ]
+            },
+            "description": "Confirm password reset with token from email."
+          },
+          "response": [
+            {
+              "name": "✅ Success - Password Reset",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"token\": \"reset_token_from_email\",\n    \"password\": \"NewPassword123!\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/password_resets/confirm",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "password_resets",
+                    "confirm"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"message\": \"Password reset successfully\"\n}"
+            },
+            {
+              "name": "❌ Invalid Token",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"token\": \"invalid_token\",\n    \"password\": \"NewPassword123!\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/password_resets/confirm",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "password_resets",
+                    "confirm"
+                  ]
+                }
+              },
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": false,\n    \"message\": \"Password reset failed\",\n    \"errors\": [\n        \"Invalid or expired token\"\n    ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Email Change",
+      "item": [
+        {
+          "name": "Request Email Change",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"new_email\": \"newemail@example.com\",\n    \"current_password\": \"CurrentPassword123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/me/email_change",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "me",
+                "email_change"
+              ]
+            },
+            "description": "Request email change with verification."
+          },
+          "response": [
+            {
+              "name": "✅ Success - Verification Sent",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"new_email\": \"newemail@example.com\",\n    \"current_password\": \"CurrentPassword123!\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/users/me/email_change",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "users",
+                    "me",
+                    "email_change"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"message\": \"Verification email sent to newemail@example.com. Please check your inbox.\"\n}"
+            },
+            {
+              "name": "❌ Email Already Taken",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"new_email\": \"existing@example.com\",\n    \"current_password\": \"CurrentPassword123!\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/users/me/email_change",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "users",
+                    "me",
+                    "email_change"
+                  ]
+                }
+              },
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": false,\n    \"message\": \"Email change request failed\",\n    \"errors\": [\n        \"Email has already been taken\"\n    ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Confirm Email Change",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"token\": \"email_change_token_from_email\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/me/email_change/confirm",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "me",
+                "email_change",
+                "confirm"
+              ]
+            },
+            "description": "Confirm email change with token from verification email."
+          },
+          "response": [
+            {
+              "name": "✅ Success - Email Changed",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"token\": \"email_change_token_from_email\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/users/me/email_change/confirm",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "users",
+                    "me",
+                    "email_change",
+                    "confirm"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"message\": \"Email changed successfully\",\n    \"data\": {\n        \"user\": {\n            \"id\": 1,\n            \"email\": \"newemail@example.com\",\n            \"first_name\": \"John\",\n            \"last_name\": \"Doe\",\n            \"email_verified\": true,\n            \"email_verified_at\": \"2024-01-15T10:35:00.000Z\",\n            \"pending_email\": null,\n            \"created_at\": \"2024-01-15T10:30:00.000Z\",\n            \"updated_at\": \"2024-01-15T10:35:00.000Z\"\n        }\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Cancel Email Change",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/me/email_change",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "me",
+                "email_change"
+              ]
+            },
+            "description": "Cancel pending email change request."
+          },
+          "response": [
+            {
+              "name": "✅ Success - Change Cancelled",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/users/me/email_change",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "users",
+                    "me",
+                    "email_change"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"message\": \"Email change request cancelled\"\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    }
+  ]
+}

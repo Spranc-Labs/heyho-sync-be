@@ -59,4 +59,11 @@ Rails.application.configure do
 
   # Annotate rendered view with file names.
   # config.action_view.annotate_rendered_view_with_filenames = true
+
+  # Disable host authorization in test environment completely
+  config.force_ssl = false
+
+  # Rails 7 requires explicit host configuration for tests
+  # Allow all hosts in test environment
+  config.hosts = nil
 end

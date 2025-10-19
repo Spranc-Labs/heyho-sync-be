@@ -1,4 +1,4 @@
-.PHONY: help setup build up down restart logs console migrate seed test clean db-create db-drop db-reset shell lint lint-fix security-check docs quality-check hooks-install hooks-test docs-serve docs-stats rubocop-todo security-report security-interactive dev staging prod dev-up dev-down dev-logs staging-up staging-down staging-logs prod-up prod-down prod-logs env-setup env-check
+.PHONY: help setup build up down restart logs console migrate seed test test-auth test-users test-verification test-requests test-models test-fast test-coverage test-ci clean db-create db-drop db-reset shell lint lint-fix security-check docs quality-check pre-commit-check hooks-install hooks-test docs-serve docs-stats rubocop-todo security-report security-interactive dev staging prod dev-up dev-down dev-logs staging-up staging-down staging-logs prod-up prod-down prod-logs env-setup env-check
 
 help: ## Show this help message
 	@echo 'Usage: make [target]'
@@ -44,8 +44,39 @@ migrate: ## Run database migrations
 seed: ## Seed the database
 	docker-compose run --rm app bundle exec rails db:seed
 
-test: ## Run tests
-	docker-compose run --rm app bundle exec rspec
+test: ## Run all tests
+	@echo "🏗️  Setting up test database..."
+	docker-compose run --rm -e RAILS_ENV=test app bundle exec rails db:test:prepare
+	@echo "🧪 Running tests..."
+	docker-compose run --rm -e RAILS_ENV=test app bundle exec rspec
+
+test-setup: ## Setup test database
+	@echo "🏗️  Setting up test database..."
+	docker-compose run --rm -e RAILS_ENV=test app bundle exec rails db:test:prepare
+
+test-auth: test-setup ## Run authentication tests only
+	docker-compose run --rm -e RAILS_ENV=test app bundle exec rspec spec/requests/auth_spec.rb
+
+test-users: test-setup ## Run user management tests only
+	docker-compose run --rm -e RAILS_ENV=test app bundle exec rspec spec/requests/users_spec.rb
+
+test-verification: test-setup ## Run email verification tests only
+	docker-compose run --rm -e RAILS_ENV=test app bundle exec rspec spec/requests/verification_spec.rb
+
+test-requests: test-setup ## Run all request specs
+	docker-compose run --rm -e RAILS_ENV=test app bundle exec rspec spec/requests/
+
+test-models: test-setup ## Run model tests only
+	docker-compose run --rm -e RAILS_ENV=test app bundle exec rspec spec/models/
+
+test-fast: test-setup ## Run tests with fast fail (stop on first failure)
+	docker-compose run --rm -e RAILS_ENV=test app bundle exec rspec --fail-fast
+
+test-coverage: test-setup ## Run tests with coverage report
+	docker-compose run --rm -e RAILS_ENV=test app bundle exec rspec --format documentation
+
+test-ci: test-setup ## Run tests for CI (with junit output)
+	docker-compose run --rm -e RAILS_ENV=test app bundle exec rspec --format RspecJunitFormatter --out tmp/rspec.xml
 
 db-create: ## Create database
 	docker-compose run --rm app bundle exec rails db:create
@@ -93,10 +124,25 @@ docs: ## Generate YARD documentation
 quality-check: lint security-check test ## Run all quality checks (lint, security, tests)
 	@echo "✅ All quality checks passed!"
 
+pre-commit-check: lint test ## Run pre-commit checks (lint and tests)
+	@echo "✅ Pre-commit checks passed!"
+
 # Git Hooks (Docker-based)
 hooks-install: ## Install git hooks
-	@echo "Git hooks already installed via scripts/pre-commit.sh"
-	@echo "Hooks run RuboCop in Docker automatically on commit"
+	@echo "Installing pre-commit hook..."
+	@rm -f .git/hooks/pre-commit
+	@cp scripts/pre-commit.sh .git/hooks/pre-commit
+	@chmod +x .git/hooks/pre-commit
+	@echo "✅ Pre-commit hook installed successfully!"
+	@echo "The hook will run:"
+	@echo "  - Debugging statement checks"
+	@echo "  - RuboCop (linting & style)"
+	@echo "  - Security checks (if Brakeman installed)"
+	@echo "  - Schema consistency"
+	@echo "  - Tests for changed files"
+	@echo "  - File size validation"
+	@echo "  - Merge conflict detection"
+	@echo "  - YAML validation"
 
 hooks-test: ## Test pre-commit hook manually
 	@./scripts/pre-commit.sh

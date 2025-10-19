@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .button {
+      background-color: #FF9800;
+      color: white;
+      padding: 14px 20px;
+      text-decoration: none;
+      border-radius: 4px;
+      display: inline-block;
+      margin: 20px 0;
+    }
+    .footer {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #ddd;
+      font-size: 12px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <h2>Confirm Your Email Change</h2>
+  <p>Hi <%= @user.first_name %>,</p>
+  <p>You requested to change your HeyHo Sync email from <%= @old_email %> to this email address.</p>
+  <p>Please confirm this change by clicking the button below:</p>
+  <p>
+    <a href="<%= @email_change_url %>" class="button">Confirm Email Change</a>
+  </p>
+  <p>Or copy and paste this link in your browser:</p>
+  <p><%= @email_change_url %></p>
+  <p>This link will expire in 24 hours.</p>
+  <div class="footer">
+    <p>If you didn't request this change, please ignore this email.</p>
+  </div>
+</body>
+</html>

@@ -19,6 +19,15 @@ AllCops:
     - 'public/**/*'
     - 'storage/**/*'
 
+# Project-specific exceptions
+Rails/UniqueValidationWithoutIndex:
+  Exclude:
+    - 'app/models/jwt_denylist.rb'  # Index exists in migration
+
+Naming/MethodName:
+  Exclude:
+    - 'app/models/user.rb'  # Legacy isVerified column (TODO: migration needed)
+
 # Style Configuration
 Style/Documentation:
   Enabled: false
@@ -120,7 +129,7 @@ Rails/Output:
 
 # RSpec Configuration
 RSpec/ExampleLength:
-  Max: 15
+  Max: 20  # Allow slightly longer examples for integration tests
 
 RSpec/MultipleExpectations:
   Max: 5
