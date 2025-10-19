@@ -16,18 +16,35 @@ fi
 echo "Checking Ruby files with RuboCop..."
 echo "$STAGED_FILES"
 
-# Find docker-compose.yml location (root of platform)
-PLATFORM_ROOT=$(cd "$(git rev-parse --show-toplevel)/.." && pwd)
+# Get the repo root
+REPO_ROOT=$(git rev-parse --show-toplevel)
 
-# Run RuboCop on staged files
-cd "$PLATFORM_ROOT"
-if docker-compose run --rm --no-deps heyho-sync-be bundle exec rubocop $STAGED_FILES; then
-  echo "✓ All checks passed!"
-  exit 0
+# Check if we're in the standalone repo or nested in platform
+if [ -f "$REPO_ROOT/docker-compose.yml" ]; then
+  # Standalone repo - use local docker-compose
+  cd "$REPO_ROOT"
+  if docker-compose run --rm --no-deps heyho-sync-be bundle exec rubocop $STAGED_FILES; then
+    echo "✓ All checks passed!"
+    exit 0
+  fi
+elif [ -f "$REPO_ROOT/../docker-compose.yml" ]; then
+  # Nested in platform - use platform docker-compose
+  cd "$REPO_ROOT/.."
+  if docker-compose run --rm --no-deps heyho-sync-be bundle exec rubocop $STAGED_FILES; then
+    echo "✓ All checks passed!"
+    exit 0
+  fi
 else
-  echo ""
-  echo "❌ RuboCop found issues. Please fix them before committing."
-  echo "   Run: make lint-fix"
-  echo "   Or: docker-compose run --rm --no-deps heyho-sync-be bundle exec rubocop -A"
-  exit 1
+  # Neither found - try local bundle exec
+  cd "$REPO_ROOT"
+  if bundle exec rubocop $STAGED_FILES; then
+    echo "✓ All checks passed!"
+    exit 0
+  fi
 fi
+
+echo ""
+echo "❌ RuboCop found issues. Please fix them before committing."
+echo "   Run: bundle exec rubocop -A"
+echo "   Or (with docker): docker-compose run --rm --no-deps heyho-sync-be bundle exec rubocop -A"
+exit 1
