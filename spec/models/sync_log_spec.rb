@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe SyncLog, type: :model do
+RSpec.describe SyncLog do
   # Associations
   describe 'associations' do
     it { is_expected.to belong_to(:user) }
@@ -10,18 +10,20 @@ RSpec.describe SyncLog, type: :model do
 
   # Validations
   describe 'validations' do
+    subject(:sync_log) { build(:sync_log) }
+
     it { is_expected.to validate_presence_of(:synced_at) }
     it { is_expected.to validate_presence_of(:status) }
     it { is_expected.to validate_inclusion_of(:status).in_array(SyncLog::STATUSES) }
 
     it do
-      expect(subject).to validate_numericality_of(:page_visits_synced)
+      expect(sync_log).to validate_numericality_of(:page_visits_synced)
         .only_integer
         .is_greater_than_or_equal_to(0)
     end
 
     it do
-      expect(subject).to validate_numericality_of(:tab_aggregates_synced)
+      expect(sync_log).to validate_numericality_of(:tab_aggregates_synced)
         .only_integer
         .is_greater_than_or_equal_to(0)
     end
@@ -36,7 +38,7 @@ RSpec.describe SyncLog, type: :model do
 
     describe '.recent' do
       it 'orders by synced_at descending' do
-        expect(SyncLog.recent.to_a).to eq([failed_log, new_log, old_log])
+        expect(described_class.recent.to_a).to eq([failed_log, new_log, old_log])
       end
     end
 
@@ -45,27 +47,27 @@ RSpec.describe SyncLog, type: :model do
         other_user = create(:user)
         other_log = create(:sync_log, user: other_user)
 
-        expect(SyncLog.for_user(user.id)).to contain_exactly(old_log, new_log, failed_log)
-        expect(SyncLog.for_user(other_user.id)).to contain_exactly(other_log)
+        expect(described_class.for_user(user.id)).to contain_exactly(old_log, new_log, failed_log)
+        expect(described_class.for_user(other_user.id)).to contain_exactly(other_log)
       end
     end
 
     describe '.by_status' do
       it 'returns logs with specific status' do
-        expect(SyncLog.by_status('completed')).to contain_exactly(old_log, new_log)
-        expect(SyncLog.by_status('failed')).to contain_exactly(failed_log)
+        expect(described_class.by_status('completed')).to contain_exactly(old_log, new_log)
+        expect(described_class.by_status('failed')).to contain_exactly(failed_log)
       end
     end
 
     describe '.completed' do
       it 'returns only completed logs' do
-        expect(SyncLog.completed).to contain_exactly(old_log, new_log)
+        expect(described_class.completed).to contain_exactly(old_log, new_log)
       end
     end
 
     describe '.failed' do
       it 'returns only failed logs' do
-        expect(SyncLog.failed).to contain_exactly(failed_log)
+        expect(described_class.failed).to contain_exactly(failed_log)
       end
     end
   end
@@ -79,13 +81,13 @@ RSpec.describe SyncLog, type: :model do
       latest = create(:sync_log, user:, synced_at: 1.day.ago, status: 'completed')
       create(:sync_log, user:, synced_at: 1.hour.ago, status: 'failed')
 
-      expect(SyncLog.last_sync_for(user)).to eq(latest)
+      expect(described_class.last_sync_for(user)).to eq(latest)
     end
 
     it 'returns nil if no completed syncs' do
       create(:sync_log, user:, status: 'failed')
 
-      expect(SyncLog.last_sync_for(user)).to be_nil
+      expect(described_class.last_sync_for(user)).to be_nil
     end
   end
 
@@ -96,11 +98,11 @@ RSpec.describe SyncLog, type: :model do
       create_list(:sync_log, 8, user:, status: 'completed')
       create_list(:sync_log, 2, user:, status: 'failed')
 
-      expect(SyncLog.success_rate_for(user)).to eq(80.0)
+      expect(described_class.success_rate_for(user)).to eq(80.0)
     end
 
     it 'returns 0.0 if no syncs' do
-      expect(SyncLog.success_rate_for(user)).to eq(0.0)
+      expect(described_class.success_rate_for(user)).to eq(0.0)
     end
   end
 

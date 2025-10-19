@@ -57,17 +57,21 @@ RSpec.describe DataSyncService, type: :service do
 
     context 'when sync fails' do
       it 'marks sync log as failed' do
-        allow_any_instance_of(described_class).to receive(:save_batch).and_raise(StandardError, 'DB error')
+        service_instance = described_class.new(user:, page_visits:, tab_aggregates:, client_info:)
+        allow(described_class).to receive(:new).and_return(service_instance)
+        allow(service_instance).to receive(:save_batch).and_raise(StandardError, 'DB error')
 
         described_class.sync(user:, page_visits:, tab_aggregates:, client_info:)
 
         sync_log = SyncLog.last
         expect(sync_log.status).to eq('failed')
-        expect(sync_log.errors).to include('DB error')
+        expect(sync_log.error_messages).to include('DB error')
       end
 
       it 'returns failure result' do
-        allow_any_instance_of(described_class).to receive(:save_batch).and_raise(StandardError, 'DB error')
+        service_instance = described_class.new(user:, page_visits:, tab_aggregates:, client_info:)
+        allow(described_class).to receive(:new).and_return(service_instance)
+        allow(service_instance).to receive(:save_batch).and_raise(StandardError, 'DB error')
 
         result = described_class.sync(user:, page_visits:, tab_aggregates:, client_info:)
 
@@ -76,7 +80,7 @@ RSpec.describe DataSyncService, type: :service do
       end
     end
 
-    context 'batch size limits' do
+    context 'with batch size limits' do
       it 'rejects batch exceeding MAX_BATCH_SIZE' do
         large_batch = Array.new(1001) do |i|
           {
@@ -224,7 +228,7 @@ RSpec.describe DataSyncService, type: :service do
       result = service.send(:deduplicate_by_id, records, sort_by: 'visited_at')
 
       expect(result.size).to eq(2)
-      expect(result.map { |r| r['id'] }).to contain_exactly('1', '2')
+      expect(result.pluck('id')).to contain_exactly('1', '2')
     end
 
     it 'keeps most recent version by default' do

@@ -2,7 +2,7 @@
 
 FactoryBot.define do
   factory :sync_log do
-    association :user
+    user
     synced_at { Time.current }
     status { 'completed' }
     page_visits_synced { rand(10..100) }
