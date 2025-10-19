@@ -16,4 +16,11 @@ class PageVisit < ApplicationRecord
   # Scopes
   scope :recent, -> { order(visited_at: :desc) }
   scope :for_user, ->(user_id) { where(user_id:) }
+  scope :valid_data, lambda {
+    where.not(visited_at: nil)
+      .where.not(url: nil)
+      .where('duration_seconds >= 0 OR duration_seconds IS NULL')
+      .where('scroll_depth_percent >= 0 AND scroll_depth_percent <= 100 OR scroll_depth_percent IS NULL')
+      .where('engagement_rate >= 0 AND engagement_rate <= 1 OR engagement_rate IS NULL')
+  }
 end

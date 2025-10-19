@@ -23,8 +23,10 @@ Rails.application.routes.draw do
 
       # Insights endpoints
       get 'insights/daily_summary', to: 'insights#daily_summary'
+      get 'insights/weekly_summary', to: 'insights#weekly_summary'
       get 'insights/top_sites', to: 'insights#top_sites'
       get 'insights/recent_activity', to: 'insights#recent_activity'
+      get 'insights/productivity_hours', to: 'insights#productivity_hours'
     end
   end
 
