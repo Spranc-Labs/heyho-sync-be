@@ -287,7 +287,7 @@ class DataSyncService < BaseService
       update_only: %i[
         url title visited_at source_page_visit_id domain
         duration_seconds active_duration_seconds engagement_rate
-        idle_periods last_heartbeat anonymous_client_id updated_at
+        idle_periods last_heartbeat anonymous_client_id
       ]
     )
     # rubocop:enable Rails/SkipsModelValidations
@@ -326,7 +326,7 @@ class DataSyncService < BaseService
       update_only: %i[
         page_visit_id total_time_seconds active_time_seconds
         scroll_depth_percent closed_at domain_durations page_count
-        current_url current_domain statistics updated_at
+        current_url current_domain statistics
       ]
     )
     # rubocop:enable Rails/SkipsModelValidations
