@@ -132,7 +132,7 @@ RSpec/ExampleLength:
   Max: 20  # Allow slightly longer examples for integration tests
 
 RSpec/MultipleExpectations:
-  Max: 5
+  Max: 6  # Allow up to 6 for integration tests checking response structure
 
 RSpec/NestedGroups:
   Max: 4
@@ -147,7 +147,16 @@ RSpec/FilePath:
   Enabled: true
   CustomTransform:
     RuboCop: rubocop
-    RSpec: rspec
+
+RSpec/AnyInstance:
+  Enabled: false  # Allow for error testing in service specs
+
+# Metrics Configuration - Allow slightly higher complexity for business logic
+Metrics/MethodLength:
+  Max: 25  # Increased for complex service methods
+
+Metrics/AbcSize:
+  Max: 30  # Increased for complex business logic
 
 # Performance Configuration
 Performance:

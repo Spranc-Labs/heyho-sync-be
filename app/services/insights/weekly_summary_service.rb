@@ -42,15 +42,25 @@ module Insights
     def parse_week(week_input)
       if week_input.present?
         # Parse ISO week format: "2025-W42"
-        year, week_num = week_input.split('-W').map(&:to_i)
-        start_date = Date.commercial(year, week_num, 1) # Monday
+        parts = week_input.split('-W')
+        year = parts[0].to_i
+        week_num = parts[1].to_i
+
+        # Validate year and week_num before using Date.commercial
+        if year.positive? && week_num.positive?
+          start_date = Date.commercial(year, week_num, 1) # Monday
+        else
+          # Invalid format, fallback to current week
+          today = Time.zone.today
+          start_date = today.beginning_of_week(:monday)
+        end
       else
         # Default to current week (Monday to Sunday)
         today = Time.zone.today
         start_date = today.beginning_of_week(:monday)
       end
       [start_date, start_date + 6.days]
-    rescue ArgumentError => e
+    rescue ArgumentError, TypeError => e
       log_error("Invalid week format: #{week_input}", e)
       # Fall back to current week
       today = Time.zone.today
