@@ -21,14 +21,14 @@ REPO_ROOT=$(git rev-parse --show-toplevel)
 
 # Check if we're in the standalone repo or nested in platform
 if [ -f "$REPO_ROOT/docker-compose.yml" ]; then
-  # Standalone repo - use local docker-compose
+  # Standalone repo - use local docker-compose with 'app' service name
   cd "$REPO_ROOT"
-  if docker-compose run --rm --no-deps heyho-sync-be bundle exec rubocop $STAGED_FILES; then
+  if docker-compose run --rm --no-deps app bundle exec rubocop $STAGED_FILES; then
     echo "✓ All checks passed!"
     exit 0
   fi
 elif [ -f "$REPO_ROOT/../docker-compose.yml" ]; then
-  # Nested in platform - use platform docker-compose
+  # Nested in platform - use platform docker-compose with 'heyho-sync-be' service name
   cd "$REPO_ROOT/.."
   if docker-compose run --rm --no-deps heyho-sync-be bundle exec rubocop $STAGED_FILES; then
     echo "✓ All checks passed!"
