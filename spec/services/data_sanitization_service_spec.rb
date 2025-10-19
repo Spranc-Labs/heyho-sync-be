@@ -19,7 +19,7 @@ RSpec.describe DataSanitizationService do
       expect(result['domain']).to eq('example.com')
     end
 
-    context 'URL sanitization' do
+    context 'when sanitizing URLs' do
       it 'removes tracking parameters' do
         data = {
           'url' => 'https://example.com?utm_source=test&utm_medium=email&normal=param'
@@ -58,7 +58,7 @@ RSpec.describe DataSanitizationService do
       end
     end
 
-    context 'text sanitization' do
+    context 'when sanitizing text' do
       it 'strips whitespace' do
         data = { 'title' => '  Example  ' }
 
@@ -85,7 +85,7 @@ RSpec.describe DataSanitizationService do
       end
     end
 
-    context 'domain sanitization' do
+    context 'when sanitizing domains' do
       it 'normalizes to lowercase' do
         data = { 'domain' => 'EXAMPLE.COM' }
 
@@ -120,7 +120,7 @@ RSpec.describe DataSanitizationService do
       end
     end
 
-    context 'duration sanitization' do
+    context 'when sanitizing durations' do
       it 'clamps negative durations to 0' do
         data = { 'duration_seconds' => -10 }
 
@@ -154,7 +154,7 @@ RSpec.describe DataSanitizationService do
       end
     end
 
-    context 'scroll depth sanitization' do
+    context 'when sanitizing scroll depth' do
       it 'clamps negative scroll depth to 0' do
         data = { 'scroll_depth_percent' => -10 }
 
@@ -188,7 +188,7 @@ RSpec.describe DataSanitizationService do
       end
     end
 
-    context 'engagement rate sanitization' do
+    context 'when sanitizing engagement rates' do
       it 'clamps negative engagement rate to 0.0' do
         data = { 'engagement_rate' => -0.5 }
 
@@ -222,7 +222,7 @@ RSpec.describe DataSanitizationService do
       end
     end
 
-    context 'with nil values' do
+    context 'when values are nil' do
       it 'preserves nil values' do
         data = {
           'id' => 'pv_123',
@@ -239,7 +239,7 @@ RSpec.describe DataSanitizationService do
       end
     end
 
-    context 'data immutability' do
+    context 'when checking data immutability' do
       it 'does not modify original data' do
         original_data = {
           'url' => 'https://example.com?utm_source=test',
