@@ -1,0 +1,33 @@
+#!/bin/bash
+# Pre-commit hook to run RuboCop on all Ruby files
+
+set -e
+
+echo "Running pre-commit checks..."
+
+# Get list of staged Ruby files
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(rb|rake)$' || true)
+
+if [ -z "$STAGED_FILES" ]; then
+  echo "✓ No Ruby files to check"
+  exit 0
+fi
+
+echo "Checking Ruby files with RuboCop..."
+echo "$STAGED_FILES"
+
+# Find docker-compose.yml location (root of platform)
+PLATFORM_ROOT=$(cd "$(git rev-parse --show-toplevel)/.." && pwd)
+
+# Run RuboCop on staged files
+cd "$PLATFORM_ROOT"
+if docker-compose run --rm --no-deps heyho-sync-be bundle exec rubocop $STAGED_FILES; then
+  echo "✓ All checks passed!"
+  exit 0
+else
+  echo ""
+  echo "❌ RuboCop found issues. Please fix them before committing."
+  echo "   Run: make lint-fix"
+  echo "   Or: docker-compose run --rm --no-deps heyho-sync-be bundle exec rubocop -A"
+  exit 1
+fi

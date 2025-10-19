@@ -35,6 +35,12 @@ docker-compose run --rm app bundle exec rails db:create db:migrate
 docker-compose up
 ```
 
+5. Install git hooks (recommended):
+```bash
+.githooks/install.sh
+```
+This sets up pre-commit hooks to run RuboCop before each commit.
+
 The application will be available at `http://localhost:3000`
 
 ## 📋 Available Make Commands
