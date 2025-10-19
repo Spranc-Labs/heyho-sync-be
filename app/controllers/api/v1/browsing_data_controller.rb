@@ -11,35 +11,15 @@ module Api
         target_user = find_target_user
         return unless target_user
 
-        @page_visits = target_user.page_visits
-                                   .order(visited_at: :desc)
-                                   .limit(page_limit)
-                                   .offset(page_offset)
-
-        @tab_aggregates = target_user.tab_aggregates
-                                      .order(closed_at: :desc)
-                                      .limit(page_limit)
-                                      .offset(page_offset)
+        page_visits = fetch_paginated_page_visits(target_user)
+        tab_aggregates = fetch_paginated_tab_aggregates(target_user)
 
         render_json_response(
           success: true,
           data: {
-            page_visits: @page_visits.as_json(
-              only: [:id, :url, :title, :visited_at, :tab_id, :domain, :duration_seconds,
-                     :active_duration_seconds, :engagement_rate, :idle_periods, :last_heartbeat,
-                     :anonymous_client_id, :created_at, :updated_at]
-            ),
-            tab_aggregates: @tab_aggregates.as_json(
-              only: [:id, :page_visit_id, :total_time_seconds, :active_time_seconds,
-                     :scroll_depth_percent, :closed_at, :domain_durations, :page_count,
-                     :current_url, :current_domain, :statistics, :created_at, :updated_at]
-            ),
-            pagination: {
-              page: current_page,
-              per_page: page_limit,
-              total_page_visits: target_user.page_visits.count,
-              total_tab_aggregates: target_user.tab_aggregates.count
-            }
+            page_visits: serialize_page_visits(page_visits),
+            tab_aggregates: serialize_tab_aggregates(tab_aggregates),
+            pagination: build_pagination_data(target_user)
           }
         )
       end
@@ -82,9 +62,7 @@ module Api
         service_token = request.headers['X-Service-Token']
 
         # Check for service token first (simple service-to-service auth)
-        if service_token.present? && service_token == ENV['SERVICE_SECRET']
-          return true
-        end
+        return true if service_token.present? && service_token == ENV['SERVICE_SECRET']
 
         # Otherwise, require JWT authentication
         auth_header = request.headers['Authorization']
@@ -110,7 +88,7 @@ module Api
 
         if email.present?
           # Service-to-service call with email parameter
-          user = User.find_by(email: email)
+          user = User.find_by(email:)
           unless user
             render_error_response(message: 'User not found', status: :not_found)
             return nil
@@ -141,6 +119,39 @@ module Api
 
       def page_offset
         (current_page - 1) * page_limit
+      end
+
+      def fetch_paginated_page_visits(user)
+        user.page_visits.order(visited_at: :desc).limit(page_limit).offset(page_offset)
+      end
+
+      def fetch_paginated_tab_aggregates(user)
+        user.tab_aggregates.order(closed_at: :desc).limit(page_limit).offset(page_offset)
+      end
+
+      def serialize_page_visits(visits)
+        visits.as_json(
+          only: %i[id url title visited_at tab_id domain duration_seconds
+                   active_duration_seconds engagement_rate idle_periods last_heartbeat
+                   anonymous_client_id created_at updated_at]
+        )
+      end
+
+      def serialize_tab_aggregates(aggregates)
+        aggregates.as_json(
+          only: %i[id page_visit_id total_time_seconds active_time_seconds
+                   scroll_depth_percent closed_at domain_durations page_count
+                   current_url current_domain statistics created_at updated_at]
+        )
+      end
+
+      def build_pagination_data(user)
+        {
+          page: current_page,
+          per_page: page_limit,
+          total_page_visits: user.page_visits.count,
+          total_tab_aggregates: user.tab_aggregates.count
+        }
       end
     end
   end

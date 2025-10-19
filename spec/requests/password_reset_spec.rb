@@ -117,7 +117,7 @@ RSpec.describe 'Password Reset API' do
       it 'resets password successfully' do
         reset_params = {
           email: user.email,
-          reset_code: reset_code,
+          reset_code:,
           new_password: 'NewPassword456!'
         }
 
@@ -139,7 +139,7 @@ RSpec.describe 'Password Reset API' do
       it 'deletes reset token after successful reset' do
         reset_params = {
           email: user.email,
-          reset_code: reset_code,
+          reset_code:,
           new_password: 'NewPassword456!'
         }
 
@@ -176,7 +176,7 @@ RSpec.describe 'Password Reset API' do
 
         reset_params = {
           email: user.email,
-          reset_code: reset_code,
+          reset_code:,
           new_password: 'NewPassword456!'
         }
 
@@ -190,7 +190,7 @@ RSpec.describe 'Password Reset API' do
     context 'with missing parameters' do
       it 'returns error for missing email' do
         reset_params = {
-          reset_code: reset_code,
+          reset_code:,
           new_password: 'NewPassword456!'
         }
 
@@ -215,7 +215,7 @@ RSpec.describe 'Password Reset API' do
       it 'returns error for missing password' do
         reset_params = {
           email: user.email,
-          reset_code: reset_code
+          reset_code:
         }
 
         post '/api/v1/reset-password', params: reset_params, as: :json
@@ -229,7 +229,7 @@ RSpec.describe 'Password Reset API' do
       it 'returns error for unknown email' do
         reset_params = {
           email: 'unknown@example.com',
-          reset_code: reset_code,
+          reset_code:,
           new_password: 'NewPassword456!'
         }
 
@@ -244,7 +244,7 @@ RSpec.describe 'Password Reset API' do
       it 'handles database errors gracefully' do
         reset_params = {
           email: user.email,
-          reset_code: reset_code,
+          reset_code:,
           new_password: 'NewPassword456!'
         }
 

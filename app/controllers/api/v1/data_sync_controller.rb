@@ -3,7 +3,6 @@
 module Api
   module V1
     class DataSyncController < AuthenticatedController
-
       # POST /api/v1/data/sync
       def create
         result = DataSyncService.sync(
@@ -30,9 +29,7 @@ module Api
       private
 
       def error_status_for(result)
-        if result.message&.include?('Validation failed')
-          :bad_request
-        elsif result.message&.include?('required')
+        if result.message&.include?('Validation failed') || result.message&.include?('required')
           :bad_request
         else
           :internal_server_error

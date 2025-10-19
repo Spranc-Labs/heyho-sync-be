@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# rubocop:disable Metrics/ClassLength
+# This service handles complex data transformation from browser extension format to our internal format.
+# Breaking it into multiple classes would reduce cohesion. All methods are focused and under 20 lines.
 class DataSyncService < BaseService
   PAGE_VISIT_SCHEMA = {
     type: 'object',
@@ -61,101 +64,148 @@ class DataSyncService < BaseService
 
   # Transform extension format to our internal format
   def transform_page_visits(visits)
-    visits.map do |visit|
-      {
-        'id' => visit['id'] || visit['visitId'],
-        'url' => visit['url'],
-        'title' => visit['title'] || extract_title_from_url(visit['url']),
-        'visited_at' => timestamp_to_iso8601(visit['visited_at'] || visit['startedAt']),
-        'source_page_visit_id' => visit['source_page_visit_id'] || visit['sourcePageVisitId'],
-        'tab_id' => visit['tabId'],
-        'domain' => visit['domain'],
-        'duration_seconds' => visit['durationSeconds'] || visit['duration_seconds'],
-        'active_duration_seconds' => (visit['activeDuration'] || 0) / 1000, # Convert ms to seconds
-        'engagement_rate' => visit['engagementRate'] || visit['engagement_rate'],
-        'idle_periods' => visit['idlePeriods'] || visit['idle_periods'],
-        'last_heartbeat' => visit['lastHeartbeat'] || visit['last_heartbeat'],
-        'anonymous_client_id' => visit['anonymousClientId'] || visit['anonymous_client_id']
-      }
+    visits.map { |visit| build_page_visit_hash(visit) }
+  end
+
+  def build_page_visit_hash(visit)
+    {
+      'id' => get_value(visit, 'id', 'visitId'),
+      'url' => visit['url'],
+      'title' => visit['title'] || extract_title_from_url(visit['url']),
+      'visited_at' => timestamp_to_iso_8601(get_value(visit, 'visited_at', 'startedAt')),
+      'source_page_visit_id' => get_value(visit, 'source_page_visit_id', 'sourcePageVisitId'),
+      'tab_id' => visit['tabId'],
+      'domain' => visit['domain'],
+      'duration_seconds' => get_value(visit, 'durationSeconds', 'duration_seconds'),
+      'active_duration_seconds' => (visit['activeDuration'] || 0) / 1000, # Convert ms to seconds
+      'engagement_rate' => get_value(visit, 'engagementRate', 'engagement_rate'),
+      'idle_periods' => get_value(visit, 'idlePeriods', 'idle_periods'),
+      'last_heartbeat' => get_value(visit, 'lastHeartbeat', 'last_heartbeat'),
+      'anonymous_client_id' => get_value(visit, 'anonymousClientId', 'anonymous_client_id')
+    }
+  end
+
+  def get_value(hash, *keys)
+    keys.each do |key|
+      value = hash[key]
+      return value if value
     end
+    nil
   end
 
   def transform_tab_aggregates(aggregates, page_visits)
-    # Build a map of tabId -> first page visit ID for that tab
-    tab_to_page_visit = {}
-    page_visits.each do |visit|
+    tab_to_page_visit = build_tab_to_page_visit_map(page_visits)
+    aggregates.filter_map { |aggregate| transform_single_aggregate(aggregate, tab_to_page_visit) }.compact
+  end
+
+  def build_tab_to_page_visit_map(page_visits)
+    page_visits.each_with_object({}) do |visit, map|
       tab_id = visit['tabId']
       visit_id = visit['id'] || visit['visitId']
       next unless tab_id && visit_id
 
-      # Keep the first (earliest) page visit for each tab
-      tab_to_page_visit[tab_id] ||= visit_id
+      map[tab_id] ||= visit_id # Keep the first (earliest) page visit for each tab
+    end
+  end
+
+  def transform_single_aggregate(aggregate, tab_to_page_visit)
+    if browser_extension_format?(aggregate)
+      transform_browser_extension_aggregate(aggregate, tab_to_page_visit)
+    else
+      transform_api_aggregate(aggregate)
+    end
+  end
+
+  def browser_extension_format?(aggregate)
+    aggregate['tabId'] && aggregate['startTime']
+  end
+
+  def transform_browser_extension_aggregate(aggregate, tab_to_page_visit)
+    tab_id = aggregate['tabId']
+    page_visit_id = tab_to_page_visit[tab_id]
+
+    return log_and_skip('no matching page visit found', tab_id) unless page_visit_id
+
+    start_time = aggregate['startTime']
+    last_active = aggregate['lastActiveTime'] || start_time
+    calculated_seconds = calculate_duration_seconds(start_time, last_active, tab_id)
+
+    return nil unless calculated_seconds
+
+    build_aggregate_hash(
+      aggregate:,
+      page_visit_id:,
+      calculated_seconds:,
+      last_active:,
+      start_time:,
+      tab_id:
+    )
+  end
+
+  def calculate_duration_seconds(start_time, last_active, tab_id)
+    calculated_duration_ms = last_active - start_time
+    calculated_seconds = (calculated_duration_ms / 1000.0).to_i
+    max_seconds = 365 * 24 * 3600 # 1 year
+
+    if calculated_seconds > max_seconds || calculated_seconds.negative?
+      log_invalid_duration(calculated_seconds, tab_id)
+      return nil
     end
 
-    aggregates.map do |aggregate|
-      # Handle browser extension format
-      if aggregate['tabId'] && aggregate['startTime']
-        # Browser extension format
-        tab_id = aggregate['tabId']
-        start_time = aggregate['startTime']
-        last_active = aggregate['lastActiveTime'] || start_time
+    calculated_seconds
+  end
 
-        # Find the actual page visit ID for this tab
-        page_visit_id = tab_to_page_visit[tab_id]
-        unless page_visit_id
-          Rails.logger.warn "Skipping tab aggregate for tabId #{tab_id}: no matching page visit found"
-          next nil
-        end
+  # rubocop:disable Metrics/ParameterLists
+  # Keyword arguments improve readability for this data transformation method
+  def build_aggregate_hash(aggregate:, page_visit_id:, calculated_seconds:, last_active:, start_time:, tab_id:)
+    # rubocop:enable Metrics/ParameterLists
+    {
+      'id' => aggregate['id'] || "agg_#{start_time}_#{tab_id}",
+      'page_visit_id' => page_visit_id,
+      'total_time_seconds' => calculated_seconds,
+      'active_time_seconds' => calculated_seconds,
+      'scroll_depth_percent' => aggregate['scroll_depth_percent'] || 0,
+      'closed_at' => timestamp_to_iso_8601(last_active),
+      'domain_durations' => aggregate['domainDurations'] || aggregate['domain_durations'],
+      'page_count' => validate_page_count(aggregate['pageCount'] || aggregate['page_count'], tab_id),
+      'current_url' => aggregate['currentUrl'] || aggregate['current_url'],
+      'current_domain' => aggregate['currentDomain'] || aggregate['current_domain'],
+      'statistics' => aggregate['statistics']
+    }
+  end
 
-        # Calculate actual duration from timestamps (more reliable than totalActiveDuration)
-        calculated_duration_ms = last_active - start_time
-        calculated_seconds = (calculated_duration_ms / 1000.0).to_i
+  def validate_page_count(page_count, tab_id)
+    return nil unless page_count
 
-        # Sanity check: Max 1 year (browsers shouldn't keep tabs for longer)
-        # This catches corrupt data while allowing long-running tabs
-        max_seconds = 365 * 24 * 3600 # 1 year
+    max_bigint = 9_223_372_036_854_775_807
+    if page_count.to_i > max_bigint
+      Rails.logger.warn "Capping invalid page_count #{page_count} to nil for tabId #{tab_id}"
+      return nil
+    end
 
-        if calculated_seconds > max_seconds || calculated_seconds < 0
-          Rails.logger.warn "Skipping tab aggregate with invalid duration: #{calculated_seconds}s (#{calculated_seconds / 86400.0} days) for tabId #{tab_id}"
-          next nil
-        end
+    page_count
+  end
 
-        # Generate ID from tabId and startTime
-        id = aggregate['id'] || "agg_#{start_time}_#{tab_id}"
+  def transform_api_aggregate(aggregate)
+    {
+      'id' => aggregate['id'],
+      'page_visit_id' => aggregate['page_visit_id'] || aggregate['pageVisitId'],
+      'total_time_seconds' => aggregate['total_time_seconds'] || aggregate['totalTimeSeconds'],
+      'active_time_seconds' => aggregate['active_time_seconds'] || aggregate['activeTimeSeconds'],
+      'scroll_depth_percent' => aggregate['scroll_depth_percent'] || aggregate['scrollDepthPercent'],
+      'closed_at' => timestamp_to_iso_8601(aggregate['closed_at'] || aggregate['closedAt'])
+    }
+  end
 
-        # Validate page_count (max bigint is ~9.2 quintillion)
-        page_count = aggregate['pageCount'] || aggregate['page_count']
-        max_bigint = 9_223_372_036_854_775_807
-        if page_count && page_count.to_i > max_bigint
-          Rails.logger.warn "Capping invalid page_count #{page_count} to nil for tabId #{tab_id}"
-          page_count = nil
-        end
+  def log_and_skip(reason, tab_id)
+    Rails.logger.warn "Skipping tab aggregate for tabId #{tab_id}: #{reason}"
+    nil
+  end
 
-        {
-          'id' => id,
-          'page_visit_id' => page_visit_id,
-          'total_time_seconds' => calculated_seconds,
-          'active_time_seconds' => calculated_seconds,
-          'scroll_depth_percent' => aggregate['scroll_depth_percent'] || 0,
-          'closed_at' => timestamp_to_iso8601(last_active),
-          'domain_durations' => aggregate['domainDurations'] || aggregate['domain_durations'],
-          'page_count' => page_count,
-          'current_url' => aggregate['currentUrl'] || aggregate['current_url'],
-          'current_domain' => aggregate['currentDomain'] || aggregate['current_domain'],
-          'statistics' => aggregate['statistics']
-        }
-      else
-        # API format (already correct)
-        {
-          'id' => aggregate['id'],
-          'page_visit_id' => aggregate['page_visit_id'] || aggregate['pageVisitId'],
-          'total_time_seconds' => aggregate['total_time_seconds'] || aggregate['totalTimeSeconds'],
-          'active_time_seconds' => aggregate['active_time_seconds'] || aggregate['activeTimeSeconds'],
-          'scroll_depth_percent' => aggregate['scroll_depth_percent'] || aggregate['scrollDepthPercent'],
-          'closed_at' => timestamp_to_iso8601(aggregate['closed_at'] || aggregate['closedAt'])
-        }
-      end.compact
-    end.compact # Remove nil values from skipped aggregates
+  def log_invalid_duration(calculated_seconds, tab_id)
+    days = calculated_seconds / 86_400.0
+    Rails.logger.warn "Skipping tab aggregate with invalid duration: #{calculated_seconds}s " \
+                      "(#{days} days) for tabId #{tab_id}"
   end
 
   def extract_title_from_url(url)
@@ -172,7 +222,7 @@ class DataSyncService < BaseService
     'Unknown'
   end
 
-  def timestamp_to_iso8601(value)
+  def timestamp_to_iso_8601(value)
     return value if value.blank?
     return value if value.is_a?(String) && value.match?(/^\d{4}-\d{2}-\d{2}/)
 
@@ -217,62 +267,62 @@ class DataSyncService < BaseService
   end
 
   def save_page_visits
-    # Deduplicate by ID, keeping the latest version (highest endedAt/timestamp)
-    deduplicated_visits = page_visits
-                          .group_by { |v| v['id'] }
-                          .map do |_id, versions|
-      versions.max_by { |v| v['visited_at'] || v['timestamp'] || 0 }
-    end
-
-    visits_params = deduplicated_visits.map do |visit|
-      {
-        id: visit['id'],
-        user_id: user.id,
-        url: visit['url'],
-        title: visit['title'],
-        visited_at: visit['visited_at'],
-        source_page_visit_id: visit['source_page_visit_id'],
-        tab_id: visit['tab_id'],
-        domain: visit['domain'],
-        duration_seconds: visit['duration_seconds'],
-        active_duration_seconds: visit['active_duration_seconds'],
-        engagement_rate: visit['engagement_rate'],
-        idle_periods: visit['idle_periods'],
-        last_heartbeat: visit['last_heartbeat'],
-        anonymous_client_id: visit['anonymous_client_id']
-      }
-    end
-
+    deduplicated_visits = deduplicate_by_id(page_visits, sort_by: 'visited_at')
+    visits_params = deduplicated_visits.map { |visit| build_page_visit_params(visit) }
+    # rubocop:disable Rails/SkipsModelValidations
     PageVisit.upsert_all(visits_params, unique_by: :id)
+    # rubocop:enable Rails/SkipsModelValidations
+  end
+
+  def build_page_visit_params(visit)
+    {
+      id: visit['id'],
+      user_id: user.id,
+      url: visit['url'],
+      title: visit['title'],
+      visited_at: visit['visited_at'],
+      source_page_visit_id: visit['source_page_visit_id'],
+      tab_id: visit['tab_id'],
+      domain: visit['domain'],
+      duration_seconds: visit['duration_seconds'],
+      active_duration_seconds: visit['active_duration_seconds'],
+      engagement_rate: visit['engagement_rate'],
+      idle_periods: visit['idle_periods'],
+      last_heartbeat: visit['last_heartbeat'],
+      anonymous_client_id: visit['anonymous_client_id']
+    }
   end
 
   def save_tab_aggregates
     return if tab_aggregates.empty?
 
-    # Deduplicate by ID, keeping the latest version
-    deduplicated_aggregates = tab_aggregates
-                               .group_by { |a| a['id'] }
-                               .map do |_id, versions|
-      versions.max_by { |a| a['closed_at'] || 0 }
-    end
-
-    aggregates_params = deduplicated_aggregates.map do |aggregate|
-      {
-        id: aggregate['id'],
-        page_visit_id: aggregate['page_visit_id'],
-        total_time_seconds: aggregate['total_time_seconds'],
-        active_time_seconds: aggregate['active_time_seconds'],
-        scroll_depth_percent: aggregate['scroll_depth_percent'],
-        closed_at: aggregate['closed_at'],
-        domain_durations: aggregate['domain_durations'],
-        page_count: aggregate['page_count'],
-        current_url: aggregate['current_url'],
-        current_domain: aggregate['current_domain'],
-        statistics: aggregate['statistics']
-      }
-    end
-
+    deduplicated_aggregates = deduplicate_by_id(tab_aggregates, sort_by: 'closed_at')
+    aggregates_params = deduplicated_aggregates.map { |aggregate| build_tab_aggregate_params(aggregate) }
+    # rubocop:disable Rails/SkipsModelValidations
     TabAggregate.upsert_all(aggregates_params, unique_by: :id)
+    # rubocop:enable Rails/SkipsModelValidations
+  end
+
+  def build_tab_aggregate_params(aggregate)
+    {
+      id: aggregate['id'],
+      page_visit_id: aggregate['page_visit_id'],
+      total_time_seconds: aggregate['total_time_seconds'],
+      active_time_seconds: aggregate['active_time_seconds'],
+      scroll_depth_percent: aggregate['scroll_depth_percent'],
+      closed_at: aggregate['closed_at'],
+      domain_durations: aggregate['domain_durations'],
+      page_count: aggregate['page_count'],
+      current_url: aggregate['current_url'],
+      current_domain: aggregate['current_domain'],
+      statistics: aggregate['statistics']
+    }
+  end
+
+  def deduplicate_by_id(records, sort_by:)
+    records
+      .group_by { |record| record['id'] }
+      .map { |_id, versions| versions.max_by { |v| v[sort_by] || 0 } }
   end
 
   def sync_stats
@@ -293,3 +343,4 @@ class DataSyncService < BaseService
     )
   end
 end
+# rubocop:enable Metrics/ClassLength

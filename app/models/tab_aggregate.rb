@@ -19,8 +19,8 @@ class TabAggregate < ApplicationRecord
   def active_time_not_greater_than_total_time
     return unless active_time_seconds && total_time_seconds
 
-    if active_time_seconds > total_time_seconds
-      errors.add(:active_time_seconds, 'cannot be greater than total time')
-    end
+    return unless active_time_seconds > total_time_seconds
+
+    errors.add(:active_time_seconds, 'cannot be greater than total time')
   end
 end
