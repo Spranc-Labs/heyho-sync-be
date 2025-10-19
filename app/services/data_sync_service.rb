@@ -29,38 +29,47 @@ class DataSyncService < BaseService
     }
   }.freeze
 
+  # Configuration
+  MAX_BATCH_SIZE = 1000
+
   class << self
-    def sync(user:, page_visits: [], tab_aggregates: [])
-      new(user:, page_visits:, tab_aggregates:).sync
+    def sync(user:, page_visits: [], tab_aggregates: [], client_info: {})
+      new(user:, page_visits:, tab_aggregates:, client_info:).sync
     end
   end
 
-  def initialize(user:, page_visits: [], tab_aggregates: [])
+  def initialize(user:, page_visits: [], tab_aggregates: [], client_info: {})
     super()
     @user = user
+    @client_info = client_info || {}
     @raw_page_visits = Array(page_visits)
     @raw_tab_aggregates = Array(tab_aggregates)
     @page_visits = transform_page_visits(@raw_page_visits)
     @tab_aggregates = transform_tab_aggregates(@raw_tab_aggregates, @raw_page_visits)
+    @sync_log = nil
   end
 
   def sync
     return invalid_params_result if user.blank?
+    return batch_size_exceeded_result if batch_size_exceeded?
     return validation_result unless validate_payload
 
+    create_sync_log
     save_batch
+    complete_sync_log
     success_result(
       data: sync_stats,
       message: 'Data synced successfully'
     )
   rescue StandardError => e
     log_error('Data sync failed', e)
+    fail_sync_log(e.message)
     failure_result(message: 'Data sync failed')
   end
 
   private
 
-  attr_reader :user, :page_visits, :tab_aggregates, :raw_page_visits, :raw_tab_aggregates
+  attr_reader :user, :page_visits, :tab_aggregates, :raw_page_visits, :raw_tab_aggregates, :client_info, :sync_log
 
   # Transform extension format to our internal format
   def transform_page_visits(visits)
@@ -269,8 +278,18 @@ class DataSyncService < BaseService
   def save_page_visits
     deduplicated_visits = deduplicate_by_id(page_visits, sort_by: 'visited_at')
     visits_params = deduplicated_visits.map { |visit| build_page_visit_params(visit) }
+
+    # Use smart merge: update only if new data is more recent or more complete
     # rubocop:disable Rails/SkipsModelValidations
-    PageVisit.upsert_all(visits_params, unique_by: :id)
+    PageVisit.upsert_all(
+      visits_params,
+      unique_by: :id,
+      update_only: %i[
+        url title visited_at source_page_visit_id domain
+        duration_seconds active_duration_seconds engagement_rate
+        idle_periods last_heartbeat anonymous_client_id updated_at
+      ]
+    )
     # rubocop:enable Rails/SkipsModelValidations
   end
 
@@ -298,8 +317,18 @@ class DataSyncService < BaseService
 
     deduplicated_aggregates = deduplicate_by_id(tab_aggregates, sort_by: 'closed_at')
     aggregates_params = deduplicated_aggregates.map { |aggregate| build_tab_aggregate_params(aggregate) }
+
+    # Use smart merge: update only if new data is more recent or more complete
     # rubocop:disable Rails/SkipsModelValidations
-    TabAggregate.upsert_all(aggregates_params, unique_by: :id)
+    TabAggregate.upsert_all(
+      aggregates_params,
+      unique_by: :id,
+      update_only: %i[
+        page_visit_id total_time_seconds active_time_seconds
+        scroll_depth_percent closed_at domain_durations page_count
+        current_url current_domain statistics updated_at
+      ]
+    )
     # rubocop:enable Rails/SkipsModelValidations
   end
 
@@ -322,7 +351,48 @@ class DataSyncService < BaseService
   def deduplicate_by_id(records, sort_by:)
     records
       .group_by { |record| record['id'] }
-      .map { |_id, versions| versions.max_by { |v| v[sort_by] || 0 } }
+      .map { |_id, versions| resolve_conflict(versions, sort_by) }
+  end
+
+  # Smart conflict resolution: merge multiple versions of same record
+  def resolve_conflict(versions, sort_by)
+    return versions.first if versions.size == 1
+
+    # Start with the most recent version
+    base = versions.max_by { |v| v[sort_by] || 0 }
+
+    # Merge in non-nil values from other versions (prefer non-nil over nil)
+    versions.each do |version|
+      next if version == base
+
+      merge_version_into_base(base, version)
+    end
+
+    base
+  end
+
+  # Duration fields that should use max value during conflict resolution
+  DURATION_FIELDS = %w[
+    duration_seconds active_duration_seconds
+    total_time_seconds active_time_seconds
+  ].freeze
+
+  def merge_version_into_base(base, version)
+    version.each do |key, value|
+      next if value.nil?
+
+      # Update if base value is nil and new value is not
+      if base[key].nil?
+        base[key] = value
+        next
+      end
+
+      # For duration fields, prefer higher values (more complete data)
+      base[key] = [base[key].to_i, value.to_i].max if DURATION_FIELDS.include?(key)
+
+      # For scroll depth, prefer higher values
+      base[key] = [base[key].to_i, value.to_i].max if key == 'scroll_depth_percent'
+    end
   end
 
   def sync_stats
@@ -341,6 +411,46 @@ class DataSyncService < BaseService
       message: 'Validation failed for one or more records',
       errors: @validation_errors
     )
+  end
+
+  def batch_size_exceeded?
+    total_records = page_visits.size + tab_aggregates.size
+    total_records > MAX_BATCH_SIZE
+  end
+
+  def batch_size_exceeded_result
+    total = page_visits.size + tab_aggregates.size
+    failure_result(
+      message: "Batch size exceeded. Maximum #{MAX_BATCH_SIZE} records allowed, got #{total}"
+    )
+  end
+
+  # SyncLog tracking methods
+  def create_sync_log
+    @sync_log = SyncLog.create!(
+      user:,
+      synced_at: Time.current,
+      status: 'processing',
+      client_info:,
+      page_visits_synced: 0,
+      tab_aggregates_synced: 0
+    )
+  end
+
+  def complete_sync_log
+    return unless sync_log
+
+    sync_log.update!(
+      status: 'completed',
+      page_visits_synced: page_visits.size,
+      tab_aggregates_synced: tab_aggregates.size
+    )
+  end
+
+  def fail_sync_log(error_message)
+    return unless sync_log
+
+    sync_log.mark_failed!([error_message])
   end
 end
 # rubocop:enable Metrics/ClassLength

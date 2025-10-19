@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_10_12_192135) do
+ActiveRecord::Schema[7.0].define(version: 2025_10_19_123356) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "plpgsql"
@@ -45,6 +45,22 @@ ActiveRecord::Schema[7.0].define(version: 2025_10_12_192135) do
     t.index ["source_page_visit_id"], name: "index_page_visits_on_source_page_visit_id"
     t.index ["user_id"], name: "index_page_visits_on_user_id"
     t.index ["visited_at"], name: "index_page_visits_on_visited_at"
+  end
+
+  create_table "sync_logs", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.datetime "synced_at", null: false
+    t.integer "page_visits_synced", default: 0, null: false
+    t.integer "tab_aggregates_synced", default: 0, null: false
+    t.string "status", default: "pending", null: false
+    t.jsonb "error_messages", default: []
+    t.jsonb "client_info", default: {}
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["status"], name: "index_sync_logs_on_status"
+    t.index ["synced_at"], name: "index_sync_logs_on_synced_at"
+    t.index ["user_id", "synced_at"], name: "index_sync_logs_on_user_id_and_synced_at"
+    t.index ["user_id"], name: "index_sync_logs_on_user_id"
   end
 
   create_table "tab_aggregates", id: :string, force: :cascade do |t|
@@ -101,6 +117,7 @@ ActiveRecord::Schema[7.0].define(version: 2025_10_12_192135) do
   add_foreign_key "jwt_denylists", "users"
   add_foreign_key "page_visits", "page_visits", column: "source_page_visit_id"
   add_foreign_key "page_visits", "users"
+  add_foreign_key "sync_logs", "users"
   add_foreign_key "tab_aggregates", "page_visits"
   add_foreign_key "user_login_change_keys", "users", column: "id"
   add_foreign_key "user_password_reset_keys", "users", column: "id"
