@@ -27,6 +27,12 @@ RSpec.describe SyncLog do
         .only_integer
         .is_greater_than_or_equal_to(0)
     end
+
+    it do
+      expect(sync_log).to validate_numericality_of(:rejected_records_count)
+        .only_integer
+        .is_greater_than_or_equal_to(0)
+    end
   end
 
   # Scopes
@@ -68,6 +74,26 @@ RSpec.describe SyncLog do
     describe '.failed' do
       it 'returns only failed logs' do
         expect(described_class.failed).to contain_exactly(failed_log)
+      end
+    end
+
+    describe '.with_validation_errors' do
+      it 'returns logs with rejected records' do
+        other_user = create(:user)
+        create(:sync_log, user: other_user, rejected_records_count: 0)
+        dirty_log = create(:sync_log, user: other_user, rejected_records_count: 5)
+
+        expect(described_class.for_user(other_user.id).with_validation_errors).to contain_exactly(dirty_log)
+      end
+    end
+
+    describe '.clean' do
+      it 'returns logs without rejected records' do
+        other_user = create(:user)
+        clean_log = create(:sync_log, user: other_user, rejected_records_count: 0)
+        create(:sync_log, user: other_user, rejected_records_count: 5)
+
+        expect(described_class.for_user(other_user.id).clean).to contain_exactly(clean_log)
       end
     end
   end
@@ -163,6 +189,109 @@ RSpec.describe SyncLog do
       log.mark_failed!('Something went wrong')
 
       expect(log.reload.error_messages).to eq(['Something went wrong'])
+    end
+  end
+
+  describe '#add_validation_error' do
+    it 'adds validation error to the log' do
+      log = create(:sync_log)
+
+      log.add_validation_error(
+        record_id: 'pv_123',
+        record_type: 'page_visit',
+        field: 'url',
+        message: 'is invalid'
+      )
+
+      expect(log.validation_errors.size).to eq(1)
+      expect(log.validation_errors.first).to include(
+        'record_id' => 'pv_123',
+        'record_type' => 'page_visit',
+        'field' => 'url',
+        'message' => 'is invalid'
+      )
+      expect(log.rejected_records_count).to eq(1)
+    end
+
+    it 'includes value when provided' do
+      log = create(:sync_log)
+
+      log.add_validation_error(
+        record_id: 'pv_123',
+        record_type: 'page_visit',
+        field: 'scroll_depth',
+        message: 'exceeds maximum',
+        value: 150
+      )
+
+      expect(log.validation_errors.first['value']).to eq(150)
+    end
+
+    it 'includes timestamp' do
+      log = create(:sync_log)
+
+      log.add_validation_error(
+        record_id: 'pv_123',
+        record_type: 'page_visit',
+        field: 'url',
+        message: 'is invalid'
+      )
+
+      expect(log.validation_errors.first['timestamp']).to be_present
+    end
+
+    it 'increments rejected_records_count' do
+      log = create(:sync_log, rejected_records_count: 5)
+
+      log.add_validation_error(
+        record_id: 'pv_123',
+        record_type: 'page_visit',
+        field: 'url',
+        message: 'is invalid'
+      )
+
+      expect(log.rejected_records_count).to eq(6)
+    end
+  end
+
+  describe '#validation_errors?' do
+    it 'returns true when there are rejected records' do
+      log = build(:sync_log, rejected_records_count: 5)
+      expect(log.validation_errors?).to be true
+    end
+
+    it 'returns false when there are no rejected records' do
+      log = build(:sync_log, rejected_records_count: 0)
+      expect(log.validation_errors?).to be false
+    end
+  end
+
+  describe '#data_quality_score' do
+    it 'returns 100.0 when no records' do
+      log = build(:sync_log, page_visits_synced: 0, tab_aggregates_synced: 0, rejected_records_count: 0)
+      expect(log.data_quality_score).to eq(100.0)
+    end
+
+    it 'calculates score when all records are valid' do
+      log = build(:sync_log, page_visits_synced: 100, tab_aggregates_synced: 50, rejected_records_count: 0)
+      expect(log.data_quality_score).to eq(100.0)
+    end
+
+    it 'calculates score with some rejected records' do
+      log = build(:sync_log, page_visits_synced: 80, tab_aggregates_synced: 0, rejected_records_count: 20)
+      expect(log.data_quality_score).to eq(80.0)
+    end
+
+    it 'calculates score with multiple types of records' do
+      log = build(:sync_log, page_visits_synced: 70, tab_aggregates_synced: 20, rejected_records_count: 10)
+      expect(log.data_quality_score).to eq(90.0)
+    end
+  end
+
+  describe '#total_records' do
+    it 'returns sum of all records including rejected' do
+      log = build(:sync_log, page_visits_synced: 100, tab_aggregates_synced: 50, rejected_records_count: 10)
+      expect(log.total_records).to eq(160)
     end
   end
 end
