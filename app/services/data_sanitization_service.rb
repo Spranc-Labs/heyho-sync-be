@@ -15,7 +15,7 @@ class DataSanitizationService
     new.sanitize_tab_aggregate(data)
   end
 
-  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  # rubocop:disable Metrics/AbcSize
   # This method intentionally sanitizes multiple fields comprehensively
   def sanitize_page_visit(data)
     sanitized = data.dup
@@ -42,9 +42,8 @@ class DataSanitizationService
 
     sanitized
   end
-  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
+  # rubocop:enable Metrics/AbcSize
 
-  # rubocop:disable Metrics/AbcSize
   # This method intentionally sanitizes multiple fields comprehensively
   def sanitize_tab_aggregate(data)
     sanitized = data.dup
@@ -67,7 +66,6 @@ class DataSanitizationService
 
     sanitized
   end
-  # rubocop:enable Metrics/AbcSize
 
   private
 

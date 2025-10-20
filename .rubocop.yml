@@ -66,12 +66,7 @@ Layout/HashAlignment:
   EnforcedColonStyle: key
   EnforcedLastArgumentHashStyle: always_inspect
 
-# Metrics Configuration
-Metrics/MethodLength:
-  Max: 20
-  Exclude:
-    - 'db/migrate/*'
-    - 'spec/**/*'
+# Metrics Configuration (consolidated at bottom for clarity)
 
 Metrics/BlockLength:
   Max: 25
@@ -91,10 +86,7 @@ Metrics/ModuleLength:
   Exclude:
     - 'spec/**/*'
 
-Metrics/AbcSize:
-  Max: 20
-  Exclude:
-    - 'db/migrate/*'
+# Metrics/AbcSize moved to consolidated section below
 
 Metrics/CyclomaticComplexity:
   Max: 10
