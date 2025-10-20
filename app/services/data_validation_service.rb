@@ -34,7 +34,6 @@ class DataValidationService
     @warnings = []
   end
 
-  # rubocop:disable Metrics/AbcSize
   # This method intentionally validates multiple fields comprehensively
   def validate_page_visit(data)
     validate_required_fields(data, %w[id url visited_at])
@@ -49,7 +48,6 @@ class DataValidationService
 
     build_result
   end
-  # rubocop:enable Metrics/AbcSize
 
   # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
   # This method intentionally validates multiple fields comprehensively
