@@ -46,6 +46,14 @@ class DataValidationService
     validate_engagement_rate(data['engagement_rate']) if data['engagement_rate']
     validate_scroll_depth(data['scroll_depth_percent']) if data['scroll_depth_percent']
 
+    # Category validation
+    validate_category(data['category']) if data['category']
+    validate_category_confidence(data['category_confidence']) if data['category_confidence']
+    validate_category_method(data['category_method']) if data['category_method']
+
+    # Metadata size validation
+    validate_metadata_size(data['metadata']) if data['metadata']
+
     build_result
   end
 
@@ -163,6 +171,46 @@ class DataValidationService
   rescue ArgumentError
     # Timestamp validation will catch this
     nil
+  end
+
+  def validate_category(value)
+    return if value.blank?
+
+    return if PageVisit::VALID_CATEGORIES.include?(value)
+
+    add_error('category', "must be one of: #{PageVisit::VALID_CATEGORIES.join(", ")}")
+  end
+
+  def validate_category_confidence(value)
+    return if value.blank?
+
+    return add_error('category_confidence', 'must be a number') unless value.is_a?(Numeric)
+
+    return add_error('category_confidence', 'cannot be less than 0') if value.negative?
+
+    return unless value > 1
+
+    add_error('category_confidence', 'cannot exceed 1')
+  end
+
+  def validate_category_method(value)
+    return if value.blank?
+
+    valid_methods = %w[metadata unclassified]
+    return if valid_methods.include?(value)
+
+    add_warning('category_method', "unknown method '#{value}' (expected: #{valid_methods.join(", ")})")
+  end
+
+  def validate_metadata_size(value)
+    return if value.blank?
+
+    max_size = 50.kilobytes
+    metadata_size = value.to_json.bytesize
+
+    return unless metadata_size > max_size
+
+    add_error('metadata', "is too large (#{metadata_size} bytes, max #{max_size} bytes)")
   end
 
   def add_error(field, message)

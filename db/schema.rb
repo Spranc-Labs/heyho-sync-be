@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_10_19_154356) do
+ActiveRecord::Schema[7.0].define(version: 2025_10_20_172053) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "plpgsql"
@@ -42,7 +42,14 @@ ActiveRecord::Schema[7.0].define(version: 2025_10_19_154356) do
     t.jsonb "idle_periods"
     t.bigint "last_heartbeat"
     t.string "anonymous_client_id"
+    t.string "category"
+    t.float "category_confidence"
+    t.string "category_method"
+    t.jsonb "metadata", default: {}
+    t.index ["category"], name: "index_page_visits_on_category"
+    t.index ["metadata"], name: "index_page_visits_on_metadata", using: :gin
     t.index ["source_page_visit_id"], name: "index_page_visits_on_source_page_visit_id"
+    t.index ["user_id", "category"], name: "index_page_visits_on_user_id_and_category"
     t.index ["user_id", "domain", "visited_at"], name: "index_page_visits_on_user_domain_and_visited_at"
     t.index ["user_id", "domain"], name: "index_page_visits_on_user_and_domain"
     t.index ["user_id", "visited_at"], name: "index_page_visits_on_user_and_visited_at"
