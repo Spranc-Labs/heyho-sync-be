@@ -42,14 +42,8 @@ module Insights
     attr_reader :user, :period
 
     def calculate_date_range
-      case period
-      when 'week'
-        { start: 7.days.ago.beginning_of_day, end: Time.current.end_of_day }
-      when 'month'
-        { start: 30.days.ago.beginning_of_day, end: Time.current.end_of_day }
-      else
-        { start: 7.days.ago.beginning_of_day, end: Time.current.end_of_day }
-      end
+      start_time = period == 'month' ? 30.days.ago : 7.days.ago
+      { start: start_time.beginning_of_day, end: Time.current.end_of_day }
     end
 
     def fetch_visits(date_range)

@@ -42,21 +42,16 @@ module Insights
     attr_reader :user, :period, :limit, :sort_by
 
     def sanitize_limit(raw_limit)
-      parsed = raw_limit.to_i
-      [[parsed, MIN_LIMIT].max, MAX_LIMIT].min
+      raw_limit.to_i.clamp(MIN_LIMIT, MAX_LIMIT)
     end
 
     def calculate_date_range
-      case period
-      when 'day'
-        { start: Time.current.beginning_of_day, end: Time.current.end_of_day }
-      when 'week'
-        { start: 7.days.ago.beginning_of_day, end: Time.current.end_of_day }
-      when 'month'
-        { start: 30.days.ago.beginning_of_day, end: Time.current.end_of_day }
-      else
-        { start: 7.days.ago.beginning_of_day, end: Time.current.end_of_day }
-      end
+      start_time = case period
+                   when 'day' then Time.current
+                   when 'month' then 30.days.ago
+                   else 7.days.ago
+                   end
+      { start: start_time.beginning_of_day, end: Time.current.end_of_day }
     end
 
     def fetch_visits(date_range)

@@ -38,8 +38,7 @@ module Insights
     attr_reader :user, :limit, :since
 
     def sanitize_limit(raw_limit)
-      parsed = raw_limit.to_i
-      [[parsed, MIN_LIMIT].max, MAX_LIMIT].min
+      raw_limit.to_i.clamp(MIN_LIMIT, MAX_LIMIT)
     end
 
     def parse_since(since_input)
@@ -125,8 +124,8 @@ module Insights
       end
     end
 
-    def time_gap(time1, time2)
-      (time1 - time2).abs
+    def time_gap(time_first, time_second)
+      (time_first - time_second).abs
     end
   end
 end
