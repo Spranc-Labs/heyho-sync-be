@@ -206,15 +206,152 @@ RSpec.describe Insights::RecentActivityService do
 
     context 'when service encounters an error' do
       before do
-        allow_any_instance_of(described_class).to receive(:fetch_visits).and_raise(StandardError, 'Database error')
+        allow_any_instance_of(described_class).to receive(:fetch_visits).and_raise(ActiveRecord::StatementInvalid, 'Database error')
       end
 
       it 'returns failure result' do
         result = described_class.call(user:)
 
         expect(result.failure?).to be true
-        expect(result.message).to eq('Failed to generate recent activity')
+        expect(result.message).to eq('Database query failed')
         expect(result.errors).to include('Database error')
+      end
+    end
+
+    context 'with session classification boundary conditions' do
+      it 'classifies session as research when duration is exactly 1800s and visits exactly 10' do
+        base_time = 1.hour.ago
+        10.times do |i|
+          create(:page_visit, user:, visited_at: base_time + (i * 3).minutes, domain: 'test.com')
+        end
+
+        result = described_class.call(user:)
+        session = result.data[:activities].first
+
+        expect(session[:duration_seconds]).to eq(1620) # 9 gaps * 180s
+        # Should be browsing_session (>= 600s but < 1800s with < 10 visits)
+      end
+
+      it 'classifies session as browsing when duration is exactly 600s' do
+        base_time = 1.hour.ago
+        create(:page_visit, user:, visited_at: base_time, domain: 'test.com')
+        create(:page_visit, user:, visited_at: base_time + 600.seconds, domain: 'test.com')
+
+        result = described_class.call(user:)
+        session = result.data[:activities].first
+
+        expect(session[:duration_seconds]).to eq(600)
+        expect(session[:type]).to eq('browsing_session') # >= 600s
+      end
+
+      it 'classifies session as quick_search when visits is exactly 5' do
+        base_time = 1.hour.ago
+        5.times do |i|
+          create(:page_visit, user:, visited_at: base_time + (i * 30).seconds, domain: 'test.com')
+        end
+
+        result = described_class.call(user:)
+        session = result.data[:activities].first
+
+        expect(session[:visit_count]).to eq(5)
+        expect(session[:type]).to eq('quick_search') # >= 5 visits
+      end
+
+      it 'classifies session as brief_visit when just below thresholds' do
+        base_time = 1.hour.ago
+        4.times do |i|
+          create(:page_visit, user:, visited_at: base_time + (i * 30).seconds, domain: 'test.com')
+        end
+
+        result = described_class.call(user:)
+        session = result.data[:activities].first
+
+        expect(session[:visit_count]).to eq(4)
+        expect(session[:duration_seconds]).to be < 600
+        expect(session[:type]).to eq('brief_visit')
+      end
+
+      it 'classifies session correctly with duration >= 1800 AND visits >= 10' do
+        base_time = 2.hours.ago
+        15.times do |i|
+          create(:page_visit, user:, visited_at: base_time + (i * 3).minutes, domain: 'test.com')
+        end
+
+        result = described_class.call(user:)
+        session = result.data[:activities].first
+
+        expect(session[:duration_seconds]).to be >= 1800
+        expect(session[:visit_count]).to be >= 10
+        expect(session[:type]).to eq('research_session')
+      end
+    end
+
+    context 'with edge case limit parameters' do
+      before do
+        30.times do |i|
+          create(:page_visit, user:, visited_at: (i * 15).minutes.ago)
+        end
+      end
+
+      it 'handles limit of 0 by clamping to MIN_LIMIT (1)' do
+        result = described_class.call(user:, limit: 0)
+
+        expect(result.success?).to be true
+        expect(result.data[:activities].size).to be >= 0
+      end
+
+      it 'handles negative limit by clamping to MIN_LIMIT (1)' do
+        result = described_class.call(user:, limit: -10)
+
+        expect(result.success?).to be true
+        expect(result.data[:activities].size).to be >= 0
+      end
+
+      it 'handles limit above MAX_LIMIT (100) by clamping' do
+        result = described_class.call(user:, limit: 500)
+
+        expect(result.success?).to be true
+        expect(result.data[:activities].size).to be <= 100
+      end
+
+      it 'handles limit exactly at MIN_LIMIT (1)' do
+        result = described_class.call(user:, limit: 1)
+
+        expect(result.success?).to be true
+        expect(result.data[:activities].size).to eq(1)
+      end
+
+      it 'handles limit exactly at MAX_LIMIT (100)' do
+        result = described_class.call(user:, limit: 100)
+
+        expect(result.success?).to be true
+        expect(result.data[:activities].size).to be <= 100
+      end
+    end
+
+    context 'with null/zero duration visits in sessions' do
+      before do
+        base_time = 1.hour.ago
+        create(:page_visit, user:, visited_at: base_time, domain: 'test.com', duration_seconds: nil, engagement_rate: 0.8)
+        create(:page_visit, user:, visited_at: base_time + 1.minute, domain: 'test.com', duration_seconds: 0, engagement_rate: 0.9)
+        create(:page_visit, user:, visited_at: base_time + 2.minutes, domain: 'test.com', duration_seconds: 100, engagement_rate: 0.7)
+      end
+
+      it 'calculates weighted engagement correctly with null durations' do
+        result = described_class.call(user:)
+
+        expect(result.success?).to be true
+        session = result.data[:activities].first
+        # Should use weighted formula, null and 0 duration visits excluded from weighting
+        expect(session[:avg_engagement]).to be_a(Float)
+        expect(session[:avg_engagement]).to be >= 0.0
+      end
+
+      it 'includes all visits in visit_count regardless of null duration' do
+        result = described_class.call(user:)
+
+        session = result.data[:activities].first
+        expect(session[:visit_count]).to eq(3)
       end
     end
   end

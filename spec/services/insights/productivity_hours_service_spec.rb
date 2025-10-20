@@ -169,15 +169,111 @@ RSpec.describe Insights::ProductivityHoursService do
 
     context 'when service encounters an error' do
       before do
-        allow_any_instance_of(described_class).to receive(:fetch_visits).and_raise(StandardError, 'Database error')
+        allow_any_instance_of(described_class).to receive(:fetch_visits).and_raise(ActiveRecord::StatementInvalid, 'Database error')
       end
 
       it 'returns failure result' do
         result = described_class.call(user:)
 
         expect(result.failure?).to be true
-        expect(result.message).to eq('Failed to generate productivity hours')
+        expect(result.message).to eq('Database query failed')
         expect(result.errors).to include('Database error')
+      end
+    end
+
+    context 'with edge case period parameters' do
+      before do
+        create(:page_visit, user:, visited_at: 2.days.ago.change(hour: 14), engagement_rate: 0.8)
+      end
+
+      it 'defaults to week period for invalid period value' do
+        result = described_class.call(user:, period: 'invalid')
+
+        expect(result.success?).to be true
+        expect(result.data[:period]).to eq('week')
+      end
+
+      it 'defaults to week period for nil period value' do
+        result = described_class.call(user:, period: nil)
+
+        expect(result.success?).to be true
+        expect(result.data[:period]).to eq('week')
+      end
+
+      it 'accepts valid period: week' do
+        result = described_class.call(user:, period: 'week')
+
+        expect(result.success?).to be true
+        expect(result.data[:period]).to eq('week')
+      end
+
+      it 'accepts valid period: month' do
+        result = described_class.call(user:, period: 'month')
+
+        expect(result.success?).to be true
+        expect(result.data[:period]).to eq('month')
+      end
+    end
+
+    context 'with null/zero duration visits' do
+      before do
+        # Hour 10: mix of null, zero, and valid durations
+        create(:page_visit, user:, visited_at: 1.day.ago.change(hour: 10),
+                            duration_seconds: nil, engagement_rate: 0.8)
+        create(:page_visit, user:, visited_at: 1.day.ago.change(hour: 10),
+                            duration_seconds: 0, engagement_rate: 0.9)
+        create(:page_visit, user:, visited_at: 1.day.ago.change(hour: 10),
+                            duration_seconds: 100, engagement_rate: 0.7)
+      end
+
+      it 'handles null duration in hourly stats by using 0' do
+        result = described_class.call(user:)
+
+        expect(result.success?).to be true
+        hour_10_stats = result.data[:hourly_stats].find { |h| h[:hour] == 10 }
+        expect(hour_10_stats[:total_time_seconds]).to eq(100) # Only the valid duration
+      end
+
+      it 'calculates weighted engagement correctly with null durations' do
+        result = described_class.call(user:)
+
+        expect(result.success?).to be true
+        hour_10_stats = result.data[:hourly_stats].find { |h| h[:hour] == 10 }
+        # Should be 0.7 (only the 100-second visit counts in weighting)
+        expect(hour_10_stats[:avg_engagement]).to be_a(Float)
+        expect(hour_10_stats[:avg_engagement]).to eq(0.7)
+      end
+
+      it 'includes all visits in visit_count regardless of null duration' do
+        result = described_class.call(user:)
+
+        hour_10_stats = result.data[:hourly_stats].find { |h| h[:hour] == 10 }
+        expect(hour_10_stats[:visit_count]).to eq(3)
+      end
+    end
+
+    context 'with all null durations' do
+      before do
+        create(:page_visit, user:, visited_at: 1.day.ago.change(hour: 10),
+                            duration_seconds: nil, engagement_rate: 0.8)
+        create(:page_visit, user:, visited_at: 1.day.ago.change(hour: 10),
+                            duration_seconds: nil, engagement_rate: 0.9)
+      end
+
+      it 'returns 0 for total_time_seconds when all durations are null' do
+        result = described_class.call(user:)
+
+        expect(result.success?).to be true
+        hour_10_stats = result.data[:hourly_stats].find { |h| h[:hour] == 10 }
+        expect(hour_10_stats[:total_time_seconds]).to eq(0)
+      end
+
+      it 'returns 0 for weighted engagement when all durations are null' do
+        result = described_class.call(user:)
+
+        expect(result.success?).to be true
+        hour_10_stats = result.data[:hourly_stats].find { |h| h[:hour] == 10 }
+        expect(hour_10_stats[:avg_engagement]).to eq(0.0)
       end
     end
   end

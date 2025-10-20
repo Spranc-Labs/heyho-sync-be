@@ -31,17 +31,24 @@ module Insights
           day_of_week_stats: day_stats
         }
       )
-    rescue StandardError => e
-      log_error("Failed to generate productivity hours for user_id=#{user.id} period=#{period}", e)
-      failure_result(
-        message: 'Failed to generate productivity hours',
-        errors: [e.message]
-      )
+    rescue ActiveRecord::RecordNotFound => e
+      handle_error(e, 'User not found', "User not found for productivity hours: user_id=#{user.id}")
+    rescue ActiveRecord::StatementInvalid => e
+      handle_error(e, 'Database query failed',
+                   "Database error in productivity hours for user_id=#{user.id} period=#{period}")
+    rescue ArgumentError => e
+      handle_error(e, 'Invalid parameters',
+                   "Invalid argument in productivity hours for user_id=#{user.id} period=#{period}")
     end
 
     private
 
     attr_reader :user, :period
+
+    def handle_error(exception, message, log_message)
+      log_error(log_message, exception)
+      failure_result(message:, errors: [exception.message])
+    end
 
     def validate_period(raw_period)
       return 'week' unless VALID_PERIODS.include?(raw_period.to_s)

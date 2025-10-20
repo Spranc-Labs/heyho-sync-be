@@ -26,17 +26,24 @@ module Insights
           activities: sessions.take(limit)
         }
       )
-    rescue StandardError => e
-      log_error("Failed to generate recent activity for user_id=#{user.id} limit=#{limit} since=#{since}", e)
-      failure_result(
-        message: 'Failed to generate recent activity',
-        errors: [e.message]
-      )
+    rescue ActiveRecord::RecordNotFound => e
+      handle_error(e, 'User not found', "User not found for recent activity: user_id=#{user.id}")
+    rescue ActiveRecord::StatementInvalid => e
+      handle_error(e, 'Database query failed',
+                   "Database error in recent activity for user_id=#{user.id} limit=#{limit} since=#{since}")
+    rescue ArgumentError => e
+      handle_error(e, 'Invalid parameters',
+                   "Invalid argument in recent activity for user_id=#{user.id} limit=#{limit} since=#{since}")
     end
 
     private
 
     attr_reader :user, :limit, :since
+
+    def handle_error(exception, message, log_message)
+      log_error(log_message, exception)
+      failure_result(message:, errors: [exception.message])
+    end
 
     def sanitize_limit(raw_limit)
       raw_limit.to_i.clamp(MIN_LIMIT, MAX_LIMIT)

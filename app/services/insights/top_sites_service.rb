@@ -31,20 +31,26 @@ module Insights
           sites:
         }
       )
-    rescue StandardError => e
-      log_error(
-        "Failed to generate top sites for user_id=#{user.id} period=#{period} limit=#{limit} sort_by=#{sort_by}",
-        e
-      )
-      failure_result(
-        message: 'Failed to generate top sites',
-        errors: [e.message]
-      )
+    rescue ActiveRecord::RecordNotFound => e
+      handle_error(e, 'User not found', "User not found for top sites: user_id=#{user.id}")
+    rescue ActiveRecord::StatementInvalid => e
+      error_msg = "Database error in top sites for user_id=#{user.id} " \
+                  "period=#{period} limit=#{limit} sort_by=#{sort_by}"
+      handle_error(e, 'Database query failed', error_msg)
+    rescue ArgumentError => e
+      error_msg = "Invalid argument in top sites for user_id=#{user.id} " \
+                  "period=#{period} limit=#{limit} sort_by=#{sort_by}"
+      handle_error(e, 'Invalid parameters', error_msg)
     end
 
     private
 
     attr_reader :user, :period, :limit, :sort_by
+
+    def handle_error(exception, message, log_message)
+      log_error(log_message, exception)
+      failure_result(message:, errors: [exception.message])
+    end
 
     def validate_period(raw_period)
       return 'week' unless VALID_PERIODS.include?(raw_period.to_s)
