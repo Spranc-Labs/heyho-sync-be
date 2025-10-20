@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# rubocop:disable Metrics/ClassLength
+# This service comprehensively validates all page visit and tab aggregate fields.
+# The class is intentionally long to keep all validation logic in one cohesive unit.
 class DataValidationService
   # Constants
   MAX_URL_LENGTH = 2048
@@ -34,6 +37,7 @@ class DataValidationService
     @warnings = []
   end
 
+  # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
   # This method intentionally validates multiple fields comprehensively
   def validate_page_visit(data)
     validate_required_fields(data, %w[id url visited_at])
@@ -56,6 +60,7 @@ class DataValidationService
 
     build_result
   end
+  # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
   # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
   # This method intentionally validates multiple fields comprehensively
@@ -229,3 +234,4 @@ class DataValidationService
     )
   end
 end
+# rubocop:enable Metrics/ClassLength

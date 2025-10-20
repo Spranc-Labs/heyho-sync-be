@@ -224,6 +224,303 @@ RSpec.describe DataValidationService do
         expect(result.warnings).to include(hash_including(field: 'title'))
       end
     end
+
+    context 'with category validation' do
+      it 'accepts nil category' do
+        data = {
+          'id' => 'pv_123',
+          'url' => 'https://example.com',
+          'visited_at' => Time.current.iso8601,
+          'category' => nil
+        }
+
+        result = described_class.validate_page_visit(data)
+
+        expect(result.valid?).to be true
+      end
+
+      it 'accepts valid work categories' do
+        %w[work_coding work_code_review work_communication work_documentation].each do |category|
+          data = {
+            'id' => 'pv_123',
+            'url' => 'https://example.com',
+            'visited_at' => Time.current.iso8601,
+            'category' => category
+          }
+
+          result = described_class.validate_page_visit(data)
+
+          expect(result.valid?).to be true
+        end
+      end
+
+      it 'accepts valid learning categories' do
+        %w[learning_video learning_reading].each do |category|
+          data = {
+            'id' => 'pv_123',
+            'url' => 'https://example.com',
+            'visited_at' => Time.current.iso8601,
+            'category' => category
+          }
+
+          result = described_class.validate_page_visit(data)
+
+          expect(result.valid?).to be true
+        end
+      end
+
+      it 'accepts valid entertainment categories' do
+        %w[entertainment_video entertainment_browsing entertainment_short_form].each do |category|
+          data = {
+            'id' => 'pv_123',
+            'url' => 'https://example.com',
+            'visited_at' => Time.current.iso8601,
+            'category' => category
+          }
+
+          result = described_class.validate_page_visit(data)
+
+          expect(result.valid?).to be true
+        end
+      end
+
+      it 'accepts other valid categories' do
+        %w[social_media news shopping reference unclassified].each do |category|
+          data = {
+            'id' => 'pv_123',
+            'url' => 'https://example.com',
+            'visited_at' => Time.current.iso8601,
+            'category' => category
+          }
+
+          result = described_class.validate_page_visit(data)
+
+          expect(result.valid?).to be true
+        end
+      end
+
+      it 'returns error for invalid category' do
+        data = {
+          'id' => 'pv_123',
+          'url' => 'https://example.com',
+          'visited_at' => Time.current.iso8601,
+          'category' => 'invalid_category'
+        }
+
+        result = described_class.validate_page_visit(data)
+
+        expect(result.valid?).to be false
+        expect(result.errors).to include(hash_including(field: 'category', message: /must be one of/))
+      end
+    end
+
+    context 'with category_confidence validation' do
+      it 'accepts nil category_confidence' do
+        data = {
+          'id' => 'pv_123',
+          'url' => 'https://example.com',
+          'visited_at' => Time.current.iso8601,
+          'category_confidence' => nil
+        }
+
+        result = described_class.validate_page_visit(data)
+
+        expect(result.valid?).to be true
+      end
+
+      it 'accepts valid confidence values' do
+        [0, 0.25, 0.5, 0.75, 1].each do |confidence|
+          data = {
+            'id' => 'pv_123',
+            'url' => 'https://example.com',
+            'visited_at' => Time.current.iso8601,
+            'category_confidence' => confidence
+          }
+
+          result = described_class.validate_page_visit(data)
+
+          expect(result.valid?).to be true
+        end
+      end
+
+      it 'returns error for negative confidence' do
+        data = {
+          'id' => 'pv_123',
+          'url' => 'https://example.com',
+          'visited_at' => Time.current.iso8601,
+          'category_confidence' => -0.1
+        }
+
+        result = described_class.validate_page_visit(data)
+
+        expect(result.valid?).to be false
+        expect(result.errors).to include(hash_including(field: 'category_confidence', message: 'cannot be less than 0'))
+      end
+
+      it 'returns error for confidence exceeding 1' do
+        data = {
+          'id' => 'pv_123',
+          'url' => 'https://example.com',
+          'visited_at' => Time.current.iso8601,
+          'category_confidence' => 1.5
+        }
+
+        result = described_class.validate_page_visit(data)
+
+        expect(result.valid?).to be false
+        expect(result.errors).to include(hash_including(field: 'category_confidence', message: 'cannot exceed 1'))
+      end
+
+      it 'returns error for non-numeric confidence' do
+        data = {
+          'id' => 'pv_123',
+          'url' => 'https://example.com',
+          'visited_at' => Time.current.iso8601,
+          'category_confidence' => 'not a number'
+        }
+
+        result = described_class.validate_page_visit(data)
+
+        expect(result.valid?).to be false
+        expect(result.errors).to include(hash_including(field: 'category_confidence', message: 'must be a number'))
+      end
+    end
+
+    context 'with category_method validation' do
+      it 'accepts nil category_method' do
+        data = {
+          'id' => 'pv_123',
+          'url' => 'https://example.com',
+          'visited_at' => Time.current.iso8601,
+          'category_method' => nil
+        }
+
+        result = described_class.validate_page_visit(data)
+
+        expect(result.valid?).to be true
+      end
+
+      it 'accepts metadata method' do
+        data = {
+          'id' => 'pv_123',
+          'url' => 'https://example.com',
+          'visited_at' => Time.current.iso8601,
+          'category_method' => 'metadata'
+        }
+
+        result = described_class.validate_page_visit(data)
+
+        expect(result.valid?).to be true
+      end
+
+      it 'accepts unclassified method' do
+        data = {
+          'id' => 'pv_123',
+          'url' => 'https://example.com',
+          'visited_at' => Time.current.iso8601,
+          'category_method' => 'unclassified'
+        }
+
+        result = described_class.validate_page_visit(data)
+
+        expect(result.valid?).to be true
+      end
+
+      it 'returns warning for unknown method' do
+        data = {
+          'id' => 'pv_123',
+          'url' => 'https://example.com',
+          'visited_at' => Time.current.iso8601,
+          'category_method' => 'unknown_method'
+        }
+
+        result = described_class.validate_page_visit(data)
+
+        expect(result.valid?).to be true
+        expect(result.warnings).to include(hash_including(field: 'category_method', message: /unknown method/))
+      end
+    end
+
+    context 'with metadata validation' do
+      it 'accepts nil metadata' do
+        data = {
+          'id' => 'pv_123',
+          'url' => 'https://example.com',
+          'visited_at' => Time.current.iso8601,
+          'metadata' => nil
+        }
+
+        result = described_class.validate_page_visit(data)
+
+        expect(result.valid?).to be true
+      end
+
+      it 'accepts empty metadata' do
+        data = {
+          'id' => 'pv_123',
+          'url' => 'https://example.com',
+          'visited_at' => Time.current.iso8601,
+          'metadata' => {}
+        }
+
+        result = described_class.validate_page_visit(data)
+
+        expect(result.valid?).to be true
+      end
+
+      it 'accepts metadata under 50KB' do
+        data = {
+          'id' => 'pv_123',
+          'url' => 'https://example.com',
+          'visited_at' => Time.current.iso8601,
+          'metadata' => {
+            'schema_type' => 'Article',
+            'title' => 'Test Article',
+            'preview' => {
+              'title' => 'Test',
+              'description' => 'Description'
+            }
+          }
+        }
+
+        result = described_class.validate_page_visit(data)
+
+        expect(result.valid?).to be true
+      end
+
+      it 'returns error for metadata over 50KB' do
+        data = {
+          'id' => 'pv_123',
+          'url' => 'https://example.com',
+          'visited_at' => Time.current.iso8601,
+          'metadata' => {
+            'huge_field' => 'x' * 60_000
+          }
+        }
+
+        result = described_class.validate_page_visit(data)
+
+        expect(result.valid?).to be false
+        expect(result.errors).to include(hash_including(field: 'metadata', message: /is too large/))
+      end
+
+      it 'calculates metadata size correctly' do
+        # Create metadata exactly at the 50KB limit
+        metadata_string = 'x' * ((50 * 1024) - 100) # Leave room for JSON structure
+        data = {
+          'id' => 'pv_123',
+          'url' => 'https://example.com',
+          'visited_at' => Time.current.iso8601,
+          'metadata' => {
+            'field' => metadata_string
+          }
+        }
+
+        result = described_class.validate_page_visit(data)
+
+        expect(result.valid?).to be true
+      end
+    end
   end
 
   describe '.validate_tab_aggregate' do

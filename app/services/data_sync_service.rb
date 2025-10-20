@@ -407,6 +407,7 @@ class DataSyncService < BaseService
         url title visited_at source_page_visit_id domain
         duration_seconds active_duration_seconds engagement_rate
         idle_periods last_heartbeat anonymous_client_id
+        category category_confidence category_method metadata
       ]
     )
     # rubocop:enable Rails/SkipsModelValidations
@@ -427,7 +428,11 @@ class DataSyncService < BaseService
       engagement_rate: visit['engagement_rate'],
       idle_periods: visit['idle_periods'],
       last_heartbeat: visit['last_heartbeat'],
-      anonymous_client_id: visit['anonymous_client_id']
+      anonymous_client_id: visit['anonymous_client_id'],
+      category: visit['category'],
+      category_confidence: visit['category_confidence'],
+      category_method: visit['category_method'],
+      metadata: visit['metadata']
     }
   end
 
