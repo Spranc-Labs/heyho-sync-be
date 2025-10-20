@@ -12,12 +12,22 @@ Comprehensive Postman collection for testing the HeyHo Sync API with both succes
 
 ### 1. Import Files into Postman
 
-1. Open Postman
+**Important**: Use Postman Desktop App (v10.0+) for best compatibility.
+
+1. Open Postman Desktop App
 2. Click **Import** button (top left)
-3. Drag and drop both JSON files OR click "Upload Files" and select:
+3. Select **files** tab
+4. Click **Upload Files** and select both:
    - `HeyHo_Sync_API.postman_collection.json`
    - `HeyHo_Sync_API.postman_environment.json`
-4. Click **Import**
+5. Click **Import**
+6. Verify both items appear in your Collections and Environments
+
+**If import fails**:
+- Ensure you're using Postman Desktop App (not web version)
+- Try importing one file at a time
+- Check Postman version is v10.0 or higher
+- Verify JSON files are not corrupted (open in text editor to check)
 
 ### 2. Select Environment
 
@@ -191,6 +201,15 @@ The collection uses these environment variables:
 
 ## 🐛 Troubleshooting
 
+### Problem: Collection import fails
+
+**Solution**:
+- Use Postman Desktop App v10.0+ (not web version)
+- Import environment file first, then collection
+- Try: File → Import → Upload Files (not drag-and-drop)
+- Ensure files are not corrupted: `python3 -m json.tool <filename>`
+- Check Postman Console (View → Show Postman Console) for error details
+
 ### Problem: "401 Unauthorized" on Insights API
 
 **Solution**: Run "Setup: Login for Insights Tests" first to get auth token
@@ -201,6 +220,7 @@ The collection uses these environment variables:
 - Verify API server is running: `docker-compose ps`
 - Check `base_url` in environment matches your server
 - Default should be `http://localhost:3001`
+- Try: `curl http://localhost:3001/api/v1/health` to verify server
 
 ### Problem: Tests are failing
 
