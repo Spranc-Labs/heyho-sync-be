@@ -4,9 +4,12 @@ Comprehensive Postman collection for testing the HeyHo Sync API with both succes
 
 ## 📦 Contents
 
-- `HeyHo_Sync_API.postman_collection.json` - Main collection with all API endpoints
+- `HeyHo_Sync_API.postman_collection.json` - Main collection with all API endpoints (7.5 KB)
 - `HeyHo_Sync_API.postman_environment.json` - Environment variables for local development
+- `HOW_TO_GET_POSTMAN_LOGS.md` - Debugging guide for import issues
 - `README.md` - This file
+
+**Note**: This is a streamlined version (v3) with core endpoints. Focused on reliability over comprehensiveness.
 
 ## 🚀 Quick Start
 
@@ -64,50 +67,30 @@ Now you can run any request in the **5. Insights API** folder!
 
 ## 📚 Collection Structure
 
-### 0. Health Check
+### 0. Health Check (1 endpoint)
 - **API Health Check** - Verify API is running
 
-### 1. Authentication (5 requests)
-- ✅ Create Account - Success
-- ❌ Create Account - Missing Email
-- ✅ Login - Success
-- ❌ Login - Invalid Credentials
-- ✅ Logout - Success
+### 1. Authentication (2 endpoints)
+- ✅ Create Account - Success (with auto-generated test credentials)
+- ✅ Login - Success (uses demo user)
 
-### 5. Insights API (25+ requests)
+### 5. Insights API (6 core endpoints)
 
-#### Daily Summary (4 scenarios)
+#### Daily Summary (2 tests)
 - ✅ Success with default parameters
-- ✅ Success with specific date
 - ❌ Unauthorized (no token)
-- ⚠️  Invalid date format (edge case)
 
-#### Weekly Summary (4 scenarios)
-- ✅ Success for current week
-- ✅ Success with ISO week format (2025-W42)
-- ⚠️  Invalid week format (graceful fallback)
-- ❌ Unauthorized
+#### Weekly Summary (1 test)
+- ✅ Success for current week (includes ISO week format validation)
 
-#### Top Sites (6 scenarios)
-- ✅ Success with defaults
-- ✅ With period parameter (month)
-- ✅ Sort by visits
-- ✅ With custom limit
-- ⚠️  Limit too high (clamped to 50)
-- ❌ Unauthorized
+#### Top Sites (1 test)
+- ✅ Success with defaults (validates sites array structure)
 
-#### Recent Activity (5 scenarios)
-- ✅ Success with defaults
-- ✅ With custom limit
-- ✅ With since timestamp
-- ⚠️  Limit too high (clamped to 100)
-- ❌ Unauthorized
+#### Recent Activity (1 test)
+- ✅ Success with defaults (validates activities array)
 
-#### Productivity Hours (4 scenarios)
-- ✅ Success with defaults
-- ✅ Week period
-- ✅ Month period
-- ❌ Unauthorized
+#### Productivity Hours (1 test)
+- ✅ Success with defaults (validates hourly stats)
 
 ## 🧪 Test Coverage
 
