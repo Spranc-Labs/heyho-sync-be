@@ -32,7 +32,10 @@ module Insights
         }
       )
     rescue StandardError => e
-      log_error('Failed to generate top sites', e)
+      log_error(
+        "Failed to generate top sites for user_id=#{user.id} period=#{period} limit=#{limit} sort_by=#{sort_by}",
+        e
+      )
       failure_result(
         message: 'Failed to generate top sites',
         errors: [e.message]
@@ -64,6 +67,8 @@ module Insights
     end
 
     def calculate_date_range
+      # TODO: Add user timezone support (requires user.timezone column)
+      # Currently uses Rails.application.config.time_zone (UTC)
       start_time = case period
                    when 'day' then Time.current
                    when 'month' then 30.days.ago
@@ -79,12 +84,15 @@ module Insights
     end
 
     def calculate_top_sites(visits)
+      weighted_engagement_sql = 'COALESCE(SUM(engagement_rate * COALESCE(duration_seconds, 0)) / ' \
+                                'NULLIF(SUM(COALESCE(duration_seconds, 0)), 0), 0) as avg_engagement'
+
       visits.group(:domain)
         .select(
           'domain',
           'COUNT(*) as visit_count',
-          'SUM(duration_seconds) as total_time',
-          'AVG(engagement_rate) as avg_engagement',
+          'COALESCE(SUM(duration_seconds), 0) as total_time',
+          weighted_engagement_sql,
           'MIN(visited_at) as first_visit',
           'MAX(visited_at) as last_visit'
         )
@@ -94,8 +102,8 @@ module Insights
         {
           domain: row.domain,
           visits: row.visit_count,
-          total_time_seconds: row.total_time&.to_i || 0,
-          avg_engagement_rate: row.avg_engagement ? row.avg_engagement.round(2) : 0.0,
+          total_time_seconds: row.total_time.to_i,
+          avg_engagement_rate: row.avg_engagement.to_f.round(2),
           first_visit: row.first_visit.iso8601,
           last_visit: row.last_visit.iso8601
         }

@@ -32,7 +32,7 @@ module Insights
         }
       )
     rescue StandardError => e
-      log_error('Failed to generate productivity hours', e)
+      log_error("Failed to generate productivity hours for user_id=#{user.id} period=#{period}", e)
       failure_result(
         message: 'Failed to generate productivity hours',
         errors: [e.message]
@@ -50,6 +50,8 @@ module Insights
     end
 
     def calculate_date_range
+      # TODO: Add user timezone support (requires user.timezone column)
+      # Currently uses Rails.application.config.time_zone (UTC)
       start_time = period == 'month' ? 30.days.ago : 7.days.ago
       { start: start_time.beginning_of_day, end: Time.current.end_of_day }
     end
@@ -61,37 +63,45 @@ module Insights
     end
 
     def calculate_hourly_stats(visits)
+      # NOTE: EXTRACT(HOUR) uses database timezone (UTC)
+      # For user-specific timezones, convert visited_at: EXTRACT(HOUR FROM visited_at AT TIME ZONE 'user_tz')
+      weighted_engagement_sql = 'COALESCE(SUM(engagement_rate * COALESCE(duration_seconds, 0)) / ' \
+                                'NULLIF(SUM(COALESCE(duration_seconds, 0)), 0), 0) as avg_engagement'
+
       visits.group('EXTRACT(HOUR FROM visited_at)')
         .select(
           'EXTRACT(HOUR FROM visited_at) as hour',
-          'AVG(engagement_rate) as avg_engagement',
-          'SUM(duration_seconds) as total_time',
+          weighted_engagement_sql,
+          'COALESCE(SUM(duration_seconds), 0) as total_time',
           'COUNT(*) as visit_count'
         )
         .order('hour')
         .map do |row|
         {
           hour: row.hour.to_i,
-          avg_engagement: row.avg_engagement ? row.avg_engagement.round(2) : 0.0,
-          total_time_seconds: row.total_time&.to_i || 0,
+          avg_engagement: row.avg_engagement.to_f.round(2),
+          total_time_seconds: row.total_time.to_i,
           visit_count: row.visit_count
         }
       end
     end
 
     def calculate_day_stats(visits)
+      weighted_engagement_sql = 'COALESCE(SUM(engagement_rate * COALESCE(duration_seconds, 0)) / ' \
+                                'NULLIF(SUM(COALESCE(duration_seconds, 0)), 0), 0) as avg_engagement'
+
       visits.group('EXTRACT(DOW FROM visited_at)')
         .select(
           'EXTRACT(DOW FROM visited_at) as day_num',
-          'AVG(engagement_rate) as avg_engagement',
-          'SUM(duration_seconds) as total_time'
+          weighted_engagement_sql,
+          'COALESCE(SUM(duration_seconds), 0) as total_time'
         )
         .order('day_num')
         .map do |row|
         {
           day: Date::DAYNAMES[row.day_num.to_i],
-          avg_engagement: row.avg_engagement ? row.avg_engagement.round(2) : 0.0,
-          total_time_seconds: row.total_time&.to_i || 0
+          avg_engagement: row.avg_engagement.to_f.round(2),
+          total_time_seconds: row.total_time.to_i
         }
       end
     end
