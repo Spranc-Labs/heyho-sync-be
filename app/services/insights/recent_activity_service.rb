@@ -8,6 +8,7 @@ module Insights
     MAX_LIMIT = 100
     MIN_LIMIT = 1
     DEFAULT_LIMIT = 20
+    MAX_VISITS_TO_PROCESS = 1000 # Prevent memory exhaustion
 
     def initialize(user:, limit: DEFAULT_LIMIT, since: nil)
       super()
@@ -55,6 +56,7 @@ module Insights
         .valid_data
         .where('visited_at >= ?', since)
         .order(visited_at: :desc)
+        .limit(MAX_VISITS_TO_PROCESS)
     end
 
     def group_into_sessions(visits)

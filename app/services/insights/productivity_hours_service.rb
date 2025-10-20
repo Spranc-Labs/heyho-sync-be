@@ -4,10 +4,12 @@ module Insights
   # Service to analyze productivity patterns by hour and day of week
   # Returns metrics about most/least productive hours and days
   class ProductivityHoursService < BaseService
+    VALID_PERIODS = %w[week month].freeze
+
     def initialize(user:, period: 'week')
       super()
       @user = user
-      @period = period
+      @period = validate_period(period)
     end
 
     def call
@@ -40,6 +42,12 @@ module Insights
     private
 
     attr_reader :user, :period
+
+    def validate_period(raw_period)
+      return 'week' unless VALID_PERIODS.include?(raw_period.to_s)
+
+      raw_period.to_s
+    end
 
     def calculate_date_range
       start_time = period == 'month' ? 30.days.ago : 7.days.ago

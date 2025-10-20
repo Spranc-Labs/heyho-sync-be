@@ -7,13 +7,15 @@ module Insights
     MAX_LIMIT = 50
     MIN_LIMIT = 1
     DEFAULT_LIMIT = 10
+    VALID_PERIODS = %w[day week month].freeze
+    VALID_SORT_OPTIONS = %w[time visits].freeze
 
     def initialize(user:, period: 'week', limit: DEFAULT_LIMIT, sort_by: 'time')
       super()
       @user = user
-      @period = period
+      @period = validate_period(period)
       @limit = sanitize_limit(limit)
-      @sort_by = sort_by
+      @sort_by = validate_sort_by(sort_by)
     end
 
     def call
@@ -41,8 +43,24 @@ module Insights
 
     attr_reader :user, :period, :limit, :sort_by
 
+    def validate_period(raw_period)
+      return 'week' unless VALID_PERIODS.include?(raw_period.to_s)
+
+      raw_period.to_s
+    end
+
+    def validate_sort_by(raw_sort)
+      return 'time' unless VALID_SORT_OPTIONS.include?(raw_sort.to_s)
+
+      raw_sort.to_s
+    end
+
     def sanitize_limit(raw_limit)
       raw_limit.to_i.clamp(MIN_LIMIT, MAX_LIMIT)
+    end
+
+    def sort_order
+      sort_by == 'visits' ? { visit_count: :desc } : { total_time: :desc }
     end
 
     def calculate_date_range
@@ -61,8 +79,6 @@ module Insights
     end
 
     def calculate_top_sites(visits)
-      sort_column = sort_by == 'visits' ? 'visit_count' : 'total_time'
-
       visits.group(:domain)
         .select(
           'domain',
@@ -72,7 +88,7 @@ module Insights
           'MIN(visited_at) as first_visit',
           'MAX(visited_at) as last_visit'
         )
-        .order("#{sort_column} DESC")
+        .order(sort_order)
         .limit(limit)
         .map do |row|
         {
