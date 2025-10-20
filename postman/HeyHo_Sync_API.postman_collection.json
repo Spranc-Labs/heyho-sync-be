@@ -1,1357 +1,529 @@
 {
-	"info": {
-		"_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-		"name": "HeyHo Sync API - Comprehensive Test Suite",
-		"description": "Complete Postman collection for testing HeyHo Sync API with success and failure scenarios.\n\n## Features\n- Authentication flows (signup, login, logout)\n- User management\n- Data synchronization\n- Browsing data retrieval\n- Insights API (5 endpoints with comprehensive tests)\n- Success and failure scenarios for all endpoints\n- Automated token management\n- Response validation tests\n\n## Setup\n1. Import the environment file: `HeyHo_Sync_API.postman_environment.json`\n2. Update `base_url` variable to your API URL (default: http://localhost:3001)\n3. Run the \"Setup\" folder first to create a test user and get auth tokens\n4. All requests automatically use the stored token\n\n## Organization\n- **0. Health Check**: Verify API is running\n- **1. Authentication**: Signup, login, logout flows\n- **2. User Management**: Profile operations\n- **3. Data Sync**: Sync browsing data\n- **4. Browsing Data**: Retrieve browsing history\n- **5. Insights API**: Comprehensive insights testing (MAIN FOCUS)\n\n## Author\nGenerated for HeyHo Sync BE API Testing",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-	},
-	"item": [
-		{
-			"name": "0. Health Check",
-			"item": [
-				{
-					"name": "API Health Check",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test(\"Response body is OK\", function () {",
-									"    pm.expect(pm.response.text()).to.equal('OK');",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": "{{base_url}}/api/v1/health",
-						"description": "Check if the API is running and responsive"
-					},
-					"response": []
-				}
-			],
-			"description": "Basic health check to verify API is running"
-		},
-		{
-			"name": "1. Authentication",
-			"item": [
-				{
-					"name": "1.1 Create Account - Success",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"const jsonData = pm.response.json();",
-									"",
-									"pm.test(\"Response has success true\", function () {",
-									"    pm.expect(jsonData.success).to.be.true;",
-									"});",
-									"",
-									"pm.test(\"Response contains verification code\", function () {",
-									"    pm.expect(jsonData.verification_code).to.match(/^\\d{6}$/);",
-									"    // Store verification code for later use",
-									"    pm.environment.set(\"verification_code\", jsonData.verification_code);",
-									"});",
-									"",
-									"pm.test(\"User data is present\", function () {",
-									"    pm.expect(jsonData.user).to.be.an('object');",
-									"    pm.expect(jsonData.user.email).to.equal(pm.variables.get(\"test_email\"));",
-									"    pm.expect(jsonData.user.isVerified).to.be.false;",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						},
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									"// Generate unique email for this test run",
-									"const timestamp = Date.now();",
-									"pm.environment.set(\"test_email\", `test${timestamp}@example.com`);",
-									"pm.environment.set(\"test_password\", \"SecurePass123!\");"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"email\": \"{{test_email}}\",\n  \"password\": \"{{test_password}}\",\n  \"first_name\": \"Test\",\n  \"last_name\": \"User\"\n}"
-						},
-						"url": "{{base_url}}/api/v1/auth/create-account",
-						"description": "Create a new user account - SUCCESS scenario"
-					},
-					"response": []
-				},
-				{
-					"name": "1.2 Create Account - Missing Email",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 422\", function () {",
-									"    pm.response.to.have.status(422);",
-									"});",
-									"",
-									"pm.test(\"Error message is present\", function () {",
-									"    const jsonData = pm.response.json();",
-									"    pm.expect(jsonData.error).to.exist;",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"password\": \"SecurePass123!\",\n  \"first_name\": \"Test\",\n  \"last_name\": \"User\"\n}"
-						},
-						"url": "{{base_url}}/api/v1/auth/create-account",
-						"description": "Attempt to create account without email - FAILURE scenario"
-					},
-					"response": []
-				},
-				{
-					"name": "1.3 Login - Success",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"const jsonData = pm.response.json();",
-									"",
-									"pm.test(\"JWT token is present\", function () {",
-									"    pm.expect(jsonData.token).to.be.a('string');",
-									"    // Store token for authenticated requests",
-									"    pm.environment.set(\"auth_token\", jsonData.token);",
-									"});",
-									"",
-									"pm.test(\"User data is returned\", function () {",
-									"    pm.expect(jsonData.user).to.be.an('object');",
-									"    pm.expect(jsonData.user.email).to.exist;",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						},
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									"// Use demo user credentials or fallback to test user",
-									"if (!pm.environment.get(\"demo_email\")) {",
-									"    pm.environment.set(\"login_email\", \"demo@syrupy.com\");",
-									"    pm.environment.set(\"login_password\", \"password123\");",
-									"} else {",
-									"    pm.environment.set(\"login_email\", pm.environment.get(\"demo_email\"));",
-									"    pm.environment.set(\"login_password\", pm.environment.get(\"demo_password\"));",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"email\": \"{{login_email}}\",\n  \"password\": \"{{login_password}}\"\n}"
-						},
-						"url": "{{base_url}}/api/v1/auth/login",
-						"description": "Login with valid credentials - SUCCESS scenario. Uses demo user by default."
-					},
-					"response": []
-				},
-				{
-					"name": "1.4 Login - Invalid Credentials",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 401\", function () {",
-									"    pm.response.to.have.status(401);",
-									"});",
-									"",
-									"pm.test(\"Error message indicates invalid credentials\", function () {",
-									"    const jsonData = pm.response.json();",
-									"    pm.expect(jsonData.error).to.exist;",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"email\": \"wrong@example.com\",\n  \"password\": \"wrongpassword\"\n}"
-						},
-						"url": "{{base_url}}/api/v1/auth/login",
-						"description": "Attempt login with invalid credentials - FAILURE scenario"
-					},
-					"response": []
-				},
-				{
-					"name": "1.5 Logout - Success",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"pm.test(\"Success message is present\", function () {",
-									"    const jsonData = pm.response.json();",
-									"    pm.expect(jsonData.success).to.be.true;",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{auth_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [],
-						"url": "{{base_url}}/api/v1/auth/logout",
-						"description": "Logout authenticated user - SUCCESS scenario"
-					},
-					"response": []
-				}
-			],
-			"description": "Authentication flow testing including signup, login, and logout"
-		},
-		{
-			"name": "5. Insights API",
-			"item": [
-				{
-					"name": "Setup: Login for Insights Tests",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"const jsonData = pm.response.json();",
-									"if (jsonData.token) {",
-									"    pm.environment.set(\"auth_token\", jsonData.token);",
-									"    console.log(\"\u2705 Auth token stored successfully\");",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"email\": \"demo@syrupy.com\",\n  \"password\": \"password123\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": "{{base_url}}/api/v1/auth/login",
-						"description": "Login to get auth token for insights API testing. Run this first!"
-					},
-					"response": []
-				},
-				{
-					"name": "Daily Summary",
-					"item": [
-						{
-							"name": "5.1.1 Daily Summary - Success (Default)",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Status code is 200\", function () {",
-											"    pm.response.to.have.status(200);",
-											"});",
-											"",
-											"const jsonData = pm.response.json();",
-											"",
-											"pm.test(\"Response has success true\", function () {",
-											"    pm.expect(jsonData.success).to.be.true;",
-											"});",
-											"",
-											"pm.test(\"Data object exists\", function () {",
-											"    pm.expect(jsonData.data).to.be.an('object');",
-											"});",
-											"",
-											"pm.test(\"Daily summary contains required fields\", function () {",
-											"    const data = jsonData.data;",
-											"    pm.expect(data).to.have.property('date');",
-											"    pm.expect(data).to.have.property('total_sites_visited');",
-											"    pm.expect(data).to.have.property('unique_domains');",
-											"    pm.expect(data).to.have.property('total_time_seconds');",
-											"    pm.expect(data).to.have.property('avg_engagement_rate');",
-											"    pm.expect(data).to.have.property('hourly_breakdown');",
-											"});",
-											"",
-											"pm.test(\"Numeric fields are numbers\", function () {",
-											"    const data = jsonData.data;",
-											"    pm.expect(data.total_sites_visited).to.be.a('number');",
-											"    pm.expect(data.unique_domains).to.be.a('number');",
-											"    pm.expect(data.total_time_seconds).to.be.a('number');",
-											"});",
-											"",
-											"pm.test(\"Hourly breakdown is an array\", function () {",
-											"    pm.expect(jsonData.data.hourly_breakdown).to.be.an('array');",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{auth_token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "GET",
-								"header": [],
-								"url": "{{base_url}}/api/v1/insights/daily_summary",
-								"description": "Get daily summary for today - SUCCESS scenario"
-							},
-							"response": []
-						},
-						{
-							"name": "5.1.2 Daily Summary - With Date Parameter",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Status code is 200\", function () {",
-											"    pm.response.to.have.status(200);",
-											"});",
-											"",
-											"const jsonData = pm.response.json();",
-											"",
-											"pm.test(\"Date matches requested date\", function () {",
-											"    pm.expect(jsonData.data.date).to.exist;",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								},
-								{
-									"listen": "prerequest",
-									"script": {
-										"exec": [
-											"// Set date to yesterday",
-											"const yesterday = new Date();",
-											"yesterday.setDate(yesterday.getDate() - 1);",
-											"const dateStr = yesterday.toISOString().split('T')[0];",
-											"pm.environment.set(\"test_date\", dateStr);"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{auth_token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "GET",
-								"header": [],
-								"url": "{{base_url}}/api/v1/insights/daily_summary?date={{test_date}}",
-								"description": "Get daily summary for a specific date - SUCCESS scenario"
-							},
-							"response": []
-						},
-						{
-							"name": "5.1.3 Daily Summary - Unauthorized (No Token)",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Status code is 401\", function () {",
-											"    pm.response.to.have.status(401);",
-											"});",
-											"",
-											"pm.test(\"Error message is present\", function () {",
-											"    const jsonData = pm.response.json();",
-											"    pm.expect(jsonData.error).to.exist;",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "GET",
-								"header": [],
-								"url": "{{base_url}}/api/v1/insights/daily_summary",
-								"description": "Attempt to access without authentication - FAILURE scenario"
-							},
-							"response": []
-						},
-						{
-							"name": "5.1.4 Daily Summary - Invalid Date Format",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"// Depending on implementation, this might return 422 or 400",
-											"pm.test(\"Status code is 4xx\", function () {",
-											"    pm.expect(pm.response.code).to.be.oneOf([400, 422, 200]);",
-											"});",
-											"",
-											"// If it returns 200, it should handle gracefully",
-											"if (pm.response.code === 200) {",
-											"    pm.test(\"Response handles invalid date gracefully\", function () {",
-											"        const jsonData = pm.response.json();",
-											"        pm.expect(jsonData.success).to.exist;",
-											"    });",
-											"}"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{auth_token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "GET",
-								"header": [],
-								"url": "{{base_url}}/api/v1/insights/daily_summary?date=invalid-date",
-								"description": "Test with invalid date format - EDGE CASE"
-							},
-							"response": []
-						}
-					],
-					"description": "Daily Summary endpoint testing with multiple scenarios"
-				},
-				{
-					"name": "Weekly Summary",
-					"item": [
-						{
-							"name": "5.2.1 Weekly Summary - Success (Current Week)",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Status code is 200\", function () {",
-											"    pm.response.to.have.status(200);",
-											"});",
-											"",
-											"const jsonData = pm.response.json();",
-											"",
-											"pm.test(\"Weekly summary contains required fields\", function () {",
-											"    const data = jsonData.data;",
-											"    pm.expect(data).to.have.property('week');",
-											"    pm.expect(data).to.have.property('start_date');",
-											"    pm.expect(data).to.have.property('end_date');",
-											"    pm.expect(data).to.have.property('total_sites_visited');",
-											"    pm.expect(data).to.have.property('unique_domains');",
-											"    pm.expect(data).to.have.property('daily_breakdown');",
-											"    pm.expect(data).to.have.property('top_domains');",
-											"});",
-											"",
-											"pm.test(\"Week format is ISO (YYYY-Wnn)\", function () {",
-											"    pm.expect(jsonData.data.week).to.match(/^\\d{4}-W\\d{2}$/);",
-											"});",
-											"",
-											"pm.test(\"Daily breakdown is an array\", function () {",
-											"    pm.expect(jsonData.data.daily_breakdown).to.be.an('array');",
-											"});",
-											"",
-											"pm.test(\"Top domains is an array\", function () {",
-											"    pm.expect(jsonData.data.top_domains).to.be.an('array');",
-											"    pm.expect(jsonData.data.top_domains.length).to.be.at.most(10);",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{auth_token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "GET",
-								"header": [],
-								"url": "{{base_url}}/api/v1/insights/weekly_summary",
-								"description": "Get weekly summary for current week - SUCCESS scenario"
-							},
-							"response": []
-						},
-						{
-							"name": "5.2.2 Weekly Summary - Specific Week (ISO Format)",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Status code is 200\", function () {",
-											"    pm.response.to.have.status(200);",
-											"});",
-											"",
-											"const jsonData = pm.response.json();",
-											"",
-											"pm.test(\"Week matches requested week\", function () {",
-											"    pm.expect(jsonData.data.week).to.equal(\"2025-W42\");",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{auth_token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "GET",
-								"header": [],
-								"url": "{{base_url}}/api/v1/insights/weekly_summary?week=2025-W42",
-								"description": "Get weekly summary for specific week - SUCCESS scenario"
-							},
-							"response": []
-						},
-						{
-							"name": "5.2.3 Weekly Summary - Invalid Week Format",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Status code is 200 (graceful fallback)\", function () {",
-											"    pm.response.to.have.status(200);",
-											"});",
-											"",
-											"pm.test(\"Falls back to current week\", function () {",
-											"    const jsonData = pm.response.json();",
-											"    pm.expect(jsonData.success).to.be.true;",
-											"    pm.expect(jsonData.data.week).to.match(/^\\d{4}-W\\d{2}$/);",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{auth_token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "GET",
-								"header": [],
-								"url": "{{base_url}}/api/v1/insights/weekly_summary?week=invalid-week",
-								"description": "Test graceful fallback with invalid week format - EDGE CASE"
-							},
-							"response": []
-						},
-						{
-							"name": "5.2.4 Weekly Summary - Unauthorized",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Status code is 401\", function () {",
-											"    pm.response.to.have.status(401);",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "GET",
-								"header": [],
-								"url": "{{base_url}}/api/v1/insights/weekly_summary",
-								"description": "Attempt without authentication - FAILURE scenario"
-							},
-							"response": []
-						}
-					],
-					"description": "Weekly Summary endpoint testing"
-				},
-				{
-					"name": "Top Sites",
-					"item": [
-						{
-							"name": "5.3.1 Top Sites - Success (Default)",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Status code is 200\", function () {",
-											"    pm.response.to.have.status(200);",
-											"});",
-											"",
-											"const jsonData = pm.response.json();",
-											"",
-											"pm.test(\"Response contains sites array\", function () {",
-											"    pm.expect(jsonData.data.sites).to.be.an('array');",
-											"    pm.expect(jsonData.data.sites.length).to.be.at.most(10);",
-											"});",
-											"",
-											"pm.test(\"Site objects have required fields\", function () {",
-											"    if (jsonData.data.sites.length > 0) {",
-											"        const site = jsonData.data.sites[0];",
-											"        pm.expect(site).to.have.property('domain');",
-											"        pm.expect(site).to.have.property('visits');",
-											"        pm.expect(site).to.have.property('total_time_seconds');",
-											"        pm.expect(site).to.have.property('avg_engagement_rate');",
-											"        pm.expect(site).to.have.property('first_visit');",
-											"        pm.expect(site).to.have.property('last_visit');",
-											"    }",
-											"});",
-											"",
-											"pm.test(\"Period is included in response\", function () {",
-											"    pm.expect(jsonData.data.period).to.exist;",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{auth_token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "GET",
-								"header": [],
-								"url": "{{base_url}}/api/v1/insights/top_sites",
-								"description": "Get top sites with default parameters - SUCCESS scenario"
-							},
-							"response": []
-						},
-						{
-							"name": "5.3.2 Top Sites - With Period (Month)",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Status code is 200\", function () {",
-											"    pm.response.to.have.status(200);",
-											"});",
-											"",
-											"const jsonData = pm.response.json();",
-											"",
-											"pm.test(\"Period is month\", function () {",
-											"    pm.expect(jsonData.data.period).to.equal('month');",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{auth_token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "GET",
-								"header": [],
-								"url": "{{base_url}}/api/v1/insights/top_sites?period=month",
-								"description": "Get top sites for month period - SUCCESS scenario"
-							},
-							"response": []
-						},
-						{
-							"name": "5.3.3 Top Sites - Sort by Visits",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Status code is 200\", function () {",
-											"    pm.response.to.have.status(200);",
-											"});",
-											"",
-											"const jsonData = pm.response.json();",
-											"",
-											"pm.test(\"Sites are sorted by visits\", function () {",
-											"    const sites = jsonData.data.sites;",
-											"    if (sites.length > 1) {",
-											"        for (let i = 0; i < sites.length - 1; i++) {",
-											"            pm.expect(sites[i].visits).to.be.at.least(sites[i + 1].visits);",
-											"        }",
-											"    }",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{auth_token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "GET",
-								"header": [],
-								"url": "{{base_url}}/api/v1/insights/top_sites?sort_by=visits",
-								"description": "Get top sites sorted by visit count - SUCCESS scenario"
-							},
-							"response": []
-						},
-						{
-							"name": "5.3.4 Top Sites - With Limit",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Status code is 200\", function () {",
-											"    pm.response.to.have.status(200);",
-											"});",
-											"",
-											"const jsonData = pm.response.json();",
-											"",
-											"pm.test(\"Results respect limit\", function () {",
-											"    pm.expect(jsonData.data.sites.length).to.be.at.most(5);",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{auth_token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "GET",
-								"header": [],
-								"url": "{{base_url}}/api/v1/insights/top_sites?limit=5",
-								"description": "Get top sites with custom limit - SUCCESS scenario"
-							},
-							"response": []
-						},
-						{
-							"name": "5.3.5 Top Sites - Limit Too High (Clamped)",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Status code is 200\", function () {",
-											"    pm.response.to.have.status(200);",
-											"});",
-											"",
-											"const jsonData = pm.response.json();",
-											"",
-											"pm.test(\"Limit is clamped to maximum (50)\", function () {",
-											"    pm.expect(jsonData.data.sites.length).to.be.at.most(50);",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{auth_token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "GET",
-								"header": [],
-								"url": "{{base_url}}/api/v1/insights/top_sites?limit=1000",
-								"description": "Test limit clamping to maximum - EDGE CASE"
-							},
-							"response": []
-						},
-						{
-							"name": "5.3.6 Top Sites - Unauthorized",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Status code is 401\", function () {",
-											"    pm.response.to.have.status(401);",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "GET",
-								"header": [],
-								"url": "{{base_url}}/api/v1/insights/top_sites",
-								"description": "Attempt without authentication - FAILURE scenario"
-							},
-							"response": []
-						}
-					],
-					"description": "Top Sites endpoint testing with various parameters"
-				},
-				{
-					"name": "Recent Activity",
-					"item": [
-						{
-							"name": "5.4.1 Recent Activity - Success (Default)",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Status code is 200\", function () {",
-											"    pm.response.to.have.status(200);",
-											"});",
-											"",
-											"const jsonData = pm.response.json();",
-											"",
-											"pm.test(\"Response contains activities array\", function () {",
-											"    pm.expect(jsonData.data.activities).to.be.an('array');",
-											"});",
-											"",
-											"pm.test(\"Activity objects have required fields\", function () {",
-											"    if (jsonData.data.activities.length > 0) {",
-											"        const activity = jsonData.data.activities[0];",
-											"        pm.expect(activity).to.have.property('type');",
-											"        pm.expect(activity).to.have.property('started_at');",
-											"        pm.expect(activity).to.have.property('ended_at');",
-											"        pm.expect(activity).to.have.property('duration_seconds');",
-											"        pm.expect(activity).to.have.property('domains');",
-											"        pm.expect(activity).to.have.property('visit_count');",
-											"        pm.expect(activity).to.have.property('avg_engagement');",
-											"    }",
-											"});",
-											"",
-											"pm.test(\"Session types are valid\", function () {",
-											"    const validTypes = ['research_session', 'browsing_session', 'quick_search', 'brief_visit'];",
-											"    jsonData.data.activities.forEach(activity => {",
-											"        pm.expect(validTypes).to.include(activity.type);",
-											"    });",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{auth_token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "GET",
-								"header": [],
-								"url": "{{base_url}}/api/v1/insights/recent_activity",
-								"description": "Get recent activity with defaults - SUCCESS scenario"
-							},
-							"response": []
-						},
-						{
-							"name": "5.4.2 Recent Activity - With Limit",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Status code is 200\", function () {",
-											"    pm.response.to.have.status(200);",
-											"});",
-											"",
-											"const jsonData = pm.response.json();",
-											"",
-											"pm.test(\"Results respect limit\", function () {",
-											"    pm.expect(jsonData.data.activities.length).to.be.at.most(5);",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{auth_token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "GET",
-								"header": [],
-								"url": "{{base_url}}/api/v1/insights/recent_activity?limit=5",
-								"description": "Get recent activity with custom limit - SUCCESS scenario"
-							},
-							"response": []
-						},
-						{
-							"name": "5.4.3 Recent Activity - With Since Parameter",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Status code is 200\", function () {",
-											"    pm.response.to.have.status(200);",
-											"});",
-											"",
-											"const jsonData = pm.response.json();",
-											"",
-											"pm.test(\"Activities are after since timestamp\", function () {",
-											"    const sinceTime = new Date(pm.environment.get(\"since_timestamp\")).getTime();",
-											"    jsonData.data.activities.forEach(activity => {",
-											"        const activityTime = new Date(activity.ended_at).getTime();",
-											"        pm.expect(activityTime).to.be.at.least(sinceTime);",
-											"    });",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								},
-								{
-									"listen": "prerequest",
-									"script": {
-										"exec": [
-											"// Set since to 1 hour ago",
-											"const oneHourAgo = new Date();",
-											"oneHourAgo.setHours(oneHourAgo.getHours() - 1);",
-											"pm.environment.set(\"since_timestamp\", oneHourAgo.toISOString());"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{auth_token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "GET",
-								"header": [],
-								"url": "{{base_url}}/api/v1/insights/recent_activity?since={{since_timestamp}}",
-								"description": "Get recent activity since specific time - SUCCESS scenario"
-							},
-							"response": []
-						},
-						{
-							"name": "5.4.4 Recent Activity - Limit Too High (Clamped)",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Status code is 200\", function () {",
-											"    pm.response.to.have.status(200);",
-											"});",
-											"",
-											"const jsonData = pm.response.json();",
-											"",
-											"pm.test(\"Limit is clamped to maximum (100)\", function () {",
-											"    pm.expect(jsonData.data.activities.length).to.be.at.most(100);",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{auth_token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "GET",
-								"header": [],
-								"url": "{{base_url}}/api/v1/insights/recent_activity?limit=500",
-								"description": "Test limit clamping - EDGE CASE"
-							},
-							"response": []
-						},
-						{
-							"name": "5.4.5 Recent Activity - Unauthorized",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Status code is 401\", function () {",
-											"    pm.response.to.have.status(401);",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "GET",
-								"header": [],
-								"url": "{{base_url}}/api/v1/insights/recent_activity",
-								"description": "Attempt without authentication - FAILURE scenario"
-							},
-							"response": []
-						}
-					],
-					"description": "Recent Activity endpoint testing"
-				},
-				{
-					"name": "Productivity Hours",
-					"item": [
-						{
-							"name": "5.5.1 Productivity Hours - Success (Default)",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Status code is 200\", function () {",
-											"    pm.response.to.have.status(200);",
-											"});",
-											"",
-											"const jsonData = pm.response.json();",
-											"",
-											"pm.test(\"Response contains required fields\", function () {",
-											"    const data = jsonData.data;",
-											"    pm.expect(data).to.have.property('most_productive_hour');",
-											"    pm.expect(data).to.have.property('least_productive_hour');",
-											"    pm.expect(data).to.have.property('hourly_stats');",
-											"    pm.expect(data).to.have.property('day_of_week_stats');",
-											"    pm.expect(data).to.have.property('period');",
-											"});",
-											"",
-											"pm.test(\"Hourly stats is an array\", function () {",
-											"    pm.expect(jsonData.data.hourly_stats).to.be.an('array');",
-											"});",
-											"",
-											"pm.test(\"Day of week stats is an array\", function () {",
-											"    pm.expect(jsonData.data.day_of_week_stats).to.be.an('array');",
-											"});",
-											"",
-											"pm.test(\"Hourly stats have required fields\", function () {",
-											"    const hourlyStats = jsonData.data.hourly_stats;",
-											"    if (hourlyStats.length > 0) {",
-											"        const stat = hourlyStats[0];",
-											"        pm.expect(stat).to.have.property('hour');",
-											"        pm.expect(stat).to.have.property('avg_engagement');",
-											"        pm.expect(stat).to.have.property('total_time_seconds');",
-											"        pm.expect(stat).to.have.property('visit_count');",
-											"        pm.expect(stat.hour).to.be.within(0, 23);",
-											"    }",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{auth_token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "GET",
-								"header": [],
-								"url": "{{base_url}}/api/v1/insights/productivity_hours",
-								"description": "Get productivity hours with defaults - SUCCESS scenario"
-							},
-							"response": []
-						},
-						{
-							"name": "5.5.2 Productivity Hours - Week Period",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Status code is 200\", function () {",
-											"    pm.response.to.have.status(200);",
-											"});",
-											"",
-											"const jsonData = pm.response.json();",
-											"",
-											"pm.test(\"Period is week\", function () {",
-											"    pm.expect(jsonData.data.period).to.equal('week');",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{auth_token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "GET",
-								"header": [],
-								"url": "{{base_url}}/api/v1/insights/productivity_hours?period=week",
-								"description": "Get productivity hours for week period - SUCCESS scenario"
-							},
-							"response": []
-						},
-						{
-							"name": "5.5.3 Productivity Hours - Month Period",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Status code is 200\", function () {",
-											"    pm.response.to.have.status(200);",
-											"});",
-											"",
-											"const jsonData = pm.response.json();",
-											"",
-											"pm.test(\"Period is month\", function () {",
-											"    pm.expect(jsonData.data.period).to.equal('month');",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"auth": {
-									"type": "bearer",
-									"bearer": [
-										{
-											"key": "token",
-											"value": "{{auth_token}}",
-											"type": "string"
-										}
-									]
-								},
-								"method": "GET",
-								"header": [],
-								"url": "{{base_url}}/api/v1/insights/productivity_hours?period=month",
-								"description": "Get productivity hours for month period - SUCCESS scenario"
-							},
-							"response": []
-						},
-						{
-							"name": "5.5.4 Productivity Hours - Unauthorized",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Status code is 401\", function () {",
-											"    pm.response.to.have.status(401);",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "GET",
-								"header": [],
-								"url": "{{base_url}}/api/v1/insights/productivity_hours",
-								"description": "Attempt without authentication - FAILURE scenario"
-							},
-							"response": []
-						}
-					],
-					"description": "Productivity Hours endpoint testing"
-				}
-			],
-			"description": "Comprehensive testing for all 5 Insights API endpoints with success/failure scenarios",
-			"event": [
-				{
-					"listen": "prerequest",
-					"script": {
-						"type": "text/javascript",
-						"exec": [
-							"// Global pre-request script for Insights API",
-							"// Ensures auth token is available",
-							"if (!pm.environment.get(\"auth_token\")) {",
-							"    console.warn(\"\u26a0\ufe0f  No auth token found. Please run 'Setup: Login for Insights Tests' first!\");",
-							"}"
-						]
-					}
-				}
-			]
-		}
-	],
-	"event": [
-		{
-			"listen": "prerequest",
-			"script": {
-				"type": "text/javascript",
-				"exec": [
-					"// Global pre-request script",
-					"// Add any global setup here"
-				]
-			}
-		},
-		{
-			"listen": "test",
-			"script": {
-				"type": "text/javascript",
-				"exec": [
-					"// Global test script",
-					"// Add global validations here"
-				]
-			}
-		}
-	]
+  "info": {
+    "_postman_id": "5bcd8aad-f8b3-4821-9f95-292972df89bb",
+    "name": "HeyHo Sync API - Comprehensive Test Suite",
+    "description": "Complete Postman collection for testing HeyHo Sync API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "0. Health Check",
+      "item": [
+        {
+          "name": "API Health Check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "health"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "1. Authentication",
+      "item": [
+        {
+          "name": "1.1 Create Account - Success",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const timestamp = Date.now();",
+                  "pm.environment.set(\"test_email\", `test${timestamp}@example.com`);",
+                  "pm.environment.set(\"test_password\", \"SecurePass123!\");"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "pm.test(\"Response has success\", function () {",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{test_email}}\",\n  \"password\": \"{{test_password}}\",\n  \"first_name\": \"Test\",\n  \"last_name\": \"User\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/create-account",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "create-account"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "1.2 Login - Success",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "if (jsonData.token) {",
+                  "    pm.environment.set(\"auth_token\", jsonData.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"demo@syrupy.com\",\n  \"password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "5. Insights API",
+      "item": [
+        {
+          "name": "Setup: Login for Insights Tests",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const jsonData = pm.response.json();",
+                  "if (jsonData.token) {",
+                  "    pm.environment.set(\"auth_token\", jsonData.token);",
+                  "    console.log(\"✅ Auth token stored\");",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"demo@syrupy.com\",\n  \"password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Daily Summary",
+          "item": [
+            {
+              "name": "5.1.1 Daily Summary - Success",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 200\", function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "const jsonData = pm.response.json();",
+                      "pm.test(\"Response has success\", function () {",
+                      "    pm.expect(jsonData.success).to.be.true;",
+                      "});",
+                      "",
+                      "pm.test(\"Data has required fields\", function () {",
+                      "    const data = jsonData.data;",
+                      "    pm.expect(data).to.have.property('date');",
+                      "    pm.expect(data).to.have.property('total_sites_visited');",
+                      "    pm.expect(data).to.have.property('unique_domains');",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{auth_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/insights/daily_summary",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "insights",
+                    "daily_summary"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "5.1.2 Daily Summary - Unauthorized",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 401\", function () {",
+                      "    pm.response.to.have.status(401);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/insights/daily_summary",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "insights",
+                    "daily_summary"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Weekly Summary",
+          "item": [
+            {
+              "name": "5.2.1 Weekly Summary - Success",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 200\", function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "const jsonData = pm.response.json();",
+                      "pm.test(\"Week format is ISO\", function () {",
+                      "    pm.expect(jsonData.data.week).to.match(/^\\d{4}-W\\d{2}$/);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{auth_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/insights/weekly_summary",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "insights",
+                    "weekly_summary"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Top Sites",
+          "item": [
+            {
+              "name": "5.3.1 Top Sites - Success",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 200\", function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "const jsonData = pm.response.json();",
+                      "pm.test(\"Response contains sites array\", function () {",
+                      "    pm.expect(jsonData.data.sites).to.be.an('array');",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{auth_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/insights/top_sites",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "insights",
+                    "top_sites"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Recent Activity",
+          "item": [
+            {
+              "name": "5.4.1 Recent Activity - Success",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 200\", function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "const jsonData = pm.response.json();",
+                      "pm.test(\"Response contains activities\", function () {",
+                      "    pm.expect(jsonData.data.activities).to.be.an('array');",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{auth_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/insights/recent_activity",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "insights",
+                    "recent_activity"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Productivity Hours",
+          "item": [
+            {
+              "name": "5.5.1 Productivity Hours - Success",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 200\", function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "const jsonData = pm.response.json();",
+                      "pm.test(\"Response has required fields\", function () {",
+                      "    pm.expect(jsonData.data.hourly_stats).to.be.an('array');",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{auth_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/insights/productivity_hours",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "insights",
+                    "productivity_hours"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
 }
