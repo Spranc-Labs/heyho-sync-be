@@ -31,11 +31,7 @@
 					"request": {
 						"method": "GET",
 						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/v1/health",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "health"]
-						},
+						"url": "{{base_url}}/api/v1/health",
 						"description": "Check if the API is running and responsive"
 					},
 					"response": []
@@ -65,7 +61,6 @@
 									"",
 									"pm.test(\"Response contains verification code\", function () {",
 									"    pm.expect(jsonData.verification_code).to.match(/^\\d{6}$/);",
-									"    // Store verification code for later use",
 									"    pm.environment.set(\"verification_code\", jsonData.verification_code);",
 									"});",
 									"",
@@ -82,7 +77,6 @@
 							"listen": "prerequest",
 							"script": {
 								"exec": [
-									"// Generate unique email for this test run",
 									"const timestamp = Date.now();",
 									"pm.environment.set(\"test_email\", `test${timestamp}@example.com`);",
 									"pm.environment.set(\"test_password\", \"SecurePass123!\");"
@@ -103,11 +97,7 @@
 							"mode": "raw",
 							"raw": "{\n  \"email\": \"{{test_email}}\",\n  \"password\": \"{{test_password}}\",\n  \"first_name\": \"Test\",\n  \"last_name\": \"User\"\n}"
 						},
-						"url": {
-							"raw": "{{base_url}}/api/v1/auth/create-account",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "auth", "create-account"]
-						},
+						"url": "{{base_url}}/api/v1/auth/create-account",
 						"description": "Create a new user account - SUCCESS scenario"
 					},
 					"response": []
@@ -144,11 +134,7 @@
 							"mode": "raw",
 							"raw": "{\n  \"password\": \"SecurePass123!\",\n  \"first_name\": \"Test\",\n  \"last_name\": \"User\"\n}"
 						},
-						"url": {
-							"raw": "{{base_url}}/api/v1/auth/create-account",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "auth", "create-account"]
-						},
+						"url": "{{base_url}}/api/v1/auth/create-account",
 						"description": "Attempt to create account without email - FAILURE scenario"
 					},
 					"response": []
@@ -168,7 +154,6 @@
 									"",
 									"pm.test(\"JWT token is present\", function () {",
 									"    pm.expect(jsonData.token).to.be.a('string');",
-									"    // Store token for authenticated requests",
 									"    pm.environment.set(\"auth_token\", jsonData.token);",
 									"});",
 									"",
@@ -184,7 +169,6 @@
 							"listen": "prerequest",
 							"script": {
 								"exec": [
-									"// Use demo user credentials or fallback to test user",
 									"if (!pm.environment.get(\"demo_email\")) {",
 									"    pm.environment.set(\"login_email\", \"demo@syrupy.com\");",
 									"    pm.environment.set(\"login_password\", \"password123\");",
@@ -209,11 +193,7 @@
 							"mode": "raw",
 							"raw": "{\n  \"email\": \"{{login_email}}\",\n  \"password\": \"{{login_password}}\"\n}"
 						},
-						"url": {
-							"raw": "{{base_url}}/api/v1/auth/login",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "auth", "login"]
-						},
+						"url": "{{base_url}}/api/v1/auth/login",
 						"description": "Login with valid credentials - SUCCESS scenario. Uses demo user by default."
 					},
 					"response": []
@@ -250,11 +230,7 @@
 							"mode": "raw",
 							"raw": "{\n  \"email\": \"wrong@example.com\",\n  \"password\": \"wrongpassword\"\n}"
 						},
-						"url": {
-							"raw": "{{base_url}}/api/v1/auth/login",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "auth", "login"]
-						},
+						"url": "{{base_url}}/api/v1/auth/login",
 						"description": "Attempt login with invalid credentials - FAILURE scenario"
 					},
 					"response": []
@@ -292,11 +268,7 @@
 						},
 						"method": "POST",
 						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/v1/auth/logout",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "auth", "logout"]
-						},
+						"url": "{{base_url}}/api/v1/auth/logout",
 						"description": "Logout authenticated user - SUCCESS scenario"
 					},
 					"response": []
@@ -326,21 +298,17 @@
 					],
 					"request": {
 						"method": "POST",
-						"header": [],
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"email\": \"demo@syrupy.com\",\n  \"password\": \"password123\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
+							"raw": "{\n  \"email\": \"demo@syrupy.com\",\n  \"password\": \"password123\"\n}"
 						},
-						"url": {
-							"raw": "{{base_url}}/api/v1/auth/login",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "auth", "login"]
-						},
+						"url": "{{base_url}}/api/v1/auth/login",
 						"description": "Login to get auth token for insights API testing. Run this first!"
 					},
 					"response": []
@@ -407,11 +375,7 @@
 								},
 								"method": "GET",
 								"header": [],
-								"url": {
-									"raw": "{{base_url}}/api/v1/insights/daily_summary",
-									"host": ["{{base_url}}"],
-									"path": ["api", "v1", "insights", "daily_summary"]
-								},
+								"url": "{{base_url}}/api/v1/insights/daily_summary",
 								"description": "Get daily summary for today - SUCCESS scenario"
 							},
 							"response": []
@@ -440,7 +404,6 @@
 									"listen": "prerequest",
 									"script": {
 										"exec": [
-											"// Set date to yesterday",
 											"const yesterday = new Date();",
 											"yesterday.setDate(yesterday.getDate() - 1);",
 											"const dateStr = yesterday.toISOString().split('T')[0];",
@@ -463,17 +426,7 @@
 								},
 								"method": "GET",
 								"header": [],
-								"url": {
-									"raw": "{{base_url}}/api/v1/insights/daily_summary?date={{test_date}}",
-									"host": ["{{base_url}}"],
-									"path": ["api", "v1", "insights", "daily_summary"],
-									"query": [
-										{
-											"key": "date",
-											"value": "{{test_date}}"
-										}
-									]
-								},
+								"url": "{{base_url}}/api/v1/insights/daily_summary?date={{test_date}}",
 								"description": "Get daily summary for a specific date - SUCCESS scenario"
 							},
 							"response": []
@@ -501,11 +454,7 @@
 							"request": {
 								"method": "GET",
 								"header": [],
-								"url": {
-									"raw": "{{base_url}}/api/v1/insights/daily_summary",
-									"host": ["{{base_url}}"],
-									"path": ["api", "v1", "insights", "daily_summary"]
-								},
+								"url": "{{base_url}}/api/v1/insights/daily_summary",
 								"description": "Attempt to access without authentication - FAILURE scenario"
 							},
 							"response": []
@@ -517,12 +466,10 @@
 									"listen": "test",
 									"script": {
 										"exec": [
-											"// Depending on implementation, this might return 422 or 400",
-											"pm.test(\"Status code is 4xx\", function () {",
+											"pm.test(\"Status code is 4xx or handles gracefully\", function () {",
 											"    pm.expect(pm.response.code).to.be.oneOf([400, 422, 200]);",
 											"});",
 											"",
-											"// If it returns 200, it should handle gracefully",
 											"if (pm.response.code === 200) {",
 											"    pm.test(\"Response handles invalid date gracefully\", function () {",
 											"        const jsonData = pm.response.json();",
@@ -547,17 +494,7 @@
 								},
 								"method": "GET",
 								"header": [],
-								"url": {
-									"raw": "{{base_url}}/api/v1/insights/daily_summary?date=invalid-date",
-									"host": ["{{base_url}}"],
-									"path": ["api", "v1", "insights", "daily_summary"],
-									"query": [
-										{
-											"key": "date",
-											"value": "invalid-date"
-										}
-									]
-								},
+								"url": "{{base_url}}/api/v1/insights/daily_summary?date=invalid-date",
 								"description": "Test with invalid date format - EDGE CASE"
 							},
 							"response": []
@@ -622,11 +559,7 @@
 								},
 								"method": "GET",
 								"header": [],
-								"url": {
-									"raw": "{{base_url}}/api/v1/insights/weekly_summary",
-									"host": ["{{base_url}}"],
-									"path": ["api", "v1", "insights", "weekly_summary"]
-								},
+								"url": "{{base_url}}/api/v1/insights/weekly_summary",
 								"description": "Get weekly summary for current week - SUCCESS scenario"
 							},
 							"response": []
@@ -665,17 +598,7 @@
 								},
 								"method": "GET",
 								"header": [],
-								"url": {
-									"raw": "{{base_url}}/api/v1/insights/weekly_summary?week=2025-W42",
-									"host": ["{{base_url}}"],
-									"path": ["api", "v1", "insights", "weekly_summary"],
-									"query": [
-										{
-											"key": "week",
-											"value": "2025-W42"
-										}
-									]
-								},
+								"url": "{{base_url}}/api/v1/insights/weekly_summary?week=2025-W42",
 								"description": "Get weekly summary for specific week - SUCCESS scenario"
 							},
 							"response": []
@@ -714,17 +637,7 @@
 								},
 								"method": "GET",
 								"header": [],
-								"url": {
-									"raw": "{{base_url}}/api/v1/insights/weekly_summary?week=invalid-week",
-									"host": ["{{base_url}}"],
-									"path": ["api", "v1", "insights", "weekly_summary"],
-									"query": [
-										{
-											"key": "week",
-											"value": "invalid-week"
-										}
-									]
-								},
+								"url": "{{base_url}}/api/v1/insights/weekly_summary?week=invalid-week",
 								"description": "Test graceful fallback with invalid week format - EDGE CASE"
 							},
 							"response": []
@@ -747,11 +660,7 @@
 							"request": {
 								"method": "GET",
 								"header": [],
-								"url": {
-									"raw": "{{base_url}}/api/v1/insights/weekly_summary",
-									"host": ["{{base_url}}"],
-									"path": ["api", "v1", "insights", "weekly_summary"]
-								},
+								"url": "{{base_url}}/api/v1/insights/weekly_summary",
 								"description": "Attempt without authentication - FAILURE scenario"
 							},
 							"response": []
@@ -813,11 +722,7 @@
 								},
 								"method": "GET",
 								"header": [],
-								"url": {
-									"raw": "{{base_url}}/api/v1/insights/top_sites",
-									"host": ["{{base_url}}"],
-									"path": ["api", "v1", "insights", "top_sites"]
-								},
+								"url": "{{base_url}}/api/v1/insights/top_sites",
 								"description": "Get top sites with default parameters - SUCCESS scenario"
 							},
 							"response": []
@@ -856,17 +761,7 @@
 								},
 								"method": "GET",
 								"header": [],
-								"url": {
-									"raw": "{{base_url}}/api/v1/insights/top_sites?period=month",
-									"host": ["{{base_url}}"],
-									"path": ["api", "v1", "insights", "top_sites"],
-									"query": [
-										{
-											"key": "period",
-											"value": "month"
-										}
-									]
-								},
+								"url": "{{base_url}}/api/v1/insights/top_sites?period=month",
 								"description": "Get top sites for month period - SUCCESS scenario"
 							},
 							"response": []
@@ -910,17 +805,7 @@
 								},
 								"method": "GET",
 								"header": [],
-								"url": {
-									"raw": "{{base_url}}/api/v1/insights/top_sites?sort_by=visits",
-									"host": ["{{base_url}}"],
-									"path": ["api", "v1", "insights", "top_sites"],
-									"query": [
-										{
-											"key": "sort_by",
-											"value": "visits"
-										}
-									]
-								},
+								"url": "{{base_url}}/api/v1/insights/top_sites?sort_by=visits",
 								"description": "Get top sites sorted by visit count - SUCCESS scenario"
 							},
 							"response": []
@@ -959,17 +844,7 @@
 								},
 								"method": "GET",
 								"header": [],
-								"url": {
-									"raw": "{{base_url}}/api/v1/insights/top_sites?limit=5",
-									"host": ["{{base_url}}"],
-									"path": ["api", "v1", "insights", "top_sites"],
-									"query": [
-										{
-											"key": "limit",
-											"value": "5"
-										}
-									]
-								},
+								"url": "{{base_url}}/api/v1/insights/top_sites?limit=5",
 								"description": "Get top sites with custom limit - SUCCESS scenario"
 							},
 							"response": []
@@ -1008,17 +883,7 @@
 								},
 								"method": "GET",
 								"header": [],
-								"url": {
-									"raw": "{{base_url}}/api/v1/insights/top_sites?limit=1000",
-									"host": ["{{base_url}}"],
-									"path": ["api", "v1", "insights", "top_sites"],
-									"query": [
-										{
-											"key": "limit",
-											"value": "1000"
-										}
-									]
-								},
+								"url": "{{base_url}}/api/v1/insights/top_sites?limit=1000",
 								"description": "Test limit clamping to maximum - EDGE CASE"
 							},
 							"response": []
@@ -1041,11 +906,7 @@
 							"request": {
 								"method": "GET",
 								"header": [],
-								"url": {
-									"raw": "{{base_url}}/api/v1/insights/top_sites",
-									"host": ["{{base_url}}"],
-									"path": ["api", "v1", "insights", "top_sites"]
-								},
+								"url": "{{base_url}}/api/v1/insights/top_sites",
 								"description": "Attempt without authentication - FAILURE scenario"
 							},
 							"response": []
@@ -1110,11 +971,7 @@
 								},
 								"method": "GET",
 								"header": [],
-								"url": {
-									"raw": "{{base_url}}/api/v1/insights/recent_activity",
-									"host": ["{{base_url}}"],
-									"path": ["api", "v1", "insights", "recent_activity"]
-								},
+								"url": "{{base_url}}/api/v1/insights/recent_activity",
 								"description": "Get recent activity with defaults - SUCCESS scenario"
 							},
 							"response": []
@@ -1153,17 +1010,7 @@
 								},
 								"method": "GET",
 								"header": [],
-								"url": {
-									"raw": "{{base_url}}/api/v1/insights/recent_activity?limit=5",
-									"host": ["{{base_url}}"],
-									"path": ["api", "v1", "insights", "recent_activity"],
-									"query": [
-										{
-											"key": "limit",
-											"value": "5"
-										}
-									]
-								},
+								"url": "{{base_url}}/api/v1/insights/recent_activity?limit=5",
 								"description": "Get recent activity with custom limit - SUCCESS scenario"
 							},
 							"response": []
@@ -1196,7 +1043,6 @@
 									"listen": "prerequest",
 									"script": {
 										"exec": [
-											"// Set since to 1 hour ago",
 											"const oneHourAgo = new Date();",
 											"oneHourAgo.setHours(oneHourAgo.getHours() - 1);",
 											"pm.environment.set(\"since_timestamp\", oneHourAgo.toISOString());"
@@ -1218,17 +1064,7 @@
 								},
 								"method": "GET",
 								"header": [],
-								"url": {
-									"raw": "{{base_url}}/api/v1/insights/recent_activity?since={{since_timestamp}}",
-									"host": ["{{base_url}}"],
-									"path": ["api", "v1", "insights", "recent_activity"],
-									"query": [
-										{
-											"key": "since",
-											"value": "{{since_timestamp}}"
-										}
-									]
-								},
+								"url": "{{base_url}}/api/v1/insights/recent_activity?since={{since_timestamp}}",
 								"description": "Get recent activity since specific time - SUCCESS scenario"
 							},
 							"response": []
@@ -1267,17 +1103,7 @@
 								},
 								"method": "GET",
 								"header": [],
-								"url": {
-									"raw": "{{base_url}}/api/v1/insights/recent_activity?limit=500",
-									"host": ["{{base_url}}"],
-									"path": ["api", "v1", "insights", "recent_activity"],
-									"query": [
-										{
-											"key": "limit",
-											"value": "500"
-										}
-									]
-								},
+								"url": "{{base_url}}/api/v1/insights/recent_activity?limit=500",
 								"description": "Test limit clamping - EDGE CASE"
 							},
 							"response": []
@@ -1300,11 +1126,7 @@
 							"request": {
 								"method": "GET",
 								"header": [],
-								"url": {
-									"raw": "{{base_url}}/api/v1/insights/recent_activity",
-									"host": ["{{base_url}}"],
-									"path": ["api", "v1", "insights", "recent_activity"]
-								},
+								"url": "{{base_url}}/api/v1/insights/recent_activity",
 								"description": "Attempt without authentication - FAILURE scenario"
 							},
 							"response": []
@@ -1374,11 +1196,7 @@
 								},
 								"method": "GET",
 								"header": [],
-								"url": {
-									"raw": "{{base_url}}/api/v1/insights/productivity_hours",
-									"host": ["{{base_url}}"],
-									"path": ["api", "v1", "insights", "productivity_hours"]
-								},
+								"url": "{{base_url}}/api/v1/insights/productivity_hours",
 								"description": "Get productivity hours with defaults - SUCCESS scenario"
 							},
 							"response": []
@@ -1417,17 +1235,7 @@
 								},
 								"method": "GET",
 								"header": [],
-								"url": {
-									"raw": "{{base_url}}/api/v1/insights/productivity_hours?period=week",
-									"host": ["{{base_url}}"],
-									"path": ["api", "v1", "insights", "productivity_hours"],
-									"query": [
-										{
-											"key": "period",
-											"value": "week"
-										}
-									]
-								},
+								"url": "{{base_url}}/api/v1/insights/productivity_hours?period=week",
 								"description": "Get productivity hours for week period - SUCCESS scenario"
 							},
 							"response": []
@@ -1466,17 +1274,7 @@
 								},
 								"method": "GET",
 								"header": [],
-								"url": {
-									"raw": "{{base_url}}/api/v1/insights/productivity_hours?period=month",
-									"host": ["{{base_url}}"],
-									"path": ["api", "v1", "insights", "productivity_hours"],
-									"query": [
-										{
-											"key": "period",
-											"value": "month"
-										}
-									]
-								},
+								"url": "{{base_url}}/api/v1/insights/productivity_hours?period=month",
 								"description": "Get productivity hours for month period - SUCCESS scenario"
 							},
 							"response": []
@@ -1499,11 +1297,7 @@
 							"request": {
 								"method": "GET",
 								"header": [],
-								"url": {
-									"raw": "{{base_url}}/api/v1/insights/productivity_hours",
-									"host": ["{{base_url}}"],
-									"path": ["api", "v1", "insights", "productivity_hours"]
-								},
+								"url": "{{base_url}}/api/v1/insights/productivity_hours",
 								"description": "Attempt without authentication - FAILURE scenario"
 							},
 							"response": []
@@ -1519,8 +1313,6 @@
 					"script": {
 						"type": "text/javascript",
 						"exec": [
-							"// Global pre-request script for Insights API",
-							"// Ensures auth token is available",
 							"if (!pm.environment.get(\"auth_token\")) {",
 							"    console.warn(\"⚠️  No auth token found. Please run 'Setup: Login for Insights Tests' first!\");",
 							"}"
@@ -1536,8 +1328,7 @@
 			"script": {
 				"type": "text/javascript",
 				"exec": [
-					"// Global pre-request script",
-					"// Add any global setup here"
+					"// Global pre-request script"
 				]
 			}
 		},
@@ -1546,8 +1337,7 @@
 			"script": {
 				"type": "text/javascript",
 				"exec": [
-					"// Global test script",
-					"// Add global validations here"
+					"// Global test script"
 				]
 			}
 		}
