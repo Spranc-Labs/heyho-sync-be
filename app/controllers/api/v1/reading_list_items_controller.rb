@@ -3,8 +3,7 @@
 module Api
   module V1
     # API controller for reading list CRUD operations
-    class ReadingListItemsController < ApplicationController
-      before_action :authenticate_user!
+    class ReadingListItemsController < AuthenticatedController
       before_action :set_reading_list_item, only: %i[show update destroy]
 
       # GET /api/v1/reading_list_items
