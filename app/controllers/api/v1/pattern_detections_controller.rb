@@ -4,9 +4,7 @@ module Api
   module V1
     # API controller for pattern detection endpoints
     # Provides access to hoarder tabs, serial openers, and research session detection
-    class PatternDetectionsController < ApplicationController
-      before_action :authenticate_user!
-
+    class PatternDetectionsController < AuthenticatedController
       # GET /api/v1/pattern_detections/hoarder_tabs
       def hoarder_tabs
         min_open_time = params[:min_open_time]&.to_i&.minutes || HoarderDetectionService::DEFAULT_MIN_OPEN_TIME

@@ -4,8 +4,7 @@ module Api
   module V1
     # API controller for research session CRUD operations
     # rubocop:disable Metrics/ClassLength
-    class ResearchSessionsController < ApplicationController
-      before_action :authenticate_user!
+    class ResearchSessionsController < AuthenticatedController
       before_action :set_research_session, only: %i[show update destroy restore]
 
       # GET /api/v1/research_sessions
