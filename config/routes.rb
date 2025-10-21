@@ -32,6 +32,15 @@ Rails.application.routes.draw do
       get 'pattern_detections/hoarder_tabs', to: 'pattern_detections#hoarder_tabs'
       get 'pattern_detections/serial_openers', to: 'pattern_detections#serial_openers'
       get 'pattern_detections/research_sessions', to: 'pattern_detections#research_sessions'
+
+      # Reading list endpoints
+      resources :reading_list_items, only: %i[index show create update destroy] do
+        member do
+          post 'mark_reading'
+          post 'mark_completed'
+          post 'mark_dismissed'
+        end
+      end
     end
   end
 
