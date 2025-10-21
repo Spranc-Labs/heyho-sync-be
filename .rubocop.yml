@@ -163,6 +163,8 @@ Naming/PredicateName:
 
 Naming/VariableNumber:
   EnforcedStyle: snake_case
+  AllowedIdentifiers:
+    - v1  # API versioning
 
 # Lint Configuration
 Lint/MissingSuper:
