@@ -242,4 +242,241 @@ RSpec.describe DataSyncService, type: :service do
       expect(result.first['title']).to eq('New')
     end
   end
+
+  describe 'metadata sanitization' do
+    let(:service) { described_class.new(user:, page_visits: [], tab_aggregates: []) }
+
+    describe '#sanitize_metadata' do
+      it 'returns empty hash for nil metadata' do
+        result = service.send(:sanitize_metadata, nil)
+
+        expect(result).to eq({})
+      end
+
+      it 'returns empty hash for blank metadata' do
+        result = service.send(:sanitize_metadata, '')
+
+        expect(result).to eq({})
+      end
+
+      it 'returns empty hash for non-hash metadata' do
+        result = service.send(:sanitize_metadata, 'not a hash')
+
+        expect(result).to eq({})
+      end
+
+      it 'preserves valid metadata' do
+        metadata = {
+          'schema_type' => 'Article',
+          'title' => 'Test Article',
+          'preview' => {
+            'title' => 'Test',
+            'description' => 'Description'
+          }
+        }
+
+        result = service.send(:sanitize_metadata, metadata)
+
+        expect(result).to eq(metadata)
+      end
+
+      it 'removes dangerous keys' do
+        metadata = {
+          'title' => 'Test',
+          '__proto__' => 'evil',
+          'constructor' => 'bad',
+          'prototype' => 'malicious'
+        }
+
+        result = service.send(:sanitize_metadata, metadata)
+
+        expect(result.keys).to contain_exactly('title')
+        expect(result['title']).to eq('Test')
+      end
+
+      it 'truncates long strings' do
+        long_string = 'x' * 2500
+        metadata = {
+          'long_field' => long_string
+        }
+
+        result = service.send(:sanitize_metadata, metadata)
+
+        expect(result['long_field']).to start_with('x' * 2000)
+        expect(result['long_field']).to end_with('...')
+        expect(result['long_field'].length).to eq(2003) # 2000 + '...'
+      end
+
+      it 'truncates nested strings' do
+        metadata = {
+          'preview' => {
+            'description' => 'x' * 2500
+          }
+        }
+
+        result = service.send(:sanitize_metadata, metadata)
+
+        expect(result['preview']['description']).to end_with('...')
+        expect(result['preview']['description'].length).to eq(2003)
+      end
+
+      it 'truncates strings in arrays' do
+        metadata = {
+          'tags' => ['short', 'x' * 2500, 'another']
+        }
+
+        result = service.send(:sanitize_metadata, metadata)
+
+        expect(result['tags'][0]).to eq('short')
+        expect(result['tags'][1]).to end_with('...')
+        expect(result['tags'][2]).to eq('another')
+      end
+
+      it 'preserves non-string values' do
+        metadata = {
+          'number' => 42,
+          'boolean' => true,
+          'null' => nil,
+          'nested' => {
+            'count' => 10
+          }
+        }
+
+        result = service.send(:sanitize_metadata, metadata)
+
+        expect(result['number']).to eq(42)
+        expect(result['boolean']).to be true
+        expect(result['null']).to be_nil
+        expect(result['nested']['count']).to eq(10)
+      end
+    end
+
+    describe '#deep_truncate_strings' do
+      it 'handles deeply nested structures' do
+        data = {
+          'level1' => {
+            'level2' => {
+              'level3' => {
+                'long_string' => 'x' * 2500
+              }
+            }
+          }
+        }
+
+        result = service.send(:deep_truncate_strings, data, max_length: 2000)
+
+        expect(result['level1']['level2']['level3']['long_string']).to end_with('...')
+      end
+
+      it 'handles arrays of hashes' do
+        data = {
+          'items' => [
+            { 'text' => 'x' * 2500 },
+            { 'text' => 'short' }
+          ]
+        }
+
+        result = service.send(:deep_truncate_strings, data, max_length: 2000)
+
+        expect(result['items'][0]['text']).to end_with('...')
+        expect(result['items'][1]['text']).to eq('short')
+      end
+    end
+  end
+
+  describe 'category field handling' do
+    # rubocop:disable RSpec/ExampleLength
+    # Integration test verifying full data flow for category fields
+    it 'syncs page visits with category data' do
+      page_visits_with_category = [
+        {
+          'id' => 'pv_1',
+          'url' => 'https://github.com',
+          'title' => 'GitHub',
+          'visited_at' => Time.current.iso8601,
+          'category' => 'work_coding',
+          'categoryConfidence' => 0.85,
+          'categoryMethod' => 'metadata',
+          'metadata' => {
+            'schema_type' => 'SoftwareSourceCode',
+            'og_site_name' => 'GitHub'
+          }
+        }
+      ]
+
+      result = described_class.sync(
+        user:,
+        page_visits: page_visits_with_category,
+        tab_aggregates:,
+        client_info:
+      )
+
+      expect(result).to be_success
+
+      page_visit = PageVisit.last
+      expect(page_visit.category).to eq('work_coding')
+      expect(page_visit.category_confidence).to eq(0.85)
+      expect(page_visit.category_method).to eq('metadata')
+      expect(page_visit.metadata['schema_type']).to eq('SoftwareSourceCode')
+    end
+    # rubocop:enable RSpec/ExampleLength
+
+    it 'handles page visits without category data' do
+      page_visits_without_category = [
+        {
+          'id' => 'pv_1',
+          'url' => 'https://example.com',
+          'title' => 'Example',
+          'visited_at' => Time.current.iso8601
+        }
+      ]
+
+      result = described_class.sync(
+        user:,
+        page_visits: page_visits_without_category,
+        tab_aggregates:,
+        client_info:
+      )
+
+      expect(result).to be_success
+
+      page_visit = PageVisit.last
+      expect(page_visit.category).to be_nil
+      expect(page_visit.category_confidence).to be_nil
+      expect(page_visit.category_method).to be_nil
+      expect(page_visit.metadata).to eq({})
+    end
+
+    # rubocop:disable RSpec/ExampleLength
+    # Integration test verifying metadata sanitization in full data flow
+    it 'sanitizes dangerous metadata keys' do
+      page_visits_with_dangerous_metadata = [
+        {
+          'id' => 'pv_1',
+          'url' => 'https://example.com',
+          'title' => 'Example',
+          'visited_at' => Time.current.iso8601,
+          'metadata' => {
+            'safe_field' => 'value',
+            '__proto__' => 'evil',
+            'constructor' => 'bad'
+          }
+        }
+      ]
+
+      result = described_class.sync(
+        user:,
+        page_visits: page_visits_with_dangerous_metadata,
+        tab_aggregates:,
+        client_info:
+      )
+
+      expect(result).to be_success
+
+      page_visit = PageVisit.last
+      expect(page_visit.metadata.keys).to contain_exactly('safe_field')
+      expect(page_visit.metadata['__proto__']).to be_nil
+    end
+    # rubocop:enable RSpec/ExampleLength
+  end
 end
