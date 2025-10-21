@@ -527,7 +527,7 @@ RSpec.describe DataValidationService do
     it 'validates a valid tab aggregate' do
       data = {
         'id' => 'ta_123',
-        'url' => 'https://example.com',
+        'current_url' => 'https://example.com',
         'closed_at' => Time.current.iso8601
       }
 
@@ -541,7 +541,7 @@ RSpec.describe DataValidationService do
       it 'returns error when closed_at is before opened_at' do
         data = {
           'id' => 'ta_123',
-          'url' => 'https://example.com',
+          'current_url' => 'https://example.com',
           'opened_at' => Time.current.iso8601,
           'closed_at' => 1.hour.ago.iso8601
         }
@@ -555,7 +555,7 @@ RSpec.describe DataValidationService do
       it 'accepts valid time order' do
         data = {
           'id' => 'ta_123',
-          'url' => 'https://example.com',
+          'current_url' => 'https://example.com',
           'opened_at' => 1.hour.ago.iso8601,
           'closed_at' => Time.current.iso8601
         }
