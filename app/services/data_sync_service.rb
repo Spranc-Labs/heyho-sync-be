@@ -209,7 +209,12 @@ class DataSyncService < BaseService
       'category_confidence' => visit['categoryConfidence'],
       'category_method' => visit['categoryMethod'],
       # Metadata (sanitize before storing)
-      'metadata' => sanitize_metadata(visit['metadata'])
+      'metadata' => begin
+        Rails.logger.debug { "📋 [DEBUG] visit['metadata'] = #{visit["metadata"].inspect}" }
+        sanitized = sanitize_metadata(visit['metadata'])
+        Rails.logger.debug { "📋 [DEBUG] sanitized metadata = #{sanitized.inspect}" }
+        sanitized
+      end
     }
   end
 
@@ -296,8 +301,8 @@ class DataSyncService < BaseService
       'closed_at' => timestamp_to_iso_8601(last_active),
       'domain_durations' => aggregate['domainDurations'] || aggregate['domain_durations'],
       'page_count' => validate_page_count(aggregate['pageCount'] || aggregate['page_count'], tab_id),
-      'current_url' => aggregate['currentUrl'] || aggregate['current_url'],
-      'current_domain' => aggregate['currentDomain'] || aggregate['current_domain'],
+      'current_url' => aggregate['currentUrl'] || aggregate['current_url'] || aggregate['url'],
+      'current_domain' => aggregate['currentDomain'] || aggregate['current_domain'] || aggregate['domain'],
       'statistics' => aggregate['statistics']
     }
   end
@@ -432,7 +437,7 @@ class DataSyncService < BaseService
       category: visit['category'],
       category_confidence: visit['category_confidence'],
       category_method: visit['category_method'],
-      metadata: visit['metadata']
+      metadata: sanitize_metadata(visit['metadata'])
     }
   end
 
