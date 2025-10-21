@@ -2,7 +2,7 @@
 
 Rails.application.routes.draw do
   # Mount letter_opener web interface in development
-  mount LetterOpenerWeb::Engine, at: "/letter_opener" if Rails.env.development?
+  mount LetterOpenerWeb::Engine, at: '/letter_opener' if Rails.env.development?
 
   # Email verification endpoints (outside Rodauth mount to avoid conflicts)
   namespace :api do
@@ -27,28 +27,33 @@ Rails.application.routes.draw do
       get 'insights/top_sites', to: 'insights#top_sites'
       get 'insights/recent_activity', to: 'insights#recent_activity'
       get 'insights/productivity_hours', to: 'insights#productivity_hours'
+
+      # Pattern detection endpoints
+      get 'pattern_detections/hoarder_tabs', to: 'pattern_detections#hoarder_tabs'
+      get 'pattern_detections/serial_openers', to: 'pattern_detections#serial_openers'
+      get 'pattern_detections/research_sessions', to: 'pattern_detections#research_sessions'
     end
   end
 
   # Mount Rodauth routes under /auth prefix to avoid conflicts
-  mount RodauthApp.app => "/api/v1/auth"
+  mount RodauthApp.app => '/api/v1/auth'
 
   # API routes
   namespace :api do
     namespace :v1 do
       # Rodauth authentication routes are now available
 
-        # User management routes - for additional user profile operations
-        resource :users, only: [] do
-          collection do
-            get 'me'
-            patch 'me', action: :update
-            patch 'me/password', action: :update_password
-          end
+      # User management routes - for additional user profile operations
+      resource :users, only: [] do
+        collection do
+          get 'me'
+          patch 'me', action: :update
+          patch 'me/password', action: :update_password
         end
+      end
 
-        # Health check
-        get 'health', to: proc { [200, {}, ['OK']] }
+      # Health check
+      get 'health', to: proc { [200, {}, ['OK']] }
     end
   end
 
