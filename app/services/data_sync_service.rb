@@ -12,7 +12,13 @@ class DataSyncService < BaseService
       url: { type: 'string', format: 'uri' },
       title: { type: 'string' },
       visited_at: { type: 'string', format: 'date-time' },
-      source_page_visit_id: { type: %w[string null] }
+      source_page_visit_id: { type: %w[string null] },
+      # Categorization fields (optional)
+      category: { type: %w[string null] },
+      categoryConfidence: { type: %w[number null] },
+      categoryMethod: { type: %w[string null] },
+      # Metadata (optional)
+      metadata: { type: %w[object null] }
     }
   }.freeze
 
@@ -197,7 +203,13 @@ class DataSyncService < BaseService
       'engagement_rate' => get_value(visit, 'engagementRate', 'engagement_rate'),
       'idle_periods' => get_value(visit, 'idlePeriods', 'idle_periods'),
       'last_heartbeat' => get_value(visit, 'lastHeartbeat', 'last_heartbeat'),
-      'anonymous_client_id' => get_value(visit, 'anonymousClientId', 'anonymous_client_id')
+      'anonymous_client_id' => get_value(visit, 'anonymousClientId', 'anonymous_client_id'),
+      # Categorization fields
+      'category' => visit['category'],
+      'category_confidence' => visit['categoryConfidence'],
+      'category_method' => visit['categoryMethod'],
+      # Metadata (sanitize before storing)
+      'metadata' => sanitize_metadata(visit['metadata'])
     }
   end
 
@@ -284,8 +296,8 @@ class DataSyncService < BaseService
       'closed_at' => timestamp_to_iso_8601(last_active),
       'domain_durations' => aggregate['domainDurations'] || aggregate['domain_durations'],
       'page_count' => validate_page_count(aggregate['pageCount'] || aggregate['page_count'], tab_id),
-      'current_url' => aggregate['currentUrl'] || aggregate['current_url'],
-      'current_domain' => aggregate['currentDomain'] || aggregate['current_domain'],
+      'current_url' => aggregate['currentUrl'] || aggregate['current_url'] || aggregate['url'],
+      'current_domain' => aggregate['currentDomain'] || aggregate['current_domain'] || aggregate['domain'],
       'statistics' => aggregate['statistics']
     }
   end
@@ -395,6 +407,7 @@ class DataSyncService < BaseService
         url title visited_at source_page_visit_id domain
         duration_seconds active_duration_seconds engagement_rate
         idle_periods last_heartbeat anonymous_client_id
+        category category_confidence category_method metadata
       ]
     )
     # rubocop:enable Rails/SkipsModelValidations
@@ -415,7 +428,11 @@ class DataSyncService < BaseService
       engagement_rate: visit['engagement_rate'],
       idle_periods: visit['idle_periods'],
       last_heartbeat: visit['last_heartbeat'],
-      anonymous_client_id: visit['anonymous_client_id']
+      anonymous_client_id: visit['anonymous_client_id'],
+      category: visit['category'],
+      category_confidence: visit['category_confidence'],
+      category_method: visit['category_method'],
+      metadata: sanitize_metadata(visit['metadata'])
     }
   end
 
@@ -562,6 +579,34 @@ class DataSyncService < BaseService
     return unless sync_log
 
     sync_log.mark_failed!([error_message])
+  end
+
+  # Sanitize metadata to prevent XSS and limit size
+  def sanitize_metadata(metadata)
+    return {} if metadata.blank?
+
+    # Ensure metadata is a hash
+    metadata = {} unless metadata.is_a?(Hash)
+
+    # Remove potentially dangerous keys
+    dangerous_keys = %w[__proto__ constructor prototype]
+    metadata = metadata.reject { |key, _| dangerous_keys.include?(key.to_s) }
+
+    # Truncate strings to prevent abuse (max 2000 chars per string)
+    deep_truncate_strings(metadata, max_length: 2000)
+  end
+
+  def deep_truncate_strings(obj, max_length:)
+    case obj
+    when Hash
+      obj.transform_values { |v| deep_truncate_strings(v, max_length:) }
+    when Array
+      obj.map { |v| deep_truncate_strings(v, max_length:) }
+    when String
+      obj.length > max_length ? "#{obj[0...max_length]}..." : obj
+    else
+      obj
+    end
   end
 end
 # rubocop:enable Metrics/ClassLength
