@@ -57,7 +57,7 @@ jobs:
       - name: Setup database
         run: |
           bundle exec rails db:create
-          bundle exec rails db:schema:load
+          bundle exec rails db:migrate
 
       - name: Run tests
         run: bundle exec rspec --format documentation
