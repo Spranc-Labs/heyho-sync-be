@@ -41,6 +41,15 @@ Rails.application.routes.draw do
           post 'mark_dismissed'
         end
       end
+
+      # Research session endpoints
+      resources :research_sessions, only: %i[index show create update destroy] do
+        member do
+          post 'save', to: 'research_sessions#save_session'
+          post 'restore'
+          post 'dismiss'
+        end
+      end
     end
   end
 
