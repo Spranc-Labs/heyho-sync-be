@@ -32,7 +32,7 @@ class HoarderDetectionService
       .where('duration_seconds >= ?', @min_open_time.to_i)
       .where('engagement_rate <= ?', @max_engagement)
       .where.not(id: already_saved_visit_ids)
-      .order(first_visit_at: :desc)
+      .order(visited_at: :desc)
 
     # Group by URL to avoid duplicates
     unique_visits = candidate_visits.group_by(&:url).transform_values(&:first)
@@ -59,9 +59,7 @@ class HoarderDetectionService
       domain: visit.domain,
       open_time_seconds: visit.duration_seconds,
       engagement_rate: visit.engagement_rate,
-      first_visit_at: visit.first_visit_at,
-      last_visit_at: visit.last_visit_at,
-      visit_count: visit.visit_count,
+      visited_at: visit.visited_at,
       suggested_action: 'save_to_reading_list'
     }
   end

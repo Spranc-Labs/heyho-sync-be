@@ -28,11 +28,11 @@ class ResearchSessionDetectionService
   private
 
   def detect_research_sessions
-    # Get all page visits ordered by first visit time
+    # Get all page visits ordered by visit time
     visits = PageVisit
       .where(user_id: @user.id)
       .where.not(id: already_in_sessions)
-      .order(first_visit_at: :asc)
+      .order(visited_at: :asc)
 
     # Group visits into potential sessions based on time proximity
     sessions = group_visits_into_sessions(visits)
@@ -52,15 +52,15 @@ class ResearchSessionDetectionService
       if current_session.empty?
         # Start new session
         current_session = [visit]
-        session_start = visit.first_visit_at
-      elsif visit.first_visit_at - session_start <= @time_window
+        session_start = visit.visited_at
+      elsif visit.visited_at - session_start <= @time_window
         # Add to current session
         current_session << visit
       else
         # Save current session and start new one
         sessions << current_session if current_session.size >= @min_tabs
         current_session = [visit]
-        session_start = visit.first_visit_at
+        session_start = visit.visited_at
       end
     end
 
@@ -73,16 +73,16 @@ class ResearchSessionDetectionService
   def valid_session?(visits)
     return false if visits.size < @min_tabs
 
-    session_start = visits.first.first_visit_at
-    session_end = visits.map { |v| v.last_visit_at || v.first_visit_at }.max
+    session_start = visits.first.visited_at
+    session_end = visits.max_by(&:visited_at).visited_at
 
     duration = session_end - session_start
     duration >= @min_duration.to_i
   end
 
   def build_research_session(visits)
-    session_start = visits.first.first_visit_at
-    session_end = visits.map { |v| v.last_visit_at || v.first_visit_at }.max
+    session_start = visits.first.visited_at
+    session_end = visits.max_by(&:visited_at).visited_at
 
     # Extract domains and determine primary domain
     domains = visits.filter_map(&:domain).uniq
