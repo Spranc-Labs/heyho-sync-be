@@ -209,12 +209,7 @@ class DataSyncService < BaseService
       'category_confidence' => visit['categoryConfidence'],
       'category_method' => visit['categoryMethod'],
       # Metadata (sanitize before storing)
-      'metadata' => begin
-        Rails.logger.debug { "📋 [DEBUG] visit['metadata'] = #{visit["metadata"].inspect}" }
-        sanitized = sanitize_metadata(visit['metadata'])
-        Rails.logger.debug { "📋 [DEBUG] sanitized metadata = #{sanitized.inspect}" }
-        sanitized
-      end
+      'metadata' => sanitize_metadata(visit['metadata'])
     }
   end
 
