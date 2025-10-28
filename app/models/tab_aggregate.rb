@@ -9,7 +9,7 @@ class TabAggregate < ApplicationRecord
   validates :active_time_seconds, presence: true, numericality: { greater_than_or_equal_to: 0 }
   validates :scroll_depth_percent, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 100 },
                                    allow_nil: true
-  validates :closed_at, presence: true
+  # closed_at can be nil for tabs whose status is unknown (no closure tracking data)
 
   # Custom validation
   validate :active_time_not_greater_than_total_time

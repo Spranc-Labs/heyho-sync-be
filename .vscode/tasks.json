@@ -226,6 +226,39 @@
       "group": "none"
     },
     {
+      "label": "Jobs: Refresh Whitelist (User ID)",
+      "type": "shell",
+      "command": "docker exec heyho-sync-be bundle exec rails runner 'RefreshPersonalWhitelistsJob.perform_now(${input:userId})'",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "group": "none"
+    },
+    {
+      "label": "Jobs: Refresh Whitelist (All Users)",
+      "type": "shell",
+      "command": "docker exec heyho-sync-be bundle exec rails runner 'User.find_each { |user| RefreshPersonalWhitelistsJob.perform_now(user.id) }'",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "group": "none"
+    },
+    {
+      "label": "Jobs: Console (Run Custom Job)",
+      "type": "shell",
+      "command": "docker exec -it heyho-sync-be bundle exec rails console",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "group": "none"
+    },
+    {
       "label": "Database: Migrate",
       "type": "shell",
       "command": "make migrate",
@@ -313,6 +346,14 @@
         "panel": "new"
       },
       "group": "none"
+    }
+  ],
+  "inputs": [
+    {
+      "id": "userId",
+      "type": "promptString",
+      "description": "Enter User ID to refresh whitelist for:",
+      "default": "1"
     }
   ]
 }

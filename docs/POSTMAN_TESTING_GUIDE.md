@@ -289,7 +289,7 @@ http://localhost:3000/api/v1/pattern_detections/serial_openers?min_visits=3&max_
 
 Groups browsing bursts into restorable sessions.
 
-**GET** `http://localhost:3000/api/v1/pattern_detections/research_sessions`
+**GET** `http://localhost:3000/`api/v1/pattern_detections/research_sessions``
 
 **Headers**:
 ```
