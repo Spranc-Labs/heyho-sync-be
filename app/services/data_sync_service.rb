@@ -24,14 +24,14 @@ class DataSyncService < BaseService
 
   TAB_AGGREGATE_SCHEMA = {
     type: 'object',
-    required: %w[id page_visit_id total_time_seconds active_time_seconds closed_at],
+    required: %w[id page_visit_id total_time_seconds active_time_seconds],
     properties: {
       id: { type: 'string' },
       page_visit_id: { type: 'string' },
       total_time_seconds: { type: 'integer', minimum: 0 },
       active_time_seconds: { type: 'integer', minimum: 0 },
       scroll_depth_percent: { type: 'integer', minimum: 0, maximum: 100 },
-      closed_at: { type: 'string', format: 'date-time' }
+      closed_at: { type: %w[string null], format: 'date-time' }
     }
   }.freeze
 
@@ -287,13 +287,21 @@ class DataSyncService < BaseService
   # Keyword arguments improve readability for this data transformation method
   def build_aggregate_hash(aggregate:, page_visit_id:, calculated_seconds:, last_active:, start_time:, tab_id:)
     # rubocop:enable Metrics/ParameterLists
+    # Determine closed_at: only set if aggregate explicitly has closedAt or isOpen=false
+    # Otherwise leave as nil (tab might still be open, we don't know)
+    closed_at = if aggregate['closedAt']
+                  timestamp_to_iso_8601(aggregate['closedAt'])
+                elsif aggregate['isOpen'] == false
+                  timestamp_to_iso_8601(aggregate['closedAt'] || last_active)
+                end
+
     {
       'id' => aggregate['id'] || "agg_#{start_time}_#{tab_id}",
       'page_visit_id' => page_visit_id,
       'total_time_seconds' => calculated_seconds,
       'active_time_seconds' => calculated_seconds,
       'scroll_depth_percent' => aggregate['scroll_depth_percent'] || 0,
-      'closed_at' => timestamp_to_iso_8601(last_active),
+      'closed_at' => closed_at,
       'domain_durations' => aggregate['domainDurations'] || aggregate['domain_durations'],
       'page_count' => validate_page_count(aggregate['pageCount'] || aggregate['page_count'], tab_id),
       'current_url' => aggregate['currentUrl'] || aggregate['current_url'] || aggregate['url'],
