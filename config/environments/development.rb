@@ -2,6 +2,7 @@
 
 require 'active_support/core_ext/integer/time'
 
+# rubocop:disable Metrics/BlockLength
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
@@ -68,11 +69,13 @@ Rails.application.configure do
   # config.action_cable.disable_request_forgery_protection = true
 
   # Allow requests from common development hosts
-  config.hosts << "localhost"
-  config.hosts << "127.0.0.1"
+  config.hosts << 'localhost'
+  config.hosts << '127.0.0.1'
   config.hosts << /.*\.local/
   config.hosts << /.*\.ngrok\.io/
   # Allow Docker internal network hosts
-  config.hosts << "sync-api"
-  config.hosts << "syrupy-api"
+  config.hosts << 'sync-api'
+  config.hosts << 'syrupy-api'
+  config.hosts << 'heyho-sync-be'
 end
+# rubocop:enable Metrics/BlockLength
