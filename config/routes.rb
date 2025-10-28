@@ -14,6 +14,11 @@ Rails.application.routes.draw do
       post 'reset-password-request', to: 'password_reset#request_reset'
       post 'reset-password', to: 'password_reset#reset_password'
 
+      # OAuth endpoints (for Syrupy integration)
+      get 'oauth/authorize', to: 'oauth#authorize'
+      post 'oauth/authorize', to: 'oauth#create_authorization'
+      post 'oauth/token', to: 'oauth#token'
+
       # Data sync endpoints
       post 'data/sync', to: 'data_sync#create'
 

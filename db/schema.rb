@@ -10,10 +10,27 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_10_28_000001) do
+ActiveRecord::Schema[7.0].define(version: 2025_10_28_215335) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "plpgsql"
+
+  create_table "authorization_codes", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "code", null: false
+    t.string "client_id", null: false
+    t.string "redirect_uri", null: false
+    t.string "scope", default: "browsing_data:read"
+    t.datetime "expires_at", null: false
+    t.boolean "used", default: false, null: false
+    t.datetime "used_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["code", "used"], name: "index_auth_codes_on_code_and_used"
+    t.index ["code"], name: "index_authorization_codes_on_code", unique: true
+    t.index ["expires_at"], name: "index_authorization_codes_on_expires_at"
+    t.index ["user_id"], name: "index_authorization_codes_on_user_id"
+  end
 
   create_table "jwt_denylists", force: :cascade do |t|
     t.string "jti"
@@ -204,6 +221,7 @@ ActiveRecord::Schema[7.0].define(version: 2025_10_28_000001) do
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
+  add_foreign_key "authorization_codes", "users"
   add_foreign_key "jwt_denylists", "users"
   add_foreign_key "page_visits", "page_visits", column: "source_page_visit_id"
   add_foreign_key "page_visits", "users"
