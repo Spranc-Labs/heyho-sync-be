@@ -46,7 +46,7 @@ class AuthorizationCode < ApplicationRecord
   end
 
   # Instance methods
-  def valid?
+  def code_valid?
     !used && !expired?
   end
 
