@@ -41,7 +41,24 @@ module Api
 
         # Find and authenticate user
         user = User.find_by(email: email.downcase)
-        unless user&.valid_password?(password)
+
+        # Validate user exists
+        unless user
+          return render json: {
+            error: 'invalid_grant',
+            error_description: 'Invalid email or password'
+          }, status: :unauthorized
+        end
+
+        # Validate password using BCrypt directly
+        begin
+          unless user.password_hash.present? && BCrypt::Password.new(user.password_hash) == password
+            return render json: {
+              error: 'invalid_grant',
+              error_description: 'Invalid email or password'
+            }, status: :unauthorized
+          end
+        rescue BCrypt::Errors::InvalidHash
           return render json: {
             error: 'invalid_grant',
             error_description: 'Invalid email or password'
