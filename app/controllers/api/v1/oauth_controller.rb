@@ -5,7 +5,7 @@ module Api
     # OAuth2 authorization controller
     # Implements simplified OAuth2 authorization code flow for Syrupy integration
     class OauthController < AuthenticatedController
-      skip_before_action :authenticate_request, only: [:token]
+      skip_before_action :require_authentication, only: [:token]
 
       # GET /api/v1/oauth/authorize
       # Shows authorization page (or returns auth details for SPA)
@@ -107,7 +107,7 @@ module Api
         if missing.any?
           render json: {
             error: 'invalid_request',
-            error_description: "Missing required parameters: #{missing.join(', ')}"
+            error_description: "Missing required parameters: #{missing.join(", ")}"
           }, status: :bad_request
           return false
         end
@@ -131,7 +131,7 @@ module Api
 
         render json: {
           error: 'invalid_request',
-          error_description: "Missing required parameters: #{missing.join(', ')}"
+          error_description: "Missing required parameters: #{missing.join(", ")}"
         }, status: :bad_request
         false
       end
