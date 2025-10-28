@@ -4,37 +4,53 @@ module Api
   module V1
     # OAuth2 authorization controller
     # Implements simplified OAuth2 authorization code flow for Syrupy integration
-    class OauthController < AuthenticatedController
-      skip_before_action :require_authentication, only: [:token]
+    class OauthController < BaseController
+      # Don't require authentication - this will be a public OAuth flow
+      # Users will login through a form on the authorization page
 
       # GET /api/v1/oauth/authorize
-      # Shows authorization page (or returns auth details for SPA)
+      # Shows authorization page info (public endpoint)
       def authorize
-        validate_authorize_params!
+        return unless validate_authorize_params!
 
-        # In a traditional OAuth flow, this would render an authorization page
-        # For our SPA, we return the authorization details
+        # Return authorization page information
         render json: {
           client_id: params[:client_id],
           redirect_uri: params[:redirect_uri],
           scope: params[:scope] || 'browsing_data:read',
-          user: {
-            id: current_user.id,
-            email: current_user.email,
-            first_name: current_user.first_name,
-            last_name: current_user.last_name
-          }
+          client_name: 'Syrupy',
+          requires_login: true
         }
       end
 
       # POST /api/v1/oauth/authorize
-      # User grants authorization
+      # User grants authorization (requires email and password)
       def create_authorization
-        validate_authorize_params!
+        return unless validate_authorize_params!
+
+        # Authenticate user with email and password
+        email = params[:email]
+        password = params[:password]
+
+        unless email.present? && password.present?
+          return render json: {
+            error: 'invalid_request',
+            error_description: 'Email and password are required'
+          }, status: :bad_request
+        end
+
+        # Find and authenticate user
+        user = User.find_by(email: email.downcase)
+        unless user&.valid_password?(password)
+          return render json: {
+            error: 'invalid_grant',
+            error_description: 'Invalid email or password'
+          }, status: :unauthorized
+        end
 
         # Generate authorization code
         auth_code = AuthorizationCode.generate_for(
-          user: current_user,
+          user: user,
           client_id: params[:client_id],
           redirect_uri: params[:redirect_uri],
           scope: params[:scope] || 'browsing_data:read'
