@@ -65,6 +65,5 @@ Rails.application.configure do
 
   # Rails 7 requires explicit host configuration for tests
   # Allow all hosts in test environment
-  config.hosts.clear
-  config.hosts << /.*/ # Accept any host
+  config.hosts = nil
 end
