@@ -171,20 +171,13 @@ module Insights
         @tab_metadata[:is_single_visit]
     end
 
-    # Check if domain is whitelisted (universal or personal)
+    # Check if domain is whitelisted (universal only)
     def check_whitelist
-      # Check universal whitelist first (always strong whitelist)
+      # Check universal whitelist (always strong whitelist)
       return { is_whitelisted: true, reason: 'universal_whitelist', is_conditional: false } if universal_whitelist?
 
-      # Check user's personal whitelist
-      whitelist_entry = PersonalWhitelist.find_for(user: @user, domain: @domain)
-      if whitelist_entry
-        return {
-          is_whitelisted: true,
-          reason: whitelist_entry.whitelist_reason,
-          is_conditional: whitelist_entry.conditional_whitelist?
-        }
-      end
+      # Personal whitelist feature disabled for now
+      # TODO: Re-enable when personal whitelist feature is implemented
 
       # Not whitelisted
       { is_whitelisted: false, reason: nil, is_conditional: false }
