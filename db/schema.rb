@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_10_28_215335) do
+ActiveRecord::Schema[7.0].define(version: 2025_10_29_060348) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "plpgsql"
@@ -63,8 +63,10 @@ ActiveRecord::Schema[7.0].define(version: 2025_10_28_215335) do
     t.float "category_confidence"
     t.string "category_method"
     t.jsonb "metadata", default: {}
+    t.datetime "opened_at"
     t.index ["category"], name: "index_page_visits_on_category"
     t.index ["metadata"], name: "index_page_visits_on_metadata", using: :gin
+    t.index ["opened_at"], name: "index_page_visits_on_opened_at"
     t.index ["source_page_visit_id"], name: "index_page_visits_on_source_page_visit_id"
     t.index ["user_id", "category"], name: "index_page_visits_on_user_id_and_category"
     t.index ["user_id", "domain", "visited_at"], name: "index_page_visits_on_user_domain_and_visited_at"

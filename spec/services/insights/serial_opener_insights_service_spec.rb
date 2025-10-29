@@ -200,17 +200,19 @@ RSpec.describe Insights::SerialOpenerInsightsService do
                               visited_at: 1.hour.ago, duration_seconds: 5),
           create(:page_visit, user:, url: 'https://notion.so/page-abc?v=view2',
                               visited_at: 2.hours.ago, duration_seconds: 5),
+          create(:page_visit, user:, url: 'https://notion.so/page-abc#section',
+                              visited_at: 3.hours.ago, duration_seconds: 5),
           create(:page_visit, user:, url: 'https://notion.so/page-abc',
-                              visited_at: 3.hours.ago, duration_seconds: 5)
+                              visited_at: 4.hours.ago, duration_seconds: 5)
         ]
       end
 
       it 'groups different URL variations as same resource' do
-        result = described_class.call(user:, period: 'week')
+        result = described_class.call(user:, period: 'day')
 
         opener = result.data[:serial_openers].first
         expect(opener[:normalized_url]).to eq('https://notion.so/page-abc')
-        expect(opener[:visit_count]).to eq(3)
+        expect(opener[:visit_count]).to eq(4)
         expect(opener[:url_variations_count]).to be >= 1
       end
     end

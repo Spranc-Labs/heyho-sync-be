@@ -346,6 +346,62 @@
         "panel": "new"
       },
       "group": "none"
+    },
+    {
+      "label": "Backup: Create User Data Backup",
+      "type": "shell",
+      "command": "docker-compose exec heyho-sync-be bundle exec rake backup:user_data EMAIL=${input:userEmail}",
+      "options": {
+        "cwd": "${workspaceFolder}/../../"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "group": "backup"
+    },
+    {
+      "label": "Backup: List All Backups",
+      "type": "shell",
+      "command": "docker-compose exec heyho-sync-be bundle exec rake backup:list",
+      "options": {
+        "cwd": "${workspaceFolder}/../../"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "group": "backup"
+    },
+    {
+      "label": "Backup: List User Backups",
+      "type": "shell",
+      "command": "docker-compose exec heyho-sync-be bundle exec rake backup:list EMAIL=${input:userEmail}",
+      "options": {
+        "cwd": "${workspaceFolder}/../../"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "group": "backup"
+    },
+    {
+      "label": "Backup: Restore User Data",
+      "type": "shell",
+      "command": "docker-compose exec heyho-sync-be bundle exec rake backup:restore_user_data BACKUP_FILE=${input:backupFile}",
+      "options": {
+        "cwd": "${workspaceFolder}/../../"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "group": "backup"
     }
   ],
   "inputs": [
@@ -354,6 +410,18 @@
       "type": "promptString",
       "description": "Enter User ID to refresh whitelist for:",
       "default": "1"
+    },
+    {
+      "id": "userEmail",
+      "type": "promptString",
+      "description": "Enter user email:",
+      "default": "demo@syrupy.com"
+    },
+    {
+      "id": "backupFile",
+      "type": "promptString",
+      "description": "Enter backup file path (e.g., backups/user_data/demo_at_syrupy_com_20251029_060600.json):",
+      "default": "backups/user_data/"
     }
   ]
 }

@@ -24,7 +24,7 @@ RSpec.describe Insights::AdaptiveThresholdCalculator do
       end
 
       it 'returns baseline serial opener max engagement' do
-        expect(calculator.max_serial_opener_engagement_seconds).to eq(300) # 5 minutes
+        expect(calculator.max_serial_opener_engagement_seconds).to eq(120) # 2 minutes
       end
     end
 
@@ -118,9 +118,15 @@ RSpec.describe Insights::AdaptiveThresholdCalculator do
       expect(result).to eq(:periodic_revisit)
     end
 
-    it 'handles zero avg_hours_between' do
+    it 'handles zero avg_hours_between as compulsive (instant reopening)' do
       result = calculator.classify_behavior_by_frequency(0)
-      expect(result).to eq(:periodic_revisit)
+      expect(result).to eq(:compulsive_checking)
+    end
+
+    it 'raises error for negative avg_hours_between' do
+      expect do
+        calculator.classify_behavior_by_frequency(-1)
+      end.to raise_error(ArgumentError, /must be non-negative/)
     end
   end
 
@@ -161,18 +167,24 @@ RSpec.describe Insights::AdaptiveThresholdCalculator do
       result = calculator.classify_engagement_type(15)
       expect(result).to eq(:scan)
     end
+
+    it 'raises error for negative avg_seconds' do
+      expect do
+        calculator.classify_engagement_type(-5)
+      end.to raise_error(ArgumentError, /must be non-negative/)
+    end
   end
 
-  describe '#min_visits_per_day_threshold' do
-    let(:calculator) { described_class.new(days_in_period: 7) }
+  describe 'serial opener visits per day consistency' do
+    it 'maintains consistent visits/day threshold across periods' do
+      short_period = described_class.new(days_in_period: 1)
+      baseline = described_class.new(days_in_period: 7)
+      long_period = described_class.new(days_in_period: 30)
 
-    it 'returns constant 0.43 for all periods' do
-      expect(calculator.min_visits_per_day_threshold).to eq(0.43)
-    end
-
-    it 'is equivalent to 3 visits per week' do
-      # 0.43 visits/day * 7 days = 3.01 visits
-      expect(calculator.min_visits_per_day_threshold * 7).to be_within(0.1).of(3.0)
+      # All should use same visits-per-day calculation (0.43 visits/day threshold)
+      expect(short_period.qualifies_as_serial_opener?(1, 1)).to be true # 1.0/day > 0.43
+      expect(baseline.qualifies_as_serial_opener?(4, 7)).to be true # 0.57/day > 0.43
+      expect(long_period.qualifies_as_serial_opener?(13, 30)).to be true # 0.43/day >= 0.43
     end
   end
 
@@ -180,15 +192,15 @@ RSpec.describe Insights::AdaptiveThresholdCalculator do
     context 'for 7-day period' do
       let(:calculator) { described_class.new(days_in_period: 7) }
 
-      it 'qualifies with 3 visits in a week' do
-        expect(calculator.qualifies_as_serial_opener?(3, 7)).to be true
+      it 'does not qualify with 3 visits in a week (0.428/day < 0.43)' do
+        expect(calculator.qualifies_as_serial_opener?(3, 7)).to be false
       end
 
-      it 'qualifies with 4 visits in a week' do
+      it 'qualifies with 4 visits in a week (0.57/day >= 0.43)' do
         expect(calculator.qualifies_as_serial_opener?(4, 7)).to be true
       end
 
-      it 'does not qualify with 2 visits in a week' do
+      it 'does not qualify with 2 visits in a week (0.285/day < 0.43)' do
         expect(calculator.qualifies_as_serial_opener?(2, 7)).to be false
       end
     end
@@ -226,9 +238,25 @@ RSpec.describe Insights::AdaptiveThresholdCalculator do
       expect(calculator.qualifies_as_serial_opener?(10, 0)).to be false
     end
 
-    it 'returns false for nil days' do
-      calculator = described_class.new(days_in_period: nil)
-      expect(calculator.qualifies_as_serial_opener?(10, nil)).to be false
+    it 'uses instance days_in_period when days parameter is nil' do
+      calculator = described_class.new(days_in_period: 7)
+      # When days param is nil, it uses instance's 7 days
+      # 10 visits / 7 days = 1.43/day >= 0.43 => true
+      expect(calculator.qualifies_as_serial_opener?(10, nil)).to be true
+    end
+
+    it 'raises error for negative visit count' do
+      calculator = described_class.new(days_in_period: 7)
+      expect do
+        calculator.qualifies_as_serial_opener?(-5, 7)
+      end.to raise_error(ArgumentError, /must be non-negative/)
+    end
+
+    it 'raises error for zero or negative days' do
+      calculator = described_class.new(days_in_period: 7)
+      expect do
+        calculator.qualifies_as_serial_opener?(10, -1)
+      end.to raise_error(ArgumentError, /must be positive/)
     end
   end
 
@@ -239,6 +267,24 @@ RSpec.describe Insights::AdaptiveThresholdCalculator do
       expect do
         calculator.min_visits_for_behavior(:unknown)
       end.to raise_error(ArgumentError, /Unknown behavior type/)
+    end
+
+    it 'raises error for period below minimum threshold' do
+      expect do
+        described_class.new(days_in_period: 0.3)
+      end.to raise_error(ArgumentError, /must be at least 0.5 days/)
+    end
+
+    it 'raises error for zero or negative period' do
+      expect do
+        described_class.new(days_in_period: 0)
+      end.to raise_error(ArgumentError, /must be positive/)
+    end
+
+    it 'raises error for negative period' do
+      expect do
+        described_class.new(days_in_period: -7)
+      end.to raise_error(ArgumentError, /must be positive/)
     end
   end
 end

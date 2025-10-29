@@ -67,7 +67,7 @@ module Api
 
         # Generate authorization code
         auth_code = AuthorizationCode.generate_for(
-          user: user,
+          user:,
           client_id: params[:client_id],
           redirect_uri: params[:redirect_uri],
           scope: params[:scope] || 'browsing_data:read'

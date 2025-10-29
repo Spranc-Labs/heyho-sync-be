@@ -65,7 +65,9 @@ class DataValidationService
   # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
   # This method intentionally validates multiple fields comprehensively
   def validate_tab_aggregate(data)
-    validate_required_fields(data, %w[id current_url closed_at])
+    validate_required_fields(data, %w[id])
+    # closed_at is optional - open tabs don't have it yet
+    # current_url is optional - validate only if present
     validate_url(data['current_url'], 'current_url') if data['current_url']
     validate_string_length(data['title'], 'title', MAX_TITLE_LENGTH) if data['title']
     validate_string_length(data['domain'], 'domain', MAX_DOMAIN_LENGTH) if data['domain']

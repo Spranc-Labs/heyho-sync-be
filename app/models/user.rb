@@ -13,6 +13,7 @@ class User < ApplicationRecord
   # Browsing data associations
   has_many :page_visits, dependent: :destroy
   has_many :tab_aggregates, through: :page_visits
+  has_many :research_sessions, dependent: :destroy
 
   # Validations
   validates :email, presence: true, format: { with: URI::MailTo::EMAIL_REGEXP }

@@ -2,14 +2,16 @@
 
 # Service to detect "serial openers" - resources repeatedly opened but never finished
 # Criteria:
-# - Visit count >= 3 (default)
-# - Total engagement time < 5 minutes (default)
+# - Visit count >= 2 (absolute minimum - must be repeated behavior)
+# - AND visits per day >= 0.43 for periods > 1 day (~3 visits per week)
+# - Total engagement time < max threshold (varies by period)
 # - Not already in reading list
 # - Supports date range filtering
 class SerialOpenerDetectionService
   DEFAULT_MIN_VISITS = 3
   DEFAULT_MAX_TOTAL_ENGAGEMENT = 5.minutes
   MIN_VISITS_PER_DAY = 0.43 # ~3 visits per week
+  ABSOLUTE_MIN_VISITS = 2 # Must have at least 2 visits (repeated behavior)
 
   def self.call(user, min_visits: DEFAULT_MIN_VISITS, max_total_engagement: DEFAULT_MAX_TOTAL_ENGAGEMENT,
                 start_date: nil, end_date: nil, days_in_period: nil)
@@ -39,14 +41,21 @@ class SerialOpenerDetectionService
     grouped_visits = all_visits.group_by { |visit| normalize_url(visit.url) }
 
     serial_openers = grouped_visits.filter_map do |normalized_url, visits|
-      # Use visits-per-day threshold if days_in_period provided, otherwise use absolute count
-      if @days_in_period
+      # Serial opener MUST have repeated behavior - minimum 2 visits
+      next if visits.size < ABSOLUTE_MIN_VISITS
+
+      # Apply period-based threshold if days_in_period is provided
+      if @days_in_period && @days_in_period > 1
+        # For longer periods, use visits-per-day threshold
         visits_per_day = visits.size.to_f / @days_in_period
         next if visits_per_day < MIN_VISITS_PER_DAY
-      elsif visits.size < @min_visits
-        next
+      elsif !@days_in_period
+        # No period specified: use absolute count threshold
+        next if visits.size < @min_visits
       end
+      # For 1-day period: ABSOLUTE_MIN_VISITS (2) is sufficient
 
+      # Check engagement threshold
       total_duration = visits.sum(&:duration_seconds)
       next if total_duration >= @max_total_engagement.to_i
 

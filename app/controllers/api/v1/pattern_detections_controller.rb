@@ -137,7 +137,7 @@ module Api
           age_min: params[:age_min]&.to_f,
           domain: params[:domain],
           exclude_domains: params[:exclude_domains]&.split(',')&.map(&:strip),
-          limit: params[:limit]&.to_i || 20, # Smart default: 20 tabs
+          limit: params[:limit]&.to_i || 1000, # High default to get all tabs (or pass limit param for fewer)
           sort_by: params[:sort_by] || 'value_rank' # Smart default: value-based ranking
         }.compact
       end

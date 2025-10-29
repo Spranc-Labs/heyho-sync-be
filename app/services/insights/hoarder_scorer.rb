@@ -9,10 +9,12 @@ module Insights
     HIGH_CONFIDENCE_THRESHOLD = 80 # Score >= 80 is high confidence hoarder
 
     # Scoring weights (designed to total ~100 for a clear hoarder)
+    # Adjusted thresholds: 3+ days primary (was 5, was 7 originally)
+    # Research shows tabs forgotten after 3 days
     WEIGHTS = {
-      tab_age_7_days: 40,           # Tab open for 7+ days
-      tab_age_3_days: 25,           # Tab open for 3-7 days
-      tab_age_1_day: 10,            # Tab open for 1-3 days
+      tab_age_3_days: 45,           # Tab open for 3+ days (primary threshold)
+      tab_age_1_day: 30,            # Tab open for 1-3 days (strengthened from 12)
+      tab_age_under_1: 0,           # Tab recently opened (< 1 day)
       inactive_2_days: 30,          # No activity for 2+ days
       inactive_1_day: 15,           # No activity for 1-2 days
       single_visit: 20,             # Opened once and forgotten
@@ -95,9 +97,9 @@ module Insights
     end
 
     # Check if tab matches severe hoarder pattern (overrides conditional whitelist)
-    # Severe pattern: 7+ days old, single visit, low engagement
+    # Severe pattern: 3+ days old (adjusted from 5, was 7), single visit, low engagement
     def severe_hoarder_pattern?
-      @tab_metadata[:tab_age_days] >= 7.0 &&
+      @tab_metadata[:tab_age_days] >= 3.0 &&
         @tab_metadata[:is_single_visit] &&
         @tab_metadata[:average_engagement_rate] < 0.1
     end
@@ -123,16 +125,14 @@ module Insights
     end
 
     # Factor 1: Tab age (PRIMARY SIGNAL)
+    # Adjusted thresholds: 3+ days primary (forgotten window)
     def calculate_tab_age_score
       age_days = @tab_metadata[:tab_age_days]
       score = 0
 
-      if age_days >= 7.0
-        score = WEIGHTS[:tab_age_7_days]
-        @score_breakdown[:tab_age] = { points: score, reason: "Tab open for #{age_days.round(1)} days (7+ days)" }
-      elsif age_days >= 3.0
+      if age_days >= 3.0
         score = WEIGHTS[:tab_age_3_days]
-        @score_breakdown[:tab_age] = { points: score, reason: "Tab open for #{age_days.round(1)} days (3-7 days)" }
+        @score_breakdown[:tab_age] = { points: score, reason: "Tab open for #{age_days.round(1)} days (3+ days)" }
       elsif age_days >= 1.0
         score = WEIGHTS[:tab_age_1_day]
         @score_breakdown[:tab_age] = { points: score, reason: "Tab open for #{age_days.round(1)} days (1-3 days)" }

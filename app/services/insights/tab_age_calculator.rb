@@ -32,6 +32,7 @@ module Insights
         visit_count: @visits.size,
 
         # Temporal data
+        opened_at: first_visit.opened_at, # Actual tab open time (from browser extension)
         first_visited_at: first_visit.visited_at,
         last_visited_at: last_visit.visited_at,
         tab_age_days: calculate_tab_age_days(first_visit, tab_lifecycle),
@@ -86,15 +87,19 @@ module Insights
     end
 
     # Calculate how many days since the tab was first opened
-    # For closed tabs, calculate time between first visit and closure
-    # For unknown status, calculate time since first visit (conservative estimate)
+    # Now uses opened_at field when available for accurate tab age
+    # Falls back to visited_at for backward compatibility with old data
     def calculate_tab_age_days(first_visit, tab_lifecycle)
+      # Use opened_at if available (accurate tab open time from browser extension)
+      # Otherwise fall back to visited_at (first activation time)
+      tab_opened_at = first_visit.opened_at || first_visit.visited_at
+
       if tab_lifecycle[:status] == :closed && tab_lifecycle[:closed_at]
         # Tab is closed: calculate actual time tab was open
-        ((tab_lifecycle[:closed_at] - first_visit.visited_at) / 1.day).round(1)
+        ((tab_lifecycle[:closed_at] - tab_opened_at) / 1.day).round(1)
       else
-        # Tab status unknown: calculate time since first visit (may overestimate)
-        ((@now - first_visit.visited_at) / 1.day).round(1)
+        # Tab status unknown or open: calculate time since tab was opened
+        ((@now - tab_opened_at) / 1.day).round(1)
       end
     end
 

@@ -12,6 +12,7 @@ class DataSyncService < BaseService
       url: { type: 'string', format: 'uri' },
       title: { type: 'string' },
       visited_at: { type: 'string', format: 'date-time' },
+      opened_at: { type: %w[string null], format: 'date-time' }, # When tab was actually opened (not just activated)
       source_page_visit_id: { type: %w[string null] },
       # Categorization fields (optional)
       category: { type: %w[string null] },
@@ -195,6 +196,7 @@ class DataSyncService < BaseService
       'url' => visit['url'],
       'title' => visit['title'] || extract_title_from_url(visit['url']),
       'visited_at' => timestamp_to_iso_8601(get_value(visit, 'visited_at', 'startedAt')),
+      'opened_at' => timestamp_to_iso_8601(get_value(visit, 'opened_at', 'openedAt')), # When tab was actually opened
       'source_page_visit_id' => get_value(visit, 'source_page_visit_id', 'sourcePageVisitId'),
       'tab_id' => visit['tabId'],
       'domain' => visit['domain'],
@@ -245,7 +247,10 @@ class DataSyncService < BaseService
   end
 
   def browser_extension_format?(aggregate)
-    aggregate['tabId'] && aggregate['startTime']
+    # Check for both camelCase (old format) and snake_case (new format)
+    has_tab_id = aggregate['tabId'].present?
+    has_start_time = aggregate['startTime'].present? || aggregate['start_time'].present?
+    has_tab_id && has_start_time
   end
 
   def transform_browser_extension_aggregate(aggregate, tab_to_page_visit)
@@ -254,8 +259,9 @@ class DataSyncService < BaseService
 
     return log_and_skip('no matching page visit found', tab_id) unless page_visit_id
 
-    start_time = aggregate['startTime']
-    last_active = aggregate['lastActiveTime'] || start_time
+    # Support both camelCase (old) and snake_case (new) formats
+    start_time = aggregate['startTime'] || aggregate['start_time']
+    last_active = aggregate['lastActiveTime'] || aggregate['last_active_time'] || start_time
     calculated_seconds = calculate_duration_seconds(start_time, last_active, tab_id)
 
     return nil unless calculated_seconds
@@ -287,12 +293,15 @@ class DataSyncService < BaseService
   # Keyword arguments improve readability for this data transformation method
   def build_aggregate_hash(aggregate:, page_visit_id:, calculated_seconds:, last_active:, start_time:, tab_id:)
     # rubocop:enable Metrics/ParameterLists
-    # Determine closed_at: only set if aggregate explicitly has closedAt or isOpen=false
+    # Determine closed_at: only set if aggregate explicitly has closedAt/closed_at or isOpen/is_open=false
     # Otherwise leave as nil (tab might still be open, we don't know)
-    closed_at = if aggregate['closedAt']
-                  timestamp_to_iso_8601(aggregate['closedAt'])
-                elsif aggregate['isOpen'] == false
-                  timestamp_to_iso_8601(aggregate['closedAt'] || last_active)
+    closed_at_value = aggregate['closedAt'] || aggregate['closed_at']
+    is_open_value = aggregate['isOpen'] || aggregate['is_open']
+
+    closed_at = if closed_at_value
+                  timestamp_to_iso_8601(closed_at_value)
+                elsif is_open_value == false
+                  timestamp_to_iso_8601(closed_at_value || last_active)
                 end
 
     {
@@ -412,7 +421,7 @@ class DataSyncService < BaseService
       visits_params,
       unique_by: :id,
       update_only: %i[
-        url title visited_at source_page_visit_id domain
+        url title visited_at opened_at source_page_visit_id domain
         duration_seconds active_duration_seconds engagement_rate
         idle_periods last_heartbeat anonymous_client_id
         category category_confidence category_method metadata
@@ -428,6 +437,7 @@ class DataSyncService < BaseService
       url: visit['url'],
       title: visit['title'],
       visited_at: visit['visited_at'],
+      opened_at: visit['opened_at'], # When tab was actually opened (from browser)
       source_page_visit_id: visit['source_page_visit_id'],
       tab_id: visit['tab_id'],
       domain: visit['domain'],

@@ -29,11 +29,11 @@ class AuthorizationCode < ApplicationRecord
     raise ArgumentError, "Invalid scope: #{scope}" unless VALID_SCOPES.include?(scope)
 
     create!(
-      user: user,
+      user:,
       code: generate_unique_code,
-      client_id: client_id,
-      redirect_uri: redirect_uri,
-      scope: scope,
+      client_id:,
+      redirect_uri:,
+      scope:,
       expires_at: CODE_EXPIRY_SECONDS.seconds.from_now
     )
   end
@@ -41,7 +41,7 @@ class AuthorizationCode < ApplicationRecord
   def self.generate_unique_code
     loop do
       code = SecureRandom.urlsafe_base64(32)
-      break code unless exists?(code: code)
+      break code unless exists?(code:)
     end
   end
 
