@@ -83,7 +83,7 @@ module Authentication
     end
 
     def deliver_reset_email(user, token)
-      if Rails.env.test?
+      if Rails.env.test? || Rails.env.development?
         UserMailer.password_reset(user, token).deliver_later
       else
         UserMailer.password_reset(user, token).deliver_now
