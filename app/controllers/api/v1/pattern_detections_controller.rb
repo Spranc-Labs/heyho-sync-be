@@ -6,20 +6,17 @@ module Api
     # Provides access to hoarder tabs, serial openers, and research session detection
     class PatternDetectionsController < AuthenticatedController
       # GET /api/v1/pattern_detections/hoarder_tabs
-      # Supports both new age-based detection and legacy duration-based detection
+      # Age-based hoarder tab detection
       # Query params:
-      #   New API (recommended):
-      #     - lookback_days: Number of days to analyze (default: 30)
-      #   Legacy API (deprecated):
-      #     - min_open_time: Minimum open time in minutes
-      #     - max_engagement: Maximum engagement rate
+      #   - lookback_days: Number of days to analyze (default: 30)
+      #   - min_score: Minimum hoarder score (default: 60)
+      #   - age_min: Minimum tab age in days
+      #   - domain: Filter by specific domain
+      #   - exclude_domains: Comma-separated domains to exclude
+      #   - limit: Max number of results (default: 1000)
+      #   - sort_by: Sort method (default: 'value_rank')
       def hoarder_tabs
-        # Check if using legacy parameters
-        if use_legacy_hoarder_detection?
-          render_legacy_hoarder_response
-        else
-          render_new_hoarder_response
-        end
+        render_new_hoarder_response
       rescue StandardError => e
         render_error_response(
           message: 'Failed to detect hoarder tabs',
@@ -101,11 +98,6 @@ module Api
 
       # Hoarder tab helpers
 
-      def use_legacy_hoarder_detection?
-        # Use legacy detection if old parameters are explicitly provided
-        params[:min_open_time].present? || params[:max_engagement].present?
-      end
-
       def render_new_hoarder_response
         lookback_days = params[:lookback_days]&.to_i || HoarderDetectionService::DEFAULT_LOOKBACK_DAYS
 
@@ -156,29 +148,6 @@ module Api
           detection_method: 'age_based_v2',
           filters_applied: filters.select { |_k, v| v.present? },
           top_domains: domain_counts
-        }
-      end
-
-      def render_legacy_hoarder_response
-        min_open_time = params[:min_open_time]&.to_i&.minutes || HoarderDetectionService::DEFAULT_MIN_OPEN_TIME
-        max_engagement = params[:max_engagement]&.to_f || HoarderDetectionService::DEFAULT_MAX_ENGAGEMENT
-
-        tabs = HoarderDetectionService.call(
-          current_user,
-          min_open_time:,
-          max_engagement:
-        )
-
-        render json: {
-          success: true,
-          data: {
-            hoarder_tabs: tabs,
-            count: tabs.size,
-            criteria: {
-              min_open_time_minutes: (min_open_time / 60).round,
-              max_engagement_rate: max_engagement
-            }
-          }
         }
       end
 
