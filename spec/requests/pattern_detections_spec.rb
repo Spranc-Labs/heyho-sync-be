@@ -3,8 +3,8 @@
 require 'rails_helper'
 
 RSpec.describe 'Pattern Detections API' do
-  let(:user) { create(:user) }
-  let(:auth_token) { user.id } # Simplified - adjust based on your auth implementation
+  let(:user) { create(:user, password_hash: BCrypt::Password.create('password123'), status: 1, isVerified: true) }
+  let(:auth_token) { generate_jwt_token(user) }
 
   describe 'GET /api/v1/pattern_detections/serial_openers' do
     context 'with legacy parameters (backward compatibility)' do

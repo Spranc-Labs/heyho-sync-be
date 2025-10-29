@@ -72,6 +72,8 @@ Rails.application.configure do
   config.hosts << 'localhost'
   config.hosts << '127.0.0.1'
   config.hosts << /.*\.local/
+  config.hosts << 'example.org' # For RSpec tests
+  config.hosts << 'www.example.com' # For RSpec tests
   config.hosts << /.*\.ngrok\.io/
   # Allow Docker internal network hosts
   config.hosts << 'sync-api'
