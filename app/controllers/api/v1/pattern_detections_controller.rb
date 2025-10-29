@@ -33,7 +33,7 @@ module Api
       #   - end_date: Custom end date (YYYY-MM-DD)
       #   - include_comparison: 'true' to include comparison with previous period
       def serial_openers
-        result = Insights::SerialOpenerInsightsService.call(
+        result = Insights::SerialOpeners::SerialOpenerInsightsService.call(
           user: current_user,
           period: params[:period],
           start_date: params[:start_date],
@@ -65,7 +65,7 @@ module Api
       def research_sessions
         detection_params = research_session_params
 
-        sessions = ResearchSessionDetectionService.call(current_user, **detection_params)
+        sessions = Detections::ResearchSessionDetectionService.call(current_user, **detection_params)
 
         render json: {
           success: true,
@@ -94,10 +94,11 @@ module Api
       end
 
       def research_session_params
+        service = Detections::ResearchSessionDetectionService
         {
-          min_tabs: params[:min_tabs]&.to_i || ResearchSessionDetectionService::DEFAULT_MIN_TABS,
-          time_window: params[:time_window]&.to_i&.minutes || ResearchSessionDetectionService::DEFAULT_TIME_WINDOW,
-          min_duration: params[:min_duration]&.to_i&.minutes || ResearchSessionDetectionService::DEFAULT_MIN_DURATION
+          min_tabs: params[:min_tabs]&.to_i || service::DEFAULT_MIN_TABS,
+          time_window: params[:time_window]&.to_i&.minutes || service::DEFAULT_TIME_WINDOW,
+          min_duration: params[:min_duration]&.to_i&.minutes || service::DEFAULT_MIN_DURATION
         }
       end
 
@@ -112,16 +113,16 @@ module Api
       # Hoarder tab helpers
 
       def render_hoarder_response
-        lookback_days = params[:lookback_days]&.to_i || HoarderDetectionService::DEFAULT_LOOKBACK_DAYS
+        lookback_days = params[:lookback_days]&.to_i || Detections::HoarderDetectionService::DEFAULT_LOOKBACK_DAYS
 
         # Parse filter parameters with smart defaults
         filters = parse_hoarder_filters
 
         # Get all tabs (before filters) for summary
-        all_tabs = HoarderDetectionService.call(current_user, lookback_days:, filters: {})
+        all_tabs = Detections::HoarderDetectionService.call(current_user, lookback_days:, filters: {})
 
         # Get filtered tabs
-        filtered_tabs = HoarderDetectionService.call(current_user, lookback_days:, filters:)
+        filtered_tabs = Detections::HoarderDetectionService.call(current_user, lookback_days:, filters:)
 
         # Generate summary
         summary = generate_hoarder_summary(all_tabs, filtered_tabs, filters)
