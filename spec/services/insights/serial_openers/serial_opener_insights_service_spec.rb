@@ -243,7 +243,7 @@ RSpec.describe Insights::SerialOpeners::SerialOpenerInsightsService do
 
     context 'error handling' do
       it 'handles and logs unexpected errors' do
-        allow(SerialOpenerDetectionService).to receive(:call).and_raise(StandardError, 'Test error')
+        allow(Detections::SerialOpenerDetectionService).to receive(:call).and_raise(StandardError, 'Test error')
 
         result = described_class.call(user:, period: 'week')
 

@@ -46,7 +46,7 @@ RSpec.describe DataProcessing::DataSanitizationService do
 
         result = described_class.sanitize_page_visit(data)
 
-        expect(result['url'].length).to eq(DataValidationService::MAX_URL_LENGTH)
+        expect(result['url'].length).to eq(DataProcessing::DataValidationService::MAX_URL_LENGTH)
       end
 
       it 'handles malformed URLs gracefully' do
@@ -81,7 +81,7 @@ RSpec.describe DataProcessing::DataSanitizationService do
 
         result = described_class.sanitize_page_visit(data)
 
-        expect(result['title'].length).to eq(DataValidationService::MAX_TITLE_LENGTH)
+        expect(result['title'].length).to eq(DataProcessing::DataValidationService::MAX_TITLE_LENGTH)
       end
     end
 
@@ -116,7 +116,7 @@ RSpec.describe DataProcessing::DataSanitizationService do
 
         result = described_class.sanitize_page_visit(data)
 
-        expect(result['domain'].length).to eq(DataValidationService::MAX_DOMAIN_LENGTH)
+        expect(result['domain'].length).to eq(DataProcessing::DataValidationService::MAX_DOMAIN_LENGTH)
       end
     end
 
@@ -134,7 +134,7 @@ RSpec.describe DataProcessing::DataSanitizationService do
 
         result = described_class.sanitize_page_visit(data)
 
-        expect(result['duration_seconds']).to eq(DataValidationService::MAX_DURATION)
+        expect(result['duration_seconds']).to eq(DataProcessing::DataValidationService::MAX_DURATION)
       end
 
       it 'converts string durations to numeric' do
@@ -270,7 +270,7 @@ RSpec.describe DataProcessing::DataSanitizationService do
       expect(result['url']).to eq('https://example.com')
       expect(result['title']).to eq('Example')
       expect(result['domain']).to eq('example.com')
-      expect(result['duration_seconds']).to eq(DataValidationService::MAX_DURATION)
+      expect(result['duration_seconds']).to eq(DataProcessing::DataValidationService::MAX_DURATION)
       expect(result['scroll_depth_percent']).to eq(100)
     end
   end

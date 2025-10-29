@@ -3,6 +3,8 @@
 require 'rails_helper'
 
 RSpec.describe Insights::Analyzers::DomainContextAnalyzer do
+  let(:user) { create(:user) }
+
   describe '.analyze' do
     context 'with productivity tool domains' do
       let(:tab_metadata) do
@@ -17,6 +19,7 @@ RSpec.describe Insights::Analyzers::DomainContextAnalyzer do
 
       it 'classifies as productivity tool' do
         result = described_class.analyze(
+          user:,
           domain: tab_metadata[:domain],
           url: tab_metadata[:url],
           tab_metadata:
@@ -27,6 +30,7 @@ RSpec.describe Insights::Analyzers::DomainContextAnalyzer do
 
       it 'applies lenient rules for recent activity' do
         result = described_class.analyze(
+          user:,
           domain: tab_metadata[:domain],
           url: tab_metadata[:url],
           tab_metadata:
@@ -40,6 +44,7 @@ RSpec.describe Insights::Analyzers::DomainContextAnalyzer do
         stale_metadata = tab_metadata.merge(days_since_last_activity: 2.0)
 
         result = described_class.analyze(
+          user:,
           domain: tab_metadata[:domain],
           url: tab_metadata[:url],
           tab_metadata: stale_metadata
@@ -62,6 +67,7 @@ RSpec.describe Insights::Analyzers::DomainContextAnalyzer do
 
       it 'classifies as content site' do
         result = described_class.analyze(
+          user:,
           domain: tab_metadata[:domain],
           url: tab_metadata[:url],
           tab_metadata:
@@ -72,6 +78,7 @@ RSpec.describe Insights::Analyzers::DomainContextAnalyzer do
 
       it 'applies strict rules for single visit' do
         result = described_class.analyze(
+          user:,
           domain: tab_metadata[:domain],
           url: tab_metadata[:url],
           tab_metadata:
@@ -96,6 +103,7 @@ RSpec.describe Insights::Analyzers::DomainContextAnalyzer do
 
         it 'classifies as code platform' do
           result = described_class.analyze(
+            user:,
             domain: tab_metadata[:domain],
             url: tab_metadata[:url],
             tab_metadata:
@@ -106,6 +114,7 @@ RSpec.describe Insights::Analyzers::DomainContextAnalyzer do
 
         it 'applies lenient rules for active work' do
           result = described_class.analyze(
+            user:,
             domain: tab_metadata[:domain],
             url: tab_metadata[:url],
             tab_metadata:
@@ -129,6 +138,7 @@ RSpec.describe Insights::Analyzers::DomainContextAnalyzer do
 
         it 'applies strict rules for random repo' do
           result = described_class.analyze(
+            user:,
             domain: tab_metadata[:domain],
             url: tab_metadata[:url],
             tab_metadata:
@@ -154,6 +164,7 @@ RSpec.describe Insights::Analyzers::DomainContextAnalyzer do
 
         it 'classifies as documentation' do
           result = described_class.analyze(
+            user:,
             domain: tab_metadata[:domain],
             url: tab_metadata[:url],
             tab_metadata:
@@ -164,6 +175,7 @@ RSpec.describe Insights::Analyzers::DomainContextAnalyzer do
 
         it 'applies lenient rules for frequent reference' do
           result = described_class.analyze(
+            user:,
             domain: tab_metadata[:domain],
             url: tab_metadata[:url],
             tab_metadata:
@@ -187,6 +199,7 @@ RSpec.describe Insights::Analyzers::DomainContextAnalyzer do
 
         it 'applies strict rules' do
           result = described_class.analyze(
+            user:,
             domain: tab_metadata[:domain],
             url: tab_metadata[:url],
             tab_metadata:
@@ -211,6 +224,7 @@ RSpec.describe Insights::Analyzers::DomainContextAnalyzer do
 
       it 'classifies as general' do
         result = described_class.analyze(
+          user:,
           domain: tab_metadata[:domain],
           url: tab_metadata[:url],
           tab_metadata:

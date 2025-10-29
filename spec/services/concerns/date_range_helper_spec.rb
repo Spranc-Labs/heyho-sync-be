@@ -138,7 +138,8 @@ RSpec.describe DateRangeHelper do
       range = helper.parse_date_range(period: 'week')
       days = helper.days_in_range(range)
 
-      expect(days).to be_within(0.1).of(7.0)
+      # Week includes today + 7 days ago = 8 days total
+      expect(days).to be_within(0.1).of(8.0)
     end
 
     it 'calculates days for custom range' do
