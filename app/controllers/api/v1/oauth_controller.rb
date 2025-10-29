@@ -25,6 +25,7 @@ module Api
 
       # POST /api/v1/oauth/authorize
       # User grants authorization (requires email and password)
+      # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
       def create_authorization
         return unless validate_authorize_params!
 
@@ -82,9 +83,11 @@ module Api
       rescue ArgumentError => e
         render json: { error: 'invalid_request', error_description: e.message }, status: :bad_request
       end
+      # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
       # POST /api/v1/oauth/token
       # Exchange authorization code for user info
+      # rubocop:disable Metrics/MethodLength
       def token
         validate_token_params!
 
@@ -130,6 +133,7 @@ module Api
           error_description: e.message
         }, status: :bad_request
       end
+      # rubocop:enable Metrics/MethodLength
 
       private
 

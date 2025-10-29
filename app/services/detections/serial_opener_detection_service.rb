@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# rubocop:disable Metrics/ParameterLists, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/AbcSize
 module Detections
   # Service to detect "serial openers" - resources repeatedly opened but never finished
   # Criteria:
@@ -151,3 +152,4 @@ module Detections
     end
   end
 end
+# rubocop:enable Metrics/ParameterLists, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/AbcSize

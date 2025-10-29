@@ -32,7 +32,10 @@ module Detections
     def self.call(user, lookback_days: DEFAULT_LOOKBACK_DAYS, filters: {}, **legacy_options)
       # Backwards compatibility: If old parameters provided, use legacy detection
       if legacy_options.key?(:min_open_time) || legacy_options.key?(:max_engagement)
-        Rails.logger.warn('HoarderDetectionService: Using deprecated detection method. Please migrate to new age-based detection.')
+        Rails.logger.warn(
+          'HoarderDetectionService: Using deprecated detection method. ' \
+          'Please migrate to new age-based detection.'
+        )
         return legacy_detection(user, **legacy_options)
       end
 
@@ -76,6 +79,7 @@ module Detections
 
     private
 
+    # rubocop:disable Naming/VariableNumber
     def detect_hoarder_tabs_v2
       # Get all page visits within lookback period
       candidate_visits = fetch_candidate_visits
@@ -143,7 +147,9 @@ module Detections
       # Build hoarder tab result
       build_hoarder_tab_v2(tab_metadata, score_result)
     end
+    # rubocop:enable Naming/VariableNumber
 
+    # rubocop:disable Naming/VariableNumber
     def build_hoarder_tab_v2(tab_metadata, score_result)
       most_recent_visit = tab_metadata[:most_recent_visit]
 
@@ -179,6 +185,7 @@ module Detections
         suggested_action: suggest_action(score_result)
       }
     end
+    # rubocop:enable Naming/VariableNumber
 
     def suggest_action(score_result)
       case score_result[:confidence_level]
@@ -219,12 +226,10 @@ module Detections
       when 'value_rank'
         # Apply value-based ranking
         Insights::Analyzers::ValueRanker.rank(tabs)
-      when 'hoarder_score'
-        tabs.sort_by { |tab| -tab[:hoarder_score] }
       when 'age'
         tabs.sort_by { |tab| -tab[:tab_age_days] }
       else
-        # Default to hoarder score
+        # Default to hoarder score (includes 'hoarder_score' and any unknown values)
         tabs.sort_by { |tab| -tab[:hoarder_score] }
       end
     end
