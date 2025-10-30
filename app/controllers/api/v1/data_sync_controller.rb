@@ -5,10 +5,12 @@ module Api
     class DataSyncController < AuthenticatedController
       # POST /api/v1/data/sync
       def create
+        # Convert to unsafe hash to preserve nested metadata structure
+        # (metadata gets sanitized in DataSyncService#sanitize_metadata)
         result = DataProcessing::DataSyncService.sync(
           user: current_user,
-          page_visits: params[:pageVisits],
-          tab_aggregates: params[:tabAggregates],
+          page_visits: params[:pageVisits]&.map(&:to_unsafe_h),
+          tab_aggregates: params[:tabAggregates]&.map(&:to_unsafe_h),
           client_info: extract_client_info
         )
 
