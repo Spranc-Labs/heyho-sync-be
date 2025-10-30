@@ -10,10 +10,27 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_10_20_172053) do
+ActiveRecord::Schema[7.0].define(version: 2025_10_29_060348) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "plpgsql"
+
+  create_table "authorization_codes", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "code", null: false
+    t.string "client_id", null: false
+    t.string "redirect_uri", null: false
+    t.string "scope", default: "browsing_data:read"
+    t.datetime "expires_at", null: false
+    t.boolean "used", default: false, null: false
+    t.datetime "used_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["code", "used"], name: "index_auth_codes_on_code_and_used"
+    t.index ["code"], name: "index_authorization_codes_on_code", unique: true
+    t.index ["expires_at"], name: "index_authorization_codes_on_expires_at"
+    t.index ["user_id"], name: "index_authorization_codes_on_user_id"
+  end
 
   create_table "jwt_denylists", force: :cascade do |t|
     t.string "jti"
@@ -46,8 +63,10 @@ ActiveRecord::Schema[7.0].define(version: 2025_10_20_172053) do
     t.float "category_confidence"
     t.string "category_method"
     t.jsonb "metadata", default: {}
+    t.datetime "opened_at"
     t.index ["category"], name: "index_page_visits_on_category"
     t.index ["metadata"], name: "index_page_visits_on_metadata", using: :gin
+    t.index ["opened_at"], name: "index_page_visits_on_opened_at"
     t.index ["source_page_visit_id"], name: "index_page_visits_on_source_page_visit_id"
     t.index ["user_id", "category"], name: "index_page_visits_on_user_id_and_category"
     t.index ["user_id", "domain", "visited_at"], name: "index_page_visits_on_user_domain_and_visited_at"
@@ -55,6 +74,83 @@ ActiveRecord::Schema[7.0].define(version: 2025_10_20_172053) do
     t.index ["user_id", "visited_at"], name: "index_page_visits_on_user_and_visited_at"
     t.index ["user_id"], name: "index_page_visits_on_user_id"
     t.index ["visited_at"], name: "index_page_visits_on_visited_at"
+  end
+
+  create_table "personal_whitelists", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "domain", null: false
+    t.string "whitelist_reason"
+    t.integer "routine_score"
+    t.datetime "detected_at"
+    t.datetime "last_verified_at"
+    t.boolean "is_active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id", "domain"], name: "index_personal_whitelists_on_user_id_and_domain", unique: true, where: "(is_active = true)"
+    t.index ["user_id", "is_active"], name: "index_personal_whitelists_on_user_id_and_is_active"
+    t.index ["user_id"], name: "index_personal_whitelists_on_user_id"
+    t.index ["whitelist_reason"], name: "index_personal_whitelists_on_whitelist_reason"
+  end
+
+  create_table "reading_list_items", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "page_visit_id"
+    t.text "url", null: false
+    t.string "title"
+    t.string "domain"
+    t.datetime "added_at", precision: nil, default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.string "added_from", limit: 50
+    t.string "status", limit: 50, default: "unread", null: false
+    t.integer "estimated_read_time"
+    t.text "notes"
+    t.string "tags", default: [], array: true
+    t.datetime "scheduled_for", precision: nil
+    t.datetime "completed_at", precision: nil
+    t.datetime "dismissed_at", precision: nil
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["added_at"], name: "idx_reading_list_added_at"
+    t.index ["scheduled_for"], name: "idx_reading_list_scheduled", where: "((status)::text = 'unread'::text)"
+    t.index ["user_id", "status"], name: "idx_reading_list_user_status"
+    t.index ["user_id", "url"], name: "idx_reading_list_user_url_unique", unique: true
+    t.index ["user_id"], name: "index_reading_list_items_on_user_id"
+  end
+
+  create_table "research_session_tabs", force: :cascade do |t|
+    t.bigint "research_session_id", null: false
+    t.string "page_visit_id", null: false
+    t.integer "tab_order"
+    t.string "url", null: false
+    t.string "title"
+    t.string "domain"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["page_visit_id"], name: "idx_session_tabs_page_visit"
+    t.index ["research_session_id", "tab_order"], name: "idx_session_tabs_order"
+    t.index ["research_session_id"], name: "index_research_session_tabs_on_research_session_id"
+  end
+
+  create_table "research_sessions", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "session_name", null: false
+    t.datetime "session_start", precision: nil, null: false
+    t.datetime "session_end", precision: nil, null: false
+    t.integer "tab_count", null: false
+    t.string "primary_domain"
+    t.string "domains", default: [], array: true
+    t.string "topics", default: [], array: true
+    t.integer "total_duration_seconds"
+    t.float "avg_engagement_rate"
+    t.string "status", limit: 50, default: "detected", null: false
+    t.datetime "saved_at", precision: nil
+    t.datetime "last_restored_at", precision: nil
+    t.integer "restore_count", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["primary_domain"], name: "idx_research_sessions_domain"
+    t.index ["session_start"], name: "idx_research_sessions_start"
+    t.index ["user_id", "status"], name: "idx_research_sessions_user_status"
+    t.index ["user_id"], name: "index_research_sessions_on_user_id"
   end
 
   create_table "sync_logs", force: :cascade do |t|
@@ -81,7 +177,7 @@ ActiveRecord::Schema[7.0].define(version: 2025_10_20_172053) do
     t.integer "total_time_seconds", default: 0, null: false
     t.integer "active_time_seconds", default: 0, null: false
     t.integer "scroll_depth_percent", default: 0
-    t.datetime "closed_at", null: false
+    t.datetime "closed_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.jsonb "domain_durations"
@@ -127,9 +223,16 @@ ActiveRecord::Schema[7.0].define(version: 2025_10_20_172053) do
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
+  add_foreign_key "authorization_codes", "users"
   add_foreign_key "jwt_denylists", "users"
   add_foreign_key "page_visits", "page_visits", column: "source_page_visit_id"
   add_foreign_key "page_visits", "users"
+  add_foreign_key "personal_whitelists", "users"
+  add_foreign_key "reading_list_items", "page_visits", on_delete: :nullify
+  add_foreign_key "reading_list_items", "users"
+  add_foreign_key "research_session_tabs", "page_visits", on_delete: :cascade
+  add_foreign_key "research_session_tabs", "research_sessions", on_delete: :cascade
+  add_foreign_key "research_sessions", "users"
   add_foreign_key "sync_logs", "users"
   add_foreign_key "tab_aggregates", "page_visits"
   add_foreign_key "user_login_change_keys", "users", column: "id"

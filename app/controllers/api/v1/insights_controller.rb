@@ -8,7 +8,7 @@ module Api
       # GET /api/v1/insights/daily_summary
       # Returns daily browsing summary for a specific date
       def daily_summary
-        result = Insights::DailySummaryService.call(
+        result = Insights::Summaries::DailySummaryService.call(
           user: current_user,
           date: params[:date] || Time.zone.today
         )
@@ -19,7 +19,7 @@ module Api
       # GET /api/v1/insights/weekly_summary
       # Returns weekly browsing summary for a specific week
       def weekly_summary
-        result = Insights::WeeklySummaryService.call(
+        result = Insights::Summaries::WeeklySummaryService.call(
           user: current_user,
           week: params[:week]
         )
@@ -30,7 +30,7 @@ module Api
       # GET /api/v1/insights/top_sites
       # Returns top visited sites ranked by time or visits
       def top_sites
-        result = Insights::TopSitesService.call(
+        result = Insights::Summaries::TopSitesService.call(
           user: current_user,
           period: params[:period] || 'week',
           limit: params[:limit] || 10,
@@ -43,7 +43,7 @@ module Api
       # GET /api/v1/insights/recent_activity
       # Returns recent browsing sessions grouped by time gaps
       def recent_activity
-        result = Insights::RecentActivityService.call(
+        result = Insights::Summaries::RecentActivityService.call(
           user: current_user,
           limit: params[:limit] || 20,
           since: params[:since]
@@ -55,7 +55,7 @@ module Api
       # GET /api/v1/insights/productivity_hours
       # Returns productivity metrics by hour and day of week
       def productivity_hours
-        result = Insights::ProductivityHoursService.call(
+        result = Insights::Summaries::ProductivityHoursService.call(
           user: current_user,
           period: params[:period] || 'week'
         )

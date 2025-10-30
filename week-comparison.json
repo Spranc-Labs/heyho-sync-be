@@ -1,0 +1,984 @@
+{
+    "success": true,
+    "data": {
+        "summary": {
+            "total_detected": 88,
+            "showing": 20,
+            "detection_method": "age_based_v2",
+            "filters_applied": {
+                "limit": 20,
+                "sort_by": "value_rank"
+            },
+            "top_domains": {
+                "canva.com": 8,
+                "chatgpt.com": 7,
+                "booking.qatarairways.com": 6,
+                "qatarairways.com": 6,
+                "teknoasian.com": 4
+            }
+        },
+        "hoarder_tabs": [
+            {
+                "page_visit_id": "pv_1761051134681_50",
+                "url": "https://clicktheredbutton.com/?site=751",
+                "title": "Radiooooo on Click The Red Button",
+                "domain": "clicktheredbutton.com",
+                "visited_at": "2025-10-21T12:52:14.000Z",
+                "last_activity_at": "2025-10-21T12:52:14.000Z",
+                "tab_age_days": 6.1,
+                "days_since_last_activity": 6.1,
+                "visit_count": 1,
+                "total_duration_seconds": 14,
+                "engagement_rate": 0.0,
+                "hoarder_score": 85,
+                "confidence_level": "high",
+                "reason": "No activity for 6.1 days (2+ days) • Tab open for 6.1 days (3-7 days) • Opened once and forgotten",
+                "score_breakdown": {
+                    "tab_age": {
+                        "points": 25,
+                        "reason": "Tab open for 6.1 days (3-7 days)"
+                    },
+                    "inactivity": {
+                        "points": 30,
+                        "reason": "No activity for 6.1 days (2+ days)"
+                    },
+                    "visit_pattern": {
+                        "points": 20,
+                        "reason": "Opened once and forgotten"
+                    },
+                    "engagement": {
+                        "points": 10,
+                        "reason": "Low engagement (0.0%)"
+                    },
+                    "domain_context": {
+                        "points": 0,
+                        "reason": "Domain type: general"
+                    }
+                },
+                "is_likely_still_open": false,
+                "is_single_visit": true,
+                "suggested_action": "save_to_reading_list_or_close",
+                "value_rank": 110.5,
+                "value_breakdown": {
+                    "base_score": 85,
+                    "age_weight": 1.3,
+                    "content_weight": 1.0,
+                    "final_value": 110.5
+                }
+            },
+            {
+                "page_visit_id": "pv_1761051106126_50",
+                "url": "https://codebeautify.org/random-link-generator",
+                "title": "random url - Google Search",
+                "domain": "codebeautify.org",
+                "visited_at": "2025-10-21T12:51:46.000Z",
+                "last_activity_at": "2025-10-21T12:51:46.000Z",
+                "tab_age_days": 6.1,
+                "days_since_last_activity": 6.1,
+                "visit_count": 1,
+                "total_duration_seconds": 2,
+                "engagement_rate": 0.0,
+                "hoarder_score": 85,
+                "confidence_level": "high",
+                "reason": "No activity for 6.1 days (2+ days) • Tab open for 6.1 days (3-7 days) • Opened once and forgotten",
+                "score_breakdown": {
+                    "tab_age": {
+                        "points": 25,
+                        "reason": "Tab open for 6.1 days (3-7 days)"
+                    },
+                    "inactivity": {
+                        "points": 30,
+                        "reason": "No activity for 6.1 days (2+ days)"
+                    },
+                    "visit_pattern": {
+                        "points": 20,
+                        "reason": "Opened once and forgotten"
+                    },
+                    "engagement": {
+                        "points": 10,
+                        "reason": "Low engagement (0.0%)"
+                    },
+                    "domain_context": {
+                        "points": 0,
+                        "reason": "Domain type: general"
+                    }
+                },
+                "is_likely_still_open": false,
+                "is_single_visit": true,
+                "suggested_action": "save_to_reading_list_or_close",
+                "value_rank": 110.5,
+                "value_breakdown": {
+                    "base_score": 85,
+                    "age_weight": 1.3,
+                    "content_weight": 1.0,
+                    "final_value": 110.5
+                }
+            },
+            {
+                "page_visit_id": "pv_1761048617851_36",
+                "url": "https://fish.io/",
+                "title": "Best AI Text To Speech & Free Voice Cloning | Fish Audio",
+                "domain": "fish.io",
+                "visited_at": "2025-10-21T12:10:17.000Z",
+                "last_activity_at": "2025-10-21T12:10:17.000Z",
+                "tab_age_days": 6.1,
+                "days_since_last_activity": 6.1,
+                "visit_count": 1,
+                "total_duration_seconds": 3,
+                "engagement_rate": 0.0,
+                "hoarder_score": 85,
+                "confidence_level": "high",
+                "reason": "No activity for 6.1 days (2+ days) • Tab open for 6.1 days (3-7 days) • Opened once and forgotten",
+                "score_breakdown": {
+                    "tab_age": {
+                        "points": 25,
+                        "reason": "Tab open for 6.1 days (3-7 days)"
+                    },
+                    "inactivity": {
+                        "points": 30,
+                        "reason": "No activity for 6.1 days (2+ days)"
+                    },
+                    "visit_pattern": {
+                        "points": 20,
+                        "reason": "Opened once and forgotten"
+                    },
+                    "engagement": {
+                        "points": 10,
+                        "reason": "Low engagement (0.0%)"
+                    },
+                    "domain_context": {
+                        "points": 0,
+                        "reason": "Domain type: general"
+                    }
+                },
+                "is_likely_still_open": false,
+                "is_single_visit": true,
+                "suggested_action": "save_to_reading_list_or_close",
+                "value_rank": 110.5,
+                "value_breakdown": {
+                    "base_score": 85,
+                    "age_weight": 1.3,
+                    "content_weight": 1.0,
+                    "final_value": 110.5
+                }
+            },
+            {
+                "page_visit_id": "pv_1761052413557_73",
+                "url": "https://huggingface.co/Jdomenusrex/WebsiteCategorize",
+                "title": "BERT",
+                "domain": "huggingface.co",
+                "visited_at": "2025-10-21T13:13:33.000Z",
+                "last_activity_at": "2025-10-21T13:13:33.000Z",
+                "tab_age_days": 6.1,
+                "days_since_last_activity": 6.1,
+                "visit_count": 1,
+                "total_duration_seconds": 4,
+                "engagement_rate": 0.0,
+                "hoarder_score": 85,
+                "confidence_level": "high",
+                "reason": "No activity for 6.1 days (2+ days) • Tab open for 6.1 days (3-7 days) • Opened once and forgotten",
+                "score_breakdown": {
+                    "tab_age": {
+                        "points": 25,
+                        "reason": "Tab open for 6.1 days (3-7 days)"
+                    },
+                    "inactivity": {
+                        "points": 30,
+                        "reason": "No activity for 6.1 days (2+ days)"
+                    },
+                    "visit_pattern": {
+                        "points": 20,
+                        "reason": "Opened once and forgotten"
+                    },
+                    "engagement": {
+                        "points": 10,
+                        "reason": "Low engagement (0.0%)"
+                    },
+                    "domain_context": {
+                        "points": 0,
+                        "reason": "Domain type: general"
+                    }
+                },
+                "is_likely_still_open": false,
+                "is_single_visit": true,
+                "suggested_action": "save_to_reading_list_or_close",
+                "value_rank": 110.5,
+                "value_breakdown": {
+                    "base_score": 85,
+                    "age_weight": 1.3,
+                    "content_weight": 1.0,
+                    "final_value": 110.5
+                }
+            },
+            {
+                "page_visit_id": "pv_1761063526308_86",
+                "url": "https://identity.getpostman.com/accounts?intent=switch-account&target_team=heyhoe&continue=https%3A%2F%2Fgo.postman.co%2F",
+                "title": "Workspaces",
+                "domain": "identity.getpostman.com",
+                "visited_at": "2025-10-21T16:18:46.000Z",
+                "last_activity_at": "2025-10-21T16:18:46.000Z",
+                "tab_age_days": 5.9,
+                "days_since_last_activity": 5.9,
+                "visit_count": 1,
+                "total_duration_seconds": 0,
+                "engagement_rate": 0.0,
+                "hoarder_score": 85,
+                "confidence_level": "high",
+                "reason": "No activity for 5.9 days (2+ days) • Tab open for 5.9 days (3-7 days) • Opened once and forgotten",
+                "score_breakdown": {
+                    "tab_age": {
+                        "points": 25,
+                        "reason": "Tab open for 5.9 days (3-7 days)"
+                    },
+                    "inactivity": {
+                        "points": 30,
+                        "reason": "No activity for 5.9 days (2+ days)"
+                    },
+                    "visit_pattern": {
+                        "points": 20,
+                        "reason": "Opened once and forgotten"
+                    },
+                    "engagement": {
+                        "points": 10,
+                        "reason": "Low engagement (0.0%)"
+                    },
+                    "domain_context": {
+                        "points": 0,
+                        "reason": "Domain type: general"
+                    }
+                },
+                "is_likely_still_open": false,
+                "is_single_visit": true,
+                "suggested_action": "save_to_reading_list_or_close",
+                "value_rank": 110.5,
+                "value_breakdown": {
+                    "base_score": 85,
+                    "age_weight": 1.3,
+                    "content_weight": 1.0,
+                    "final_value": 110.5
+                }
+            },
+            {
+                "page_visit_id": "pv_1761051406369_62",
+                "url": "https://livestreamfails.com/",
+                "title": "Hot Clips - LIVESTREAMFAILS",
+                "domain": "livestreamfails.com",
+                "visited_at": "2025-10-21T12:56:46.000Z",
+                "last_activity_at": "2025-10-21T12:56:46.000Z",
+                "tab_age_days": 6.1,
+                "days_since_last_activity": 6.1,
+                "visit_count": 1,
+                "total_duration_seconds": 14,
+                "engagement_rate": 0.0,
+                "hoarder_score": 85,
+                "confidence_level": "high",
+                "reason": "No activity for 6.1 days (2+ days) • Tab open for 6.1 days (3-7 days) • Opened once and forgotten",
+                "score_breakdown": {
+                    "tab_age": {
+                        "points": 25,
+                        "reason": "Tab open for 6.1 days (3-7 days)"
+                    },
+                    "inactivity": {
+                        "points": 30,
+                        "reason": "No activity for 6.1 days (2+ days)"
+                    },
+                    "visit_pattern": {
+                        "points": 20,
+                        "reason": "Opened once and forgotten"
+                    },
+                    "engagement": {
+                        "points": 10,
+                        "reason": "Low engagement (0.0%)"
+                    },
+                    "domain_context": {
+                        "points": 0,
+                        "reason": "Domain type: general"
+                    }
+                },
+                "is_likely_still_open": false,
+                "is_single_visit": true,
+                "suggested_action": "save_to_reading_list_or_close",
+                "value_rank": 110.5,
+                "value_breakdown": {
+                    "base_score": 85,
+                    "age_weight": 1.3,
+                    "content_weight": 1.0,
+                    "final_value": 110.5
+                }
+            },
+            {
+                "page_visit_id": "pv_1761047162135_23",
+                "url": "https://pahe.ink/the-gilded-age-season-2-complete-web-dl-720p-1080p/",
+                "title": "",
+                "domain": "pahe.ink",
+                "visited_at": "2025-10-21T11:46:02.000Z",
+                "last_activity_at": "2025-10-21T11:46:02.000Z",
+                "tab_age_days": 6.1,
+                "days_since_last_activity": 6.1,
+                "visit_count": 1,
+                "total_duration_seconds": 4,
+                "engagement_rate": 0.0,
+                "hoarder_score": 85,
+                "confidence_level": "high",
+                "reason": "No activity for 6.1 days (2+ days) • Tab open for 6.1 days (3-7 days) • Opened once and forgotten",
+                "score_breakdown": {
+                    "tab_age": {
+                        "points": 25,
+                        "reason": "Tab open for 6.1 days (3-7 days)"
+                    },
+                    "inactivity": {
+                        "points": 30,
+                        "reason": "No activity for 6.1 days (2+ days)"
+                    },
+                    "visit_pattern": {
+                        "points": 20,
+                        "reason": "Opened once and forgotten"
+                    },
+                    "engagement": {
+                        "points": 10,
+                        "reason": "Low engagement (0.0%)"
+                    },
+                    "domain_context": {
+                        "points": 0,
+                        "reason": "Domain type: general"
+                    }
+                },
+                "is_likely_still_open": false,
+                "is_single_visit": true,
+                "suggested_action": "save_to_reading_list_or_close",
+                "value_rank": 110.5,
+                "value_breakdown": {
+                    "base_score": 85,
+                    "age_weight": 1.3,
+                    "content_weight": 1.0,
+                    "final_value": 110.5
+                }
+            },
+            {
+                "page_visit_id": "pv_1761068441633_113",
+                "url": "https://pitchbook.com/profiles/company/551745-64#overview",
+                "title": "Tab AI 2025 Company Profile: Valuation, Funding & Investors | PitchBook",
+                "domain": "pitchbook.com",
+                "visited_at": "2025-10-21T17:40:41.000Z",
+                "last_activity_at": "2025-10-21T17:40:41.000Z",
+                "tab_age_days": 5.9,
+                "days_since_last_activity": 5.9,
+                "visit_count": 1,
+                "total_duration_seconds": 2,
+                "engagement_rate": 0.0,
+                "hoarder_score": 85,
+                "confidence_level": "high",
+                "reason": "No activity for 5.9 days (2+ days) • Tab open for 5.9 days (3-7 days) • Opened once and forgotten",
+                "score_breakdown": {
+                    "tab_age": {
+                        "points": 25,
+                        "reason": "Tab open for 5.9 days (3-7 days)"
+                    },
+                    "inactivity": {
+                        "points": 30,
+                        "reason": "No activity for 5.9 days (2+ days)"
+                    },
+                    "visit_pattern": {
+                        "points": 20,
+                        "reason": "Opened once and forgotten"
+                    },
+                    "engagement": {
+                        "points": 10,
+                        "reason": "Low engagement (0.0%)"
+                    },
+                    "domain_context": {
+                        "points": 0,
+                        "reason": "Domain type: general"
+                    }
+                },
+                "is_likely_still_open": false,
+                "is_single_visit": true,
+                "suggested_action": "save_to_reading_list_or_close",
+                "value_rank": 110.5,
+                "value_breakdown": {
+                    "base_score": 85,
+                    "age_weight": 1.3,
+                    "content_weight": 1.0,
+                    "final_value": 110.5
+                }
+            },
+            {
+                "page_visit_id": "pv_1761047159239_26",
+                "url": "https://s0-greate.net/go/1445313",
+                "title": "",
+                "domain": "s0-greate.net",
+                "visited_at": "2025-10-21T11:45:59.000Z",
+                "last_activity_at": "2025-10-21T11:45:59.000Z",
+                "tab_age_days": 6.1,
+                "days_since_last_activity": 6.1,
+                "visit_count": 1,
+                "total_duration_seconds": 2,
+                "engagement_rate": 0.0,
+                "hoarder_score": 85,
+                "confidence_level": "high",
+                "reason": "No activity for 6.1 days (2+ days) • Tab open for 6.1 days (3-7 days) • Opened once and forgotten",
+                "score_breakdown": {
+                    "tab_age": {
+                        "points": 25,
+                        "reason": "Tab open for 6.1 days (3-7 days)"
+                    },
+                    "inactivity": {
+                        "points": 30,
+                        "reason": "No activity for 6.1 days (2+ days)"
+                    },
+                    "visit_pattern": {
+                        "points": 20,
+                        "reason": "Opened once and forgotten"
+                    },
+                    "engagement": {
+                        "points": 10,
+                        "reason": "Low engagement (0.0%)"
+                    },
+                    "domain_context": {
+                        "points": 0,
+                        "reason": "Domain type: general"
+                    }
+                },
+                "is_likely_still_open": false,
+                "is_single_visit": true,
+                "suggested_action": "save_to_reading_list_or_close",
+                "value_rank": 110.5,
+                "value_breakdown": {
+                    "base_score": 85,
+                    "age_weight": 1.3,
+                    "content_weight": 1.0,
+                    "final_value": 110.5
+                }
+            },
+            {
+                "page_visit_id": "pv_1761047133816_24",
+                "url": "https://teknoasian.com/?ht=mIxadoLSV2V1iOXpp%2Baw%2F5cdwhU52AfuiF0%2BziE48HL8UtHfXslJECFa40TV7bj7cVJWZXdxOTVmN0ZqcThOdVN1T2x2eDB6eE9Qbm5PeEEyQTBHK1NyU2lsKzM0dEVHeEFpSUQ5K01walIyd2sxd0REMDFBMnYzcjJYK0M2WElHZVY2TUE9PQ%3D%3D",
+                "title": "",
+                "domain": "teknoasian.com",
+                "visited_at": "2025-10-21T11:45:33.000Z",
+                "last_activity_at": "2025-10-21T11:45:33.000Z",
+                "tab_age_days": 6.1,
+                "days_since_last_activity": 6.1,
+                "visit_count": 1,
+                "total_duration_seconds": 1,
+                "engagement_rate": 0.0,
+                "hoarder_score": 85,
+                "confidence_level": "high",
+                "reason": "No activity for 6.1 days (2+ days) • Tab open for 6.1 days (3-7 days) • Opened once and forgotten",
+                "score_breakdown": {
+                    "tab_age": {
+                        "points": 25,
+                        "reason": "Tab open for 6.1 days (3-7 days)"
+                    },
+                    "inactivity": {
+                        "points": 30,
+                        "reason": "No activity for 6.1 days (2+ days)"
+                    },
+                    "visit_pattern": {
+                        "points": 20,
+                        "reason": "Opened once and forgotten"
+                    },
+                    "engagement": {
+                        "points": 10,
+                        "reason": "Low engagement (0.0%)"
+                    },
+                    "domain_context": {
+                        "points": 0,
+                        "reason": "Domain type: general"
+                    }
+                },
+                "is_likely_still_open": false,
+                "is_single_visit": true,
+                "suggested_action": "save_to_reading_list_or_close",
+                "value_rank": 110.5,
+                "value_breakdown": {
+                    "base_score": 85,
+                    "age_weight": 1.3,
+                    "content_weight": 1.0,
+                    "final_value": 110.5
+                }
+            },
+            {
+                "page_visit_id": "pv_1761047138204_25",
+                "url": "https://teknoasian.com/?ht=QmaBFc8U%2FGrv627bU0nk2TvaiGZdpbvEkEHtXXjZd2%2FAsnPvY%2FBjg%2FjBQkDoOCJCM0tTbGErNnFzTmhEZDEvYzhFbnJqVHM4WEE3aDVETzdXcFV2cms5NFA5VG1nTjR6R3FUVUhOY3paL0FTTitXSitXaFlZeFlhak9ab3BkQ1lTbXd3dWc9PQ%3D%3D",
+                "title": "",
+                "domain": "teknoasian.com",
+                "visited_at": "2025-10-21T11:45:38.000Z",
+                "last_activity_at": "2025-10-21T11:45:38.000Z",
+                "tab_age_days": 6.1,
+                "days_since_last_activity": 6.1,
+                "visit_count": 1,
+                "total_duration_seconds": 1,
+                "engagement_rate": 0.0,
+                "hoarder_score": 85,
+                "confidence_level": "high",
+                "reason": "No activity for 6.1 days (2+ days) • Tab open for 6.1 days (3-7 days) • Opened once and forgotten",
+                "score_breakdown": {
+                    "tab_age": {
+                        "points": 25,
+                        "reason": "Tab open for 6.1 days (3-7 days)"
+                    },
+                    "inactivity": {
+                        "points": 30,
+                        "reason": "No activity for 6.1 days (2+ days)"
+                    },
+                    "visit_pattern": {
+                        "points": 20,
+                        "reason": "Opened once and forgotten"
+                    },
+                    "engagement": {
+                        "points": 10,
+                        "reason": "Low engagement (0.0%)"
+                    },
+                    "domain_context": {
+                        "points": 0,
+                        "reason": "Domain type: general"
+                    }
+                },
+                "is_likely_still_open": false,
+                "is_single_visit": true,
+                "suggested_action": "save_to_reading_list_or_close",
+                "value_rank": 110.5,
+                "value_breakdown": {
+                    "base_score": 85,
+                    "age_weight": 1.3,
+                    "content_weight": 1.0,
+                    "final_value": 110.5
+                }
+            },
+            {
+                "page_visit_id": "pv_1761068525165_117",
+                "url": "https://t.me/BlinkDevs",
+                "title": "Telegram: View @BlinkDevs",
+                "domain": "t.me",
+                "visited_at": "2025-10-21T17:42:05.000Z",
+                "last_activity_at": "2025-10-21T17:42:05.000Z",
+                "tab_age_days": 5.9,
+                "days_since_last_activity": 5.9,
+                "visit_count": 1,
+                "total_duration_seconds": 3,
+                "engagement_rate": 0.0,
+                "hoarder_score": 85,
+                "confidence_level": "high",
+                "reason": "No activity for 5.9 days (2+ days) • Tab open for 5.9 days (3-7 days) • Opened once and forgotten",
+                "score_breakdown": {
+                    "tab_age": {
+                        "points": 25,
+                        "reason": "Tab open for 5.9 days (3-7 days)"
+                    },
+                    "inactivity": {
+                        "points": 30,
+                        "reason": "No activity for 5.9 days (2+ days)"
+                    },
+                    "visit_pattern": {
+                        "points": 20,
+                        "reason": "Opened once and forgotten"
+                    },
+                    "engagement": {
+                        "points": 10,
+                        "reason": "Low engagement (0.0%)"
+                    },
+                    "domain_context": {
+                        "points": 0,
+                        "reason": "Domain type: general"
+                    }
+                },
+                "is_likely_still_open": false,
+                "is_single_visit": true,
+                "suggested_action": "save_to_reading_list_or_close",
+                "value_rank": 110.5,
+                "value_breakdown": {
+                    "base_score": 85,
+                    "age_weight": 1.3,
+                    "content_weight": 1.0,
+                    "final_value": 110.5
+                }
+            },
+            {
+                "page_visit_id": "pv_1761067704140_97",
+                "url": "https://web-activity-time-tracker.adsmediaextensions.com/#web-usage",
+                "title": "Web Activity Time Tracker - Track and block websites",
+                "domain": "web-activity-time-tracker.adsmediaextensions.com",
+                "visited_at": "2025-10-21T17:28:24.000Z",
+                "last_activity_at": "2025-10-21T17:28:24.000Z",
+                "tab_age_days": 5.9,
+                "days_since_last_activity": 5.9,
+                "visit_count": 1,
+                "total_duration_seconds": 2,
+                "engagement_rate": 0.0,
+                "hoarder_score": 85,
+                "confidence_level": "high",
+                "reason": "No activity for 5.9 days (2+ days) • Tab open for 5.9 days (3-7 days) • Opened once and forgotten",
+                "score_breakdown": {
+                    "tab_age": {
+                        "points": 25,
+                        "reason": "Tab open for 5.9 days (3-7 days)"
+                    },
+                    "inactivity": {
+                        "points": 30,
+                        "reason": "No activity for 5.9 days (2+ days)"
+                    },
+                    "visit_pattern": {
+                        "points": 20,
+                        "reason": "Opened once and forgotten"
+                    },
+                    "engagement": {
+                        "points": 10,
+                        "reason": "Low engagement (0.0%)"
+                    },
+                    "domain_context": {
+                        "points": 0,
+                        "reason": "Domain type: general"
+                    }
+                },
+                "is_likely_still_open": false,
+                "is_single_visit": true,
+                "suggested_action": "save_to_reading_list_or_close",
+                "value_rank": 110.5,
+                "value_breakdown": {
+                    "base_score": 85,
+                    "age_weight": 1.3,
+                    "content_weight": 1.0,
+                    "final_value": 110.5
+                }
+            },
+            {
+                "page_visit_id": "pv_1761053118243_63",
+                "url": "https://webmasters.stackexchange.com/questions/1721/why-dont-websites-have-a-description-meta-tag-in-the-head-section",
+                "title": "",
+                "domain": "webmasters.stackexchange.com",
+                "visited_at": "2025-10-21T13:25:18.000Z",
+                "last_activity_at": "2025-10-21T13:25:18.000Z",
+                "tab_age_days": 6.1,
+                "days_since_last_activity": 6.1,
+                "visit_count": 1,
+                "total_duration_seconds": 1,
+                "engagement_rate": 0.0,
+                "hoarder_score": 85,
+                "confidence_level": "high",
+                "reason": "No activity for 6.1 days (2+ days) • Tab open for 6.1 days (3-7 days) • Opened once and forgotten",
+                "score_breakdown": {
+                    "tab_age": {
+                        "points": 25,
+                        "reason": "Tab open for 6.1 days (3-7 days)"
+                    },
+                    "inactivity": {
+                        "points": 30,
+                        "reason": "No activity for 6.1 days (2+ days)"
+                    },
+                    "visit_pattern": {
+                        "points": 20,
+                        "reason": "Opened once and forgotten"
+                    },
+                    "engagement": {
+                        "points": 10,
+                        "reason": "Low engagement (0.0%)"
+                    },
+                    "domain_context": {
+                        "points": 0,
+                        "reason": "Domain type: general"
+                    }
+                },
+                "is_likely_still_open": false,
+                "is_single_visit": true,
+                "suggested_action": "save_to_reading_list_or_close",
+                "value_rank": 110.5,
+                "value_breakdown": {
+                    "base_score": 85,
+                    "age_weight": 1.3,
+                    "content_weight": 1.0,
+                    "final_value": 110.5
+                }
+            },
+            {
+                "page_visit_id": "pv_1761047090743_22",
+                "url": "https://ww1.goojara.to/",
+                "title": "",
+                "domain": "ww1.goojara.to",
+                "visited_at": "2025-10-21T11:44:50.000Z",
+                "last_activity_at": "2025-10-21T11:44:50.000Z",
+                "tab_age_days": 6.1,
+                "days_since_last_activity": 6.1,
+                "visit_count": 1,
+                "total_duration_seconds": 1,
+                "engagement_rate": 0.0,
+                "hoarder_score": 85,
+                "confidence_level": "high",
+                "reason": "No activity for 6.1 days (2+ days) • Tab open for 6.1 days (3-7 days) • Opened once and forgotten",
+                "score_breakdown": {
+                    "tab_age": {
+                        "points": 25,
+                        "reason": "Tab open for 6.1 days (3-7 days)"
+                    },
+                    "inactivity": {
+                        "points": 30,
+                        "reason": "No activity for 6.1 days (2+ days)"
+                    },
+                    "visit_pattern": {
+                        "points": 20,
+                        "reason": "Opened once and forgotten"
+                    },
+                    "engagement": {
+                        "points": 10,
+                        "reason": "Low engagement (0.0%)"
+                    },
+                    "domain_context": {
+                        "points": 0,
+                        "reason": "Domain type: general"
+                    }
+                },
+                "is_likely_still_open": false,
+                "is_single_visit": true,
+                "suggested_action": "save_to_reading_list_or_close",
+                "value_rank": 110.5,
+                "value_breakdown": {
+                    "base_score": 85,
+                    "age_weight": 1.3,
+                    "content_weight": 1.0,
+                    "final_value": 110.5
+                }
+            },
+            {
+                "page_visit_id": "pv_1761051173773_54",
+                "url": "https://www.flashbynight.com/drench/",
+                "title": "",
+                "domain": "flashbynight.com",
+                "visited_at": "2025-10-21T12:52:53.000Z",
+                "last_activity_at": "2025-10-21T12:52:53.000Z",
+                "tab_age_days": 6.1,
+                "days_since_last_activity": 6.1,
+                "visit_count": 1,
+                "total_duration_seconds": 8,
+                "engagement_rate": 0.0,
+                "hoarder_score": 85,
+                "confidence_level": "high",
+                "reason": "No activity for 6.1 days (2+ days) • Tab open for 6.1 days (3-7 days) • Opened once and forgotten",
+                "score_breakdown": {
+                    "tab_age": {
+                        "points": 25,
+                        "reason": "Tab open for 6.1 days (3-7 days)"
+                    },
+                    "inactivity": {
+                        "points": 30,
+                        "reason": "No activity for 6.1 days (2+ days)"
+                    },
+                    "visit_pattern": {
+                        "points": 20,
+                        "reason": "Opened once and forgotten"
+                    },
+                    "engagement": {
+                        "points": 10,
+                        "reason": "Low engagement (0.0%)"
+                    },
+                    "domain_context": {
+                        "points": 0,
+                        "reason": "Domain type: general"
+                    }
+                },
+                "is_likely_still_open": false,
+                "is_single_visit": true,
+                "suggested_action": "save_to_reading_list_or_close",
+                "value_rank": 110.5,
+                "value_breakdown": {
+                    "base_score": 85,
+                    "age_weight": 1.3,
+                    "content_weight": 1.0,
+                    "final_value": 110.5
+                }
+            },
+            {
+                "page_visit_id": "pv_1761051186181_55",
+                "url": "https://www.forgotify.com/",
+                "title": "",
+                "domain": "forgotify.com",
+                "visited_at": "2025-10-21T12:53:06.000Z",
+                "last_activity_at": "2025-10-21T12:53:06.000Z",
+                "tab_age_days": 6.1,
+                "days_since_last_activity": 6.1,
+                "visit_count": 1,
+                "total_duration_seconds": 219,
+                "engagement_rate": 0.0,
+                "hoarder_score": 85,
+                "confidence_level": "high",
+                "reason": "No activity for 6.1 days (2+ days) • Tab open for 6.1 days (3-7 days) • Opened once and forgotten",
+                "score_breakdown": {
+                    "tab_age": {
+                        "points": 25,
+                        "reason": "Tab open for 6.1 days (3-7 days)"
+                    },
+                    "inactivity": {
+                        "points": 30,
+                        "reason": "No activity for 6.1 days (2+ days)"
+                    },
+                    "visit_pattern": {
+                        "points": 20,
+                        "reason": "Opened once and forgotten"
+                    },
+                    "engagement": {
+                        "points": 10,
+                        "reason": "Low engagement (0.0%)"
+                    },
+                    "domain_context": {
+                        "points": 0,
+                        "reason": "Domain type: general"
+                    }
+                },
+                "is_likely_still_open": false,
+                "is_single_visit": true,
+                "suggested_action": "save_to_reading_list_or_close",
+                "value_rank": 110.5,
+                "value_breakdown": {
+                    "base_score": 85,
+                    "age_weight": 1.3,
+                    "content_weight": 1.0,
+                    "final_value": 110.5
+                }
+            },
+            {
+                "page_visit_id": "pv_1761067577395_92",
+                "url": "https://www.perplexity.ai/search/new/7f5065cc-b24e-45e7-bd57-a40b1d5bc675",
+                "title": "Perplexity",
+                "domain": "perplexity.ai",
+                "visited_at": "2025-10-21T17:26:17.000Z",
+                "last_activity_at": "2025-10-21T17:26:17.000Z",
+                "tab_age_days": 5.9,
+                "days_since_last_activity": 5.9,
+                "visit_count": 1,
+                "total_duration_seconds": 0,
+                "engagement_rate": 0.0,
+                "hoarder_score": 85,
+                "confidence_level": "high",
+                "reason": "No activity for 5.9 days (2+ days) • Tab open for 5.9 days (3-7 days) • Opened once and forgotten",
+                "score_breakdown": {
+                    "tab_age": {
+                        "points": 25,
+                        "reason": "Tab open for 5.9 days (3-7 days)"
+                    },
+                    "inactivity": {
+                        "points": 30,
+                        "reason": "No activity for 5.9 days (2+ days)"
+                    },
+                    "visit_pattern": {
+                        "points": 20,
+                        "reason": "Opened once and forgotten"
+                    },
+                    "engagement": {
+                        "points": 10,
+                        "reason": "Low engagement (0.0%)"
+                    },
+                    "domain_context": {
+                        "points": 0,
+                        "reason": "Domain type: general"
+                    }
+                },
+                "is_likely_still_open": false,
+                "is_single_visit": true,
+                "suggested_action": "save_to_reading_list_or_close",
+                "value_rank": 110.5,
+                "value_breakdown": {
+                    "base_score": 85,
+                    "age_weight": 1.3,
+                    "content_weight": 1.0,
+                    "final_value": 110.5
+                }
+            },
+            {
+                "page_visit_id": "pv_1761068091683_103",
+                "url": "https://www.perplexity.ai/search/new/bba73f84-bf03-4cf5-ba39-164ff739289e",
+                "title": "[https://tabai.dev/pricing](https://tabai.dev/pricing) do u know how much this...",
+                "domain": "perplexity.ai",
+                "visited_at": "2025-10-21T17:34:51.000Z",
+                "last_activity_at": "2025-10-21T17:34:51.000Z",
+                "tab_age_days": 5.9,
+                "days_since_last_activity": 5.9,
+                "visit_count": 1,
+                "total_duration_seconds": 0,
+                "engagement_rate": 0.0,
+                "hoarder_score": 85,
+                "confidence_level": "high",
+                "reason": "No activity for 5.9 days (2+ days) • Tab open for 5.9 days (3-7 days) • Opened once and forgotten",
+                "score_breakdown": {
+                    "tab_age": {
+                        "points": 25,
+                        "reason": "Tab open for 5.9 days (3-7 days)"
+                    },
+                    "inactivity": {
+                        "points": 30,
+                        "reason": "No activity for 5.9 days (2+ days)"
+                    },
+                    "visit_pattern": {
+                        "points": 20,
+                        "reason": "Opened once and forgotten"
+                    },
+                    "engagement": {
+                        "points": 10,
+                        "reason": "Low engagement (0.0%)"
+                    },
+                    "domain_context": {
+                        "points": 0,
+                        "reason": "Domain type: general"
+                    }
+                },
+                "is_likely_still_open": false,
+                "is_single_visit": true,
+                "suggested_action": "save_to_reading_list_or_close",
+                "value_rank": 110.5,
+                "value_breakdown": {
+                    "base_score": 85,
+                    "age_weight": 1.3,
+                    "content_weight": 1.0,
+                    "final_value": 110.5
+                }
+            },
+            {
+                "page_visit_id": "pv_1761068166515_109",
+                "url": "https://www.producthunt.com/products/tabai-browser-productivity-agent/launches",
+                "title": "TabAI: Stay focused and in control right from your browser. | Product Hunt",
+                "domain": "producthunt.com",
+                "visited_at": "2025-10-21T17:36:06.000Z",
+                "last_activity_at": "2025-10-21T17:36:06.000Z",
+                "tab_age_days": 5.9,
+                "days_since_last_activity": 5.9,
+                "visit_count": 1,
+                "total_duration_seconds": 2,
+                "engagement_rate": 0.0,
+                "hoarder_score": 85,
+                "confidence_level": "high",
+                "reason": "No activity for 5.9 days (2+ days) • Tab open for 5.9 days (3-7 days) • Opened once and forgotten",
+                "score_breakdown": {
+                    "tab_age": {
+                        "points": 25,
+                        "reason": "Tab open for 5.9 days (3-7 days)"
+                    },
+                    "inactivity": {
+                        "points": 30,
+                        "reason": "No activity for 5.9 days (2+ days)"
+                    },
+                    "visit_pattern": {
+                        "points": 20,
+                        "reason": "Opened once and forgotten"
+                    },
+                    "engagement": {
+                        "points": 10,
+                        "reason": "Low engagement (0.0%)"
+                    },
+                    "domain_context": {
+                        "points": 0,
+                        "reason": "Domain type: general"
+                    }
+                },
+                "is_likely_still_open": false,
+                "is_single_visit": true,
+                "suggested_action": "save_to_reading_list_or_close",
+                "value_rank": 110.5,
+                "value_breakdown": {
+                    "base_score": 85,
+                    "age_weight": 1.3,
+                    "content_weight": 1.0,
+                    "final_value": 110.5
+                }
+            }
+        ],
+        "count": 20
+    }
+}

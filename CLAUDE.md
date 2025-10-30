@@ -492,6 +492,169 @@ spec/
 7. **Separate concerns** using modules and services
 8. **Follow Rails conventions** unless there's a good reason not to
 
+## Database Safety & Updates
+
+### Understanding Data Persistence
+
+The PostgreSQL database uses a **named Docker volume** (`postgres_data`) for persistence:
+- **Persistent storage**: Data survives container restarts, rebuilds, and updates
+- **Only removed with `-v` flag**: Commands like `docker-compose down -v` or `make clean` will DELETE all data
+- **Safe by default**: Most operations preserve your data
+
+### Safe vs Destructive Commands
+
+| Command | Data Safety | When to Use |
+|---------|-------------|-------------|
+| `make restart` | ✅ **Safe** | Restart services without losing data |
+| `make rebuild` | ✅ **Safe** | Rebuild images, preserves database |
+| `make safe-update` | ✅ **Safe** | Update services + run migrations |
+| `make quick-update` | ✅ **Safe** | Quick sync-be only update |
+| `make restart-sync` | ✅ **Safe** | Restart sync-be service only |
+| `make db-migrate-sync` | ✅ **Safe** | Run new migrations |
+| `make clean` | ⚠️ **DESTRUCTIVE** | Removes volumes + data (auto-backup) |
+| `make db-reset-sync` | ⚠️ **DESTRUCTIVE** | Drops database (auto-backup) |
+| `make rebuild-fresh` | ⚠️ **DESTRUCTIVE** | Fresh start with clean data |
+| `docker-compose down -v` | ❌ **DANGEROUS** | Removes all data, use `make clean` instead |
+
+### Recommended Update Workflows
+
+#### When you update code (most common):
+```bash
+# Best option - handles everything safely
+make safe-update
+
+# Or for sync-be only (faster)
+make quick-update
+```
+
+#### When you need to rebuild after dependency changes:
+```bash
+make rebuild  # Preserves data
+```
+
+#### When you just need to restart:
+```bash
+make restart-sync  # Restart sync-be only
+make restart       # Restart all services
+```
+
+### Backup & Restore Workflow
+
+#### Manual Backup (recommended before experiments):
+```bash
+# Backup to timestamped file
+make db-backup
+
+# Creates: backups/heyho_sync_YYYYMMDD_HHMMSS.sql
+```
+
+#### Automatic Backup Protection:
+Destructive commands (`make clean`, `make db-reset-sync`) automatically:
+1. Create timestamped backup
+2. Show backup location
+3. Prompt for confirmation
+4. Keep last 10 backups
+
+#### Restore from Backup:
+```bash
+# Find your backup
+ls -lht backups/
+
+# Restore specific backup
+make db-restore-sync BACKUP_FILE=backups/heyho_sync_20251029_143022.sql
+```
+
+### Common Scenarios
+
+#### Scenario 1: Updated code, need to test
+```bash
+make safe-update
+# ✅ Data preserved, migrations run, ready to test
+```
+
+#### Scenario 2: Need fresh database for testing
+```bash
+# Option A: Reset just the database
+make db-reset-sync  # Auto-backup, then reset
+
+# Option B: Full clean slate
+make clean  # Auto-backup, removes everything
+make up
+make db-setup
+```
+
+#### Scenario 3: Lost data accidentally
+```bash
+# Check backups
+ls -lht backups/postgres/
+
+# Restore from most recent
+make db-restore-sync BACKUP_FILE=backups/postgres/heyho_sync_backup_YYYYMMDD_HHMMSS.sql
+```
+
+#### Scenario 4: Switching branches
+```bash
+# If schema changed
+make safe-update  # Rebuilds + migrates
+
+# If schema unchanged
+make restart-sync  # Just restart
+```
+
+### Troubleshooting Data Loss
+
+**If you lost data after an update:**
+
+1. **Check backups directory**:
+   ```bash
+   ls -lht backups/postgres/
+   ```
+
+2. **Restore most recent backup**:
+   ```bash
+   make db-restore-sync BACKUP_FILE=backups/postgres/heyho_sync_backup_YYYYMMDD_HHMMSS.sql
+   ```
+
+3. **Understand what happened**:
+   - Did you run `make clean`? (This removes volumes)
+   - Did you use `docker-compose down -v`? (The `-v` flag removes volumes)
+   - Did you run `make db-reset-sync`? (This drops/recreates the database)
+
+**Prevention:**
+- Always use `make safe-update` or `make rebuild` for updates
+- Use `make clean` only when you intentionally want to start fresh
+- Never manually run `docker-compose down -v` - use `make down` instead
+
+### Volume Management Commands
+
+```bash
+# List volumes (verify postgres_data exists)
+docker volume ls
+
+# Inspect volume
+docker volume inspect heyho-platform_postgres_data
+
+# Check volume size
+docker system df -v | grep postgres_data
+```
+
+### Quick Reference
+
+**Daily Development:**
+- Update code → `make safe-update`
+- Restart service → `make restart-sync`
+- View logs → `make logs-heyho-sync-be`
+
+**Database Operations:**
+- Run migrations → `make db-migrate-sync`
+- Backup → `make db-backup`
+- Restore → `make db-restore-sync BACKUP_FILE=path/to/backup.sql`
+- Fresh start → `make clean` (auto-backup) → `make up` → `make db-setup`
+
+**Testing:**
+- Run specs → `make test-sync`
+- Lint code → `make lint-sync`
+
 ## Remember
 - Always add `# frozen_string_literal: true` to Ruby files
 - Run `make lint` before committing
@@ -500,3 +663,4 @@ spec/
 - Use meaningful variable and method names
 - Write tests for all new code
 - Document complex logic with comments
+- Use `make safe-update` for code updates (never `docker-compose down -v`)

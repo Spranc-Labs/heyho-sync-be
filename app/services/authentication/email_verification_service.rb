@@ -77,7 +77,7 @@ module Authentication
     end
 
     def deliver_verification_email(user, code)
-      if Rails.env.test?
+      if Rails.env.test? || Rails.env.development?
         UserMailer.email_verification(user, code).deliver_later
       else
         UserMailer.email_verification(user, code).deliver_now

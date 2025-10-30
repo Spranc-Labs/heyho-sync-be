@@ -5,7 +5,7 @@ module Api
     class DataSyncController < AuthenticatedController
       # POST /api/v1/data/sync
       def create
-        result = DataSyncService.sync(
+        result = DataProcessing::DataSyncService.sync(
           user: current_user,
           page_visits: params[:pageVisits],
           tab_aggregates: params[:tabAggregates],

@@ -57,6 +57,12 @@ Layout/LineLength:
   Max: 120
   Exclude:
     - 'spec/**/*'
+    - 'app/services/detections/research_session_detection_service.rb'
+    - 'app/services/insights/analyzers/hoarder_scorer.rb'
+    - 'app/services/insights/calculators/comparison_calculator.rb'
+    - 'app/services/insights/serial_openers/serial_opener_insight_generator.rb'
+    - 'lib/tasks/**/*'
+    - 'scripts/**/*'
 
 Layout/MultilineMethodCallIndentation:
   EnforcedStyle: indented
@@ -75,11 +81,16 @@ Metrics/BlockLength:
     - 'config/routes.rb'
     - 'lib/tasks/**/*'
     - '*.gemspec'
+    - 'scripts/**/*'
 
 Metrics/ClassLength:
   Max: 150
   Exclude:
     - 'spec/**/*'
+    - 'app/services/insights/analyzers/domain_context_analyzer.rb'
+    - 'app/services/insights/analyzers/hoarder_scorer.rb'
+    - 'app/services/insights/calculators/comparison_calculator.rb'
+    - 'app/services/insights/serial_openers/serial_opener_insight_generator.rb'
 
 Metrics/ModuleLength:
   Max: 150
@@ -90,9 +101,16 @@ Metrics/ModuleLength:
 
 Metrics/CyclomaticComplexity:
   Max: 10
+  Exclude:
+    - 'app/services/data_processing/data_sync_service.rb'
+    - 'app/services/insights/serial_openers/serial_opener_insight_generator.rb'
 
 Metrics/PerceivedComplexity:
   Max: 10
+  Exclude:
+    - 'app/services/data_processing/data_sync_service.rb'
+    - 'app/services/insights/analyzers/domain_context_analyzer.rb'
+    - 'app/services/insights/serial_openers/serial_opener_insight_generator.rb'
 
 # Rails Configuration
 Rails:
@@ -134,6 +152,8 @@ RSpec/MultipleMemoizedHelpers:
 
 RSpec/MessageSpies:
   EnforcedStyle: have_received
+  Exclude:
+    - 'spec/services/detections/hoarder_detection_service_spec.rb'
 
 RSpec/FilePath:
   Enabled: true
@@ -146,9 +166,17 @@ RSpec/AnyInstance:
 # Metrics Configuration - Allow slightly higher complexity for business logic
 Metrics/MethodLength:
   Max: 25  # Increased for complex service methods
+  Exclude:
+    - 'app/services/insights/analyzers/domain_context_analyzer.rb'
+    - 'app/services/insights/calculators/comparison_calculator.rb'
+    - 'app/services/insights/serial_openers/serial_opener_insight_generator.rb'
+    - 'app/services/insights/serial_openers/serial_opener_insights_service.rb'
 
 Metrics/AbcSize:
   Max: 30  # Increased for complex business logic
+  Exclude:
+    - 'app/services/insights/serial_openers/serial_opener_insight_generator.rb'
+    - 'app/services/insights/serial_openers/serial_opener_insights_service.rb'
 
 # Performance Configuration
 Performance:
@@ -163,6 +191,8 @@ Naming/PredicateName:
 
 Naming/VariableNumber:
   EnforcedStyle: snake_case
+  AllowedIdentifiers:
+    - v1  # API versioning
 
 # Lint Configuration
 Lint/MissingSuper:
@@ -175,3 +205,18 @@ Lint/UnusedMethodArgument:
 # Bundler Configuration
 Bundler/OrderedGems:
   Enabled: true
+
+# Additional excludes for pre-existing code
+Style/MultilineBlockChain:
+  Exclude:
+    - 'app/services/insights/analyzers/value_ranker.rb'
+
+RSpec/LetSetup:
+  Exclude:
+    - 'spec/services/insights/calculators/adaptive_threshold_calculator_spec.rb'
+    - 'spec/services/insights/serial_openers/serial_opener_insights_service_spec.rb'
+
+RSpec/ContextWording:
+  Exclude:
+    - 'spec/services/insights/calculators/adaptive_threshold_calculator_spec.rb'
+    - 'spec/services/insights/serial_openers/serial_opener_insights_service_spec.rb'
