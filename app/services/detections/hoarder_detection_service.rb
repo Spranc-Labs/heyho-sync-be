@@ -10,6 +10,7 @@ module Detections
   #
   # Old approach (deprecated but kept for backwards compatibility):
   # - Simple duration + engagement thresholds
+  # rubocop:disable Metrics/ClassLength
   class HoarderDetectionService
     # Deprecated constants (kept for backwards compatibility)
     DEFAULT_MIN_OPEN_TIME = 30.minutes
@@ -181,11 +182,36 @@ module Detections
         is_likely_still_open: tab_metadata[:is_likely_still_open],
         is_single_visit: tab_metadata[:is_single_visit],
 
+        # Preview metadata (image, favicon, description for link preview cards)
+        preview: extract_preview_metadata(most_recent_visit),
+
         # Suggested action
         suggested_action: suggest_action(score_result)
       }
     end
     # rubocop:enable Naming/VariableNumber
+
+    def extract_preview_metadata(visit)
+      return nil unless visit&.metadata
+
+      # Extract preview metadata if it exists
+      preview = visit.metadata['preview'] || {}
+
+      # Only return preview if it has at least one useful field
+      has_useful_data = preview['image'].present? ||
+                        preview['favicon'].present? ||
+                        preview['description'].present?
+
+      return nil unless has_useful_data
+
+      {
+        image: preview['image'],
+        favicon: preview['favicon'],
+        description: preview['description'],
+        site_name: preview['siteName'],
+        author: preview['author']
+      }.compact # Remove nil values
+    end
 
     def suggest_action(score_result)
       case score_result[:confidence_level]
@@ -242,4 +268,5 @@ module Detections
         .pluck(:page_visit_id)
     end
   end
+  # rubocop:enable Metrics/ClassLength
 end

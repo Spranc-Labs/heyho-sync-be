@@ -333,9 +333,17 @@ module DataProcessing
     end
 
     def transform_api_aggregate(aggregate)
+      page_visit_id = aggregate['page_visit_id'] || aggregate['pageVisitId']
+
+      # Skip aggregates without a valid page_visit_id (required field)
+      unless page_visit_id
+        Rails.logger.warn "Skipping tab aggregate #{aggregate["id"]}: missing page_visit_id"
+        return nil
+      end
+
       {
         'id' => aggregate['id'],
-        'page_visit_id' => aggregate['page_visit_id'] || aggregate['pageVisitId'],
+        'page_visit_id' => page_visit_id,
         'total_time_seconds' => aggregate['total_time_seconds'] || aggregate['totalTimeSeconds'],
         'active_time_seconds' => aggregate['active_time_seconds'] || aggregate['activeTimeSeconds'],
         'scroll_depth_percent' => aggregate['scroll_depth_percent'] || aggregate['scrollDepthPercent'],
@@ -602,6 +610,17 @@ module DataProcessing
 
     # Sanitize metadata to prevent XSS and limit size
     def sanitize_metadata(metadata)
+      # DEBUG: Log what metadata we receive
+      if Rails.env.development?
+        is_blank = metadata.blank?
+        is_hash = metadata.is_a?(Hash)
+        has_keys = is_hash && metadata.keys.any?
+        Rails.logger.debug do
+          "[DataSync] Sanitizing metadata: blank=#{is_blank}, hash=#{is_hash}, " \
+            "has_keys=#{has_keys}, keys=#{metadata&.keys&.first(5)}"
+        end
+      end
+
       return {} if metadata.blank?
 
       # Ensure metadata is a hash

@@ -10,14 +10,16 @@ module Insights
       HIGH_CONFIDENCE_THRESHOLD = 80 # Score >= 80 is high confidence hoarder
 
       # Scoring weights (designed to total ~100 for a clear hoarder)
-      # Adjusted thresholds: 3+ days primary (was 5, was 7 originally)
-      # Research shows tabs forgotten after 3 days
+      # Thresholds based on industry best practices: 7+ days for forgotten tabs
+      # 1-3 days too recent to determine if forgotten
       WEIGHTS = {
-        tab_age_3_days: 45,           # Tab open for 3+ days (primary threshold)
-        tab_age_1_day: 30,            # Tab open for 1-3 days (strengthened from 12)
+        tab_age_7_days: 45,           # Tab open for 7+ days (primary threshold)
+        tab_age_3_days: 20,           # Tab open for 3-7 days (medium signal)
+        tab_age_1_day: 0,             # Tab open for 1-3 days (too recent)
         tab_age_under_1: 0,           # Tab recently opened (< 1 day)
-        inactive_2_days: 30,          # No activity for 2+ days
-        inactive_1_day: 15,           # No activity for 1-2 days
+        inactive_3_days: 30,          # No activity for 3+ days
+        inactive_2_days: 15,          # No activity for 2-3 days
+        inactive_1_day: 0,            # No activity for 1-2 days (too recent)
         single_visit: 20,             # Opened once and forgotten
         content_site: 15,             # Content meant to be consumed
         low_engagement: 10,           # Engagement rate < 10%
@@ -98,9 +100,9 @@ module Insights
       end
 
       # Check if tab matches severe hoarder pattern (overrides conditional whitelist)
-      # Severe pattern: 3+ days old (adjusted from 5, was 7), single visit, low engagement
+      # Severe pattern: 7+ days old, single visit, low engagement
       def severe_hoarder_pattern?
-        @tab_metadata[:tab_age_days] >= 3.0 &&
+        @tab_metadata[:tab_age_days] >= 7.0 &&
           @tab_metadata[:is_single_visit] &&
           @tab_metadata[:average_engagement_rate] < 0.1
       end
@@ -126,17 +128,20 @@ module Insights
       end
 
       # Factor 1: Tab age (PRIMARY SIGNAL)
-      # Adjusted thresholds: 3+ days primary (forgotten window)
+      # Industry best practices: 7+ days for forgotten tabs
       def calculate_tab_age_score
         age_days = @tab_metadata[:tab_age_days]
         score = 0
 
-        if age_days >= 3.0
+        if age_days >= 7.0
+          score = WEIGHTS[:tab_age_7_days]
+          @score_breakdown[:tab_age] = { points: score, reason: "Tab open for #{age_days.round(1)} days (7+ days)" }
+        elsif age_days >= 3.0
           score = WEIGHTS[:tab_age_3_days]
-          @score_breakdown[:tab_age] = { points: score, reason: "Tab open for #{age_days.round(1)} days (3+ days)" }
+          @score_breakdown[:tab_age] = { points: score, reason: "Tab open for #{age_days.round(1)} days (3-7 days)" }
         elsif age_days >= 1.0
           score = WEIGHTS[:tab_age_1_day]
-          @score_breakdown[:tab_age] = { points: score, reason: "Tab open for #{age_days.round(1)} days (1-3 days)" }
+          @score_breakdown[:tab_age] = { points: score, reason: "Tab open for #{age_days.round(1)} days (1-3 days, too recent)" }
         else
           @score_breakdown[:tab_age] = { points: 0, reason: 'Tab recently opened (< 1 day)' }
         end
@@ -149,14 +154,18 @@ module Insights
         inactive_days = @tab_metadata[:days_since_last_activity]
         score = 0
 
-        if inactive_days >= 2.0
+        if inactive_days >= 3.0
+          score = WEIGHTS[:inactive_3_days]
+          @score_breakdown[:inactivity] =
+            { points: score, reason: "No activity for #{inactive_days.round(1)} days (3+ days)" }
+        elsif inactive_days >= 2.0
           score = WEIGHTS[:inactive_2_days]
           @score_breakdown[:inactivity] =
-            { points: score, reason: "No activity for #{inactive_days.round(1)} days (2+ days)" }
+            { points: score, reason: "No activity for #{inactive_days.round(1)} days (2-3 days)" }
         elsif inactive_days >= 1.0
           score = WEIGHTS[:inactive_1_day]
           @score_breakdown[:inactivity] =
-            { points: score, reason: "No activity for #{inactive_days.round(1)} days (1-2 days)" }
+            { points: score, reason: "No activity for #{inactive_days.round(1)} days (1-2 days, too recent)" }
         else
           @score_breakdown[:inactivity] = { points: 0, reason: 'Recent activity (< 1 day)' }
         end
